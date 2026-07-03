@@ -48,6 +48,7 @@ public class PlayerBase : MonoBehaviour
     private void OnBCanceled(InputAction.CallbackContext context)
     {
         float pressDuration = Time.time - pressStartTime;
+        bool isHolding = heldObject != null;
 
         if (pressDuration >= holdThreshold)
         {
@@ -56,8 +57,16 @@ public class PlayerBase : MonoBehaviour
         }
         else
         {
-            Debug.Log("B’Z‰Ÿ‚µ");
-            ConfirmSelection();
+            if (!isHolding)
+            {
+                Debug.Log("B’Z‰Ÿ‚µ");
+                ConfirmSelection();
+            }
+            else
+            {
+                Debug.Log("•¨‚ğ‚Á‚Ä‚¢‚é‚Ì‚Å’Z‰Ÿ‚µ–³Œø");
+            }
+            
         }
     }
 
