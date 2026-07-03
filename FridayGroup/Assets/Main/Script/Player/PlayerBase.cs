@@ -150,29 +150,4 @@ public class PlayerBase : MonoBehaviour
         }
     }
     
-
-
-
-    /// <summary>
-    /// 移動の入力
-    /// </summary>
-    /// <param name="context"></param>
-    public virtual void OnMove(InputAction.CallbackContext context)
-    {
-        // スティックの傾き具合をVector2(X, Y)で受け取る
-        moveInput = context.ReadValue<Vector2>();
-    }
-    //void Move()
-    //{
-        // 2D入力 → 3D座標に変換
-      //  Vector3 move = new Vector3(moveInput.x, 0, moveInput.y);
-        // 移動
-        //transform.position += move * moveSpeed * Time.deltaTime;
-    //}
-
-    /// <summary>
-    /// Aボタンが押された時の実行
-    /// </summary>
-    /// <param name="context"></param>
-
 }
