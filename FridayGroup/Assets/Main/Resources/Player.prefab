@@ -121,9 +121,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   lookSpeed: 100
-  holdThreshold: 0.5
-  nearbyObject: {fileID: 3393914091797621928, guid: 8e564c5ecbdf88a40b91914b4086811e, type: 3}
-  selectableObject: {fileID: 3393914091797621928, guid: 8e564c5ecbdf88a40b91914b4086811e, type: 3}
   playerID: 0
 --- !u!114 &1863682024936407423
 MonoBehaviour:
@@ -137,7 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: -1552182283, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SortKey: 2504656170
+  SortKey: 3337961112
   ObjectInterest: 1
   Flags: 262145
   NestedObjects: []
