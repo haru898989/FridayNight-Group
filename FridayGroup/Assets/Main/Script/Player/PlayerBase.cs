@@ -24,36 +24,43 @@ public class PlayerBase : NetworkBehaviour
     public GameObject stampMenu;//スタンプの選択
     public GameObject[] stampObjects;//スタンプの数
 
+    protected virtual bool UsePlayerInput => true;
+
 
     // Start is called before the first frame update
     public override void Spawned()
     {
         if (!HasInputAuthority) return;
 
-        testplayerControl = new PlayerInputAction();
-
-        testplayerControl.Player.OnActionB.started += OnBStarted;
-        testplayerControl.Player.OnActionB.canceled += OnBCanceled;
-        testplayerControl.Player.Stamp.started += OnStampStarted;
-        testplayerControl.Player.Stamp.canceled += OnStampCanceled;
-
-        if (stampMenu != null)
+        if (UsePlayerInput) if (!HasInputAuthority) return;
         {
-            stampMenu.SetActive(false);
-        }
 
-        for (int i = 0; i < stampObjects.Length; i++)
-        {
-            stampObjects[i].SetActive(false);
-        }
+            testplayerControl = new PlayerInputAction();
 
-        testplayerControl.Enable();
-        playerCamera = Camera.main.transform;
+            testplayerControl.Player.OnActionB.started += OnBStarted;
+            testplayerControl.Player.OnActionB.canceled += OnBCanceled;
+            testplayerControl.Player.Stamp.started += OnStampStarted;
+            testplayerControl.Player.Stamp.canceled += OnStampCanceled;
+
+            if (stampMenu != null)
+            {
+                stampMenu.SetActive(false);
+            }
+
+            for (int i = 0; i < stampObjects.Length; i++)
+            {
+                stampObjects[i].SetActive(false);
+            }
+
+            testplayerControl.Enable();
+            playerCamera = Camera.main.transform;
+        }
     }
 
     // Update is called once per frame
     public override void FixedUpdateNetwork()
     {
+        if (!UsePlayerInput) return;
         if (!HasInputAuthority) return;
         if (testplayerControl == null) return;
         if (!isSelectingStamp)
