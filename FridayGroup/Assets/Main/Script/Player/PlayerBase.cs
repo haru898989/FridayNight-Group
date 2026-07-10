@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections;
+using Fusion;
 
-public class PlayerBase : MonoBehaviour
+public class PlayerBase : NetworkBehaviour
 {
     private PlayerInputAction testplayerControl;
     private Vector2 moveInput;   // 入力値
@@ -25,15 +26,21 @@ public class PlayerBase : MonoBehaviour
 
 
     // Start is called before the first frame update
-    protected virtual void Start()
+    public override void Spawned()
     {
+        if (!HasInputAuthority) return;
 
         testplayerControl = new PlayerInputAction();
+
         testplayerControl.Player.OnActionB.started += OnBStarted;
         testplayerControl.Player.OnActionB.canceled += OnBCanceled;
         testplayerControl.Player.Stamp.started += OnStampStarted;
         testplayerControl.Player.Stamp.canceled += OnStampCanceled;
-        stampMenu.SetActive(false);
+
+        if (stampMenu != null)
+        {
+            stampMenu.SetActive(false);
+        }
 
         for (int i = 0; i < stampObjects.Length; i++)
         {
@@ -41,22 +48,25 @@ public class PlayerBase : MonoBehaviour
         }
 
         testplayerControl.Enable();
+        playerCamera = Camera.main.transform;
     }
 
     // Update is called once per frame
-    public virtual void Update()
+    public override void FixedUpdateNetwork()
     {
+        if (!HasInputAuthority) return;
+        if (testplayerControl == null) return;
         if (!isSelectingStamp)
         {
             //移動
             Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
             Vector3 move = new Vector3(input.x, 0, input.y);
-            transform.position += move * moveSpeed * Time.deltaTime;
+            transform.position += move * moveSpeed * Runner.DeltaTime;
             Vector2 lookInput = testplayerControl.Player.Look.ReadValue<Vector2>();
             // 左右を見る（プレイヤー回転）
-            transform.Rotate(Vector3.up * lookInput.x * lookSpeed * Time.deltaTime);
+            transform.Rotate(Vector3.up * lookInput.x * lookSpeed * Runner.DeltaTime);
             // 上下を見る（カメラ回転）
-            cameraRotationX -= lookInput.y * lookSpeed * Time.deltaTime;
+            cameraRotationX -= lookInput.y * lookSpeed * Runner.DeltaTime;
             cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f);
             playerCamera.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
         }
@@ -242,7 +252,12 @@ public class PlayerBase : MonoBehaviour
     private void OnStampStarted(InputAction.CallbackContext context)
     {
         isSelectingStamp = true;
-        stampMenu.SetActive(true);
+
+        if (stampMenu != null)
+        {
+            stampMenu.SetActive(true);
+        }
+
         Debug.Log("スタンプ選択開始");
     }
 
@@ -251,8 +266,21 @@ public class PlayerBase : MonoBehaviour
     {
         isSelectingStamp = false;
         ShowStamp(selectedStamp);
-        stampMenu.SetActive(false);
+
+        if (stampMenu != null)
+        {
+            stampMenu.SetActive(false);
+        }
+
         Debug.Log("スタンプ選択終了");
     }
+
     //大塚駅北口は空いてないby Taiga Sato
+    private void OnDisable()
+    {
+        if (testplayerControl != null)
+        {
+            testplayerControl.Disable();
+        }
+    }
 }
