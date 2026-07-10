@@ -8,7 +8,9 @@ public class PlayerBase : MonoBehaviour
     private PlayerInputAction testplayerControl;
     private Vector2 moveInput;   // 入力値
     public float moveSpeed = 5f; // 移動速度
-    public float lookSpeed = 100f;//視点の移動速度
+    public Transform playerCamera;
+    public float lookSpeed = 100f;//視点の移動の速度
+    private float cameraRotationX = 0f;//カメラの位置
     public float holdThreshold = 0.5f;//ボタンの長押し判定
     private float pressStartTime;
     private bool isSelectingStamp = false;
@@ -17,21 +19,26 @@ public class PlayerBase : MonoBehaviour
     public GameObject nearbyObject;   // 近くにある持てる物
     public GameObject selectableObject;    // 決定できる対象
     public float groundY = 0f; //地面の座標
-
-    public Image stampImage;//Stamp内のImage
     public Sprite[] stampSprites;//スタンプ画像
+    public GameObject stampMenu;//スタンプの選択
+    public GameObject[] stampObjects;//スタンプの数
 
 
     // Start is called before the first frame update
     protected virtual void Start()
     {
-     
+
         testplayerControl = new PlayerInputAction();
         testplayerControl.Player.OnActionB.started += OnBStarted;
         testplayerControl.Player.OnActionB.canceled += OnBCanceled;
         testplayerControl.Player.Stamp.started += OnStampStarted;
         testplayerControl.Player.Stamp.canceled += OnStampCanceled;
-        stampImage.gameObject.SetActive(false);
+        stampMenu.SetActive(false);
+
+        for (int i = 0; i < stampObjects.Length; i++)
+        {
+            stampObjects[i].SetActive(false);
+        }
 
         testplayerControl.Enable();
     }
@@ -45,28 +52,13 @@ public class PlayerBase : MonoBehaviour
             Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
             Vector3 move = new Vector3(input.x, 0, input.y);
             transform.position += move * moveSpeed * Time.deltaTime;
-
-            //視点の移動
             Vector2 lookInput = testplayerControl.Player.Look.ReadValue<Vector2>();
-            transform.Rotate(0, lookInput.x * lookSpeed * Time.deltaTime, 0);
-
-        }
-        // Rボタンでスタンプ選択開始
-        if (testplayerControl.Player.Stamp.IsInProgress())
-        {
-            if(!isSelectingStamp)
-            {
-                isSelectingStamp = true;
-                Debug.Log("スタンプ選択開始");
-            }            
-        }
-        else
-        {
-            if (isSelectingStamp)
-            {
-                isSelectingStamp=false;
-                Debug.Log("スタンプ選択終了");
-            }
+            // 左右を見る（プレイヤー回転）
+            transform.Rotate(Vector3.up * lookInput.x * lookSpeed * Time.deltaTime);
+            // 上下を見る（カメラ回転）
+            cameraRotationX -= lookInput.y * lookSpeed * Time.deltaTime;
+            cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f);
+            playerCamera.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
         }
 
         // スタンプ選択中のみ十字キーを読む
@@ -102,7 +94,7 @@ public class PlayerBase : MonoBehaviour
     /// </summary>
     private void OnBStarted(InputAction.CallbackContext context)
     {
-       pressStartTime = Time.time;
+        pressStartTime = Time.time;
     }
 
     private void OnBCanceled(InputAction.CallbackContext context)
@@ -120,23 +112,13 @@ public class PlayerBase : MonoBehaviour
             if (!isHolding)
             {
                 Debug.Log("B短押し");
-                if (isSelectingStamp)
-                {
-                    Debug.Log("ShowStamp呼び出し");
-                    ShowStamp(selectedStamp);
-                    isSelectingStamp = false;
-                    Debug.Log("スタンプ決定");
-                }
-                else
-                {
-                    ConfirmSelection();
-                }
+                ConfirmSelection();
             }
             else
             {
                 Debug.Log("物を持っているので短押し無効");
             }
-            
+
         }
     }
 
@@ -179,7 +161,7 @@ public class PlayerBase : MonoBehaviour
 
             heldObject.transform.SetParent(null);
             Vector3 pos = heldObject.transform.position;
-            pos.y = groundY;;
+            pos.y = groundY;
             heldObject.transform.position = pos;
             heldObject = null;
 
@@ -207,10 +189,10 @@ public class PlayerBase : MonoBehaviour
             Debug.Log("Pickupに接触");
         }
     }
-/// <summary>
-/// オブジェクトが遠いと持てない
-/// </summary>
-/// <param name="other"></param>
+    /// <summary>
+    /// オブジェクトが遠いと持てない
+    /// </summary>
+    /// <param name="other"></param>
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Pickup"))
@@ -232,8 +214,13 @@ public class PlayerBase : MonoBehaviour
         if (index < 0 || index >= stampSprites.Length)
             return;
 
-        stampImage.sprite = stampSprites[index];
-        stampImage.gameObject.SetActive(true);
+        if (index < 0 || index >= stampObjects.Length)
+            return;
+
+        for (int i = 0; i < stampObjects.Length; i++)
+        {
+            stampObjects[i].SetActive(i == index);
+        }
 
         StartCoroutine(HideStampAfterTime());
     }
@@ -241,21 +228,31 @@ public class PlayerBase : MonoBehaviour
     IEnumerator HideStampAfterTime()
     {
         yield return new WaitForSeconds(2f);
-        stampImage.gameObject.SetActive(false);
-     }
+        for (int i = 0; i < stampObjects.Length; i++)
+        {
+            stampObjects[i].SetActive(false);
+        }
+    }
 
+
+    /// <summary>
+    /// スタンプ選択の処理
+    /// </summary>
+    /// <param name="context"></param>
     private void OnStampStarted(InputAction.CallbackContext context)
     {
         isSelectingStamp = true;
+        stampMenu.SetActive(true);
         Debug.Log("スタンプ選択開始");
     }
+
 
     private void OnStampCanceled(InputAction.CallbackContext context)
     {
         isSelectingStamp = false;
+        ShowStamp(selectedStamp);
+        stampMenu.SetActive(false);
         Debug.Log("スタンプ選択終了");
     }
-    //大塚駅北口は空いてないby Taiga Sato 
-
-
+    //大塚駅北口は空いてないby Taiga Sato
 }
