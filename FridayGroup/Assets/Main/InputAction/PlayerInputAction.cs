@@ -62,6 +62,24 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": ""Hold"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Stamp"",
+                    ""type"": ""Button"",
+                    ""id"": ""b41f2ba3-bb2f-4e9b-8034-9cb467c4d7ce"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""StampSelect"",
+                    ""type"": ""Value"",
+                    ""id"": ""0f257433-d51a-4490-87c2-3ff0cc3b4220"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -293,6 +311,61 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""OnActionB"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""39569d50-67d4-4825-99a2-7045e19ce291"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""OnActionB"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b6ce805e-8808-416d-94aa-db9f3a40e66a"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Stamp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""565945dd-ceab-468d-a9d7-8d7ec7722520"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""Stamp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""b67e3088-1364-4321-bdf7-bb30f88d7df2"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""StampSelect"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1df992a1-831a-420e-8161-8a63ef323933"",
+                    ""path"": ""<Mouse>/scroll"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard&Mouse"",
+                    ""action"": ""StampSelect"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -904,6 +977,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_Player_Look = m_Player.FindAction("Look", throwIfNotFound: true);
         m_Player_Fire = m_Player.FindAction("Fire", throwIfNotFound: true);
         m_Player_OnActionB = m_Player.FindAction("OnActionB", throwIfNotFound: true);
+        m_Player_Stamp = m_Player.FindAction("Stamp", throwIfNotFound: true);
+        m_Player_StampSelect = m_Player.FindAction("StampSelect", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -982,6 +1057,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Look;
     private readonly InputAction m_Player_Fire;
     private readonly InputAction m_Player_OnActionB;
+    private readonly InputAction m_Player_Stamp;
+    private readonly InputAction m_Player_StampSelect;
     public struct PlayerActions
     {
         private @PlayerInputAction m_Wrapper;
@@ -990,6 +1067,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         public InputAction @Look => m_Wrapper.m_Player_Look;
         public InputAction @Fire => m_Wrapper.m_Player_Fire;
         public InputAction @OnActionB => m_Wrapper.m_Player_OnActionB;
+        public InputAction @Stamp => m_Wrapper.m_Player_Stamp;
+        public InputAction @StampSelect => m_Wrapper.m_Player_StampSelect;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1011,6 +1090,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @OnActionB.started += instance.OnOnActionB;
             @OnActionB.performed += instance.OnOnActionB;
             @OnActionB.canceled += instance.OnOnActionB;
+            @Stamp.started += instance.OnStamp;
+            @Stamp.performed += instance.OnStamp;
+            @Stamp.canceled += instance.OnStamp;
+            @StampSelect.started += instance.OnStampSelect;
+            @StampSelect.performed += instance.OnStampSelect;
+            @StampSelect.canceled += instance.OnStampSelect;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1027,6 +1112,12 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
             @OnActionB.started -= instance.OnOnActionB;
             @OnActionB.performed -= instance.OnOnActionB;
             @OnActionB.canceled -= instance.OnOnActionB;
+            @Stamp.started -= instance.OnStamp;
+            @Stamp.performed -= instance.OnStamp;
+            @Stamp.canceled -= instance.OnStamp;
+            @StampSelect.started -= instance.OnStampSelect;
+            @StampSelect.performed -= instance.OnStampSelect;
+            @StampSelect.canceled -= instance.OnStampSelect;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1221,6 +1312,8 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnFire(InputAction.CallbackContext context);
         void OnOnActionB(InputAction.CallbackContext context);
+        void OnStamp(InputAction.CallbackContext context);
+        void OnStampSelect(InputAction.CallbackContext context);
     }
     public interface IUIActions
     {
