@@ -9,14 +9,14 @@ public class MapGenerator : MonoBehaviour
     public TextAsset[] mapFloorData;
 
     [Header("生成するブロックのプレハブ")]
-    public GameObject floorB1;          // [1] 地下の床
-    public GameObject floor1;          // [11]床
-    public GameObject floorR;          // [21]天井
-    public GameObject normalWallPrefab; // [10] 通常の壁
-    public GameObject lampWallPrefab;   // [10] ランプ付きの壁（3個おきに生成）
-    public GameObject pitfall;          // [31]落とし穴
-    public GameObject door;             // [13]扉
-    public GameObject dark;             // [12]暗闇
+    public GameObject[] floorB1;          //[11]地下床 
+    public GameObject[] floor1;           //[12]床
+    public GameObject[] pitfall;          //[13]落とし穴
+
+    public GameObject[] normalWallPrefab; // [21]壁
+    public GameObject[] lampWallPrefab;   //     ランプ付きの壁
+    public GameObject[] door;             // [22]扉
+    public GameObject[] dark;             // []未定
 
     [Header("マップ設定")]
     public float tileSize = 1f;         // 1マスのサイズ
@@ -66,60 +66,63 @@ public class MapGenerator : MonoBehaviour
                 // 文字列を整数に変換
                 int key = int.Parse(columns[x]);
 
+
                 // 生成する位置を計算
                 // floorIndex * floorHeight で、階層ごとにマップのY座標（高さ）を変えます
                 Vector3 spawnPos = new Vector3(x * tileSize, floorIndex * floorHeight, y * tileSize);
 
                 // 読み込んだ数値（key）によって生成するブロックを変える
-                switch (key)
+
+
+                int team = key / 10;
+                int type = key % 10;
+
+                switch (team)
                 {
-                    case 1: // B1の床
-                        Instantiate(floorB1, spawnPos, Quaternion.identity, mapParent);
-                        continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                        break;
-
-                    case 11: //1Fの床
-                        Instantiate(floor1, spawnPos, Quaternion.identity, mapParent);
-                        continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                        break;
-
-                    case 21: // 天井
-                        Instantiate(floorR, spawnPos, Quaternion.identity, mapParent);
-                        continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                        break;
-                    
-                    case 31: // 落とし穴
-                        Instantiate(pitfall, spawnPos, Quaternion.identity, mapParent);
-                        continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                        break;
-
-                    case 10: // 壁ブロックの場合
-                        continuousWallCount++; // 壁が連続しているのでカウントアップ！
-
-                        // 「3個おき」の判定：カウントが3で割り切れる時だけランプ付きにする
-                        if (continuousWallCount % 3 == 0)
+                    case 1: // 床チーム
+                        switch (type)
                         {
-                            Instantiate(lampWallPrefab, spawnPos, Quaternion.identity, mapParent);
+                            case 1: // B1の床
+                                Instantiate(floorB1[0], spawnPos, Quaternion.identity, mapParent);
+                                continuousWallCount = 0; // 壁が途切れたのでカウントリセット
+                                break;
+
+                            case 2: //1Fの床
+                                Instantiate(floor1[0], spawnPos, Quaternion.identity, mapParent);
+                                continuousWallCount = 0; // 壁が途切れたのでカウントリセット
+                                break;
+    
+                            case 3: // 落とし穴
+                                Instantiate(pitfall[0], spawnPos, Quaternion.identity, mapParent);
+                                continuousWallCount = 0; // 壁が途切れたのでカウントリセット
+                                break;
                         }
-                        else
+                    break;
+
+                    case 2: // 壁チーム
+                        switch (type)
                         {
-                            Instantiate(normalWallPrefab, spawnPos, Quaternion.identity, mapParent);
+                            case 1: // 壁ブロックの場合
+                                continuousWallCount++; // 壁が連続しているのでカウントアップ！
+
+                                // 「3個おき」の判定：カウントが3で割り切れる時だけランプ付きにする
+                                if (continuousWallCount % 3 == 0)
+                                {
+                                    Instantiate(lampWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
+                                }
+                                else
+                                {
+                                    Instantiate(normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
+                                }
+                                break;
+
+                            case 2: // 扉
+                                    Instantiate(door[0], spawnPos, Quaternion.identity, mapParent);
+                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
+                            break;
                         }
-                        break;
-                    
-                    case 12: // 暗闇
-                        Instantiate(dark, spawnPos, Quaternion.identity, mapParent);
-                        continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                        break;
-                    
-                    case 13: // 扉
-                        Instantiate(door, spawnPos, Quaternion.identity, mapParent);
-                        continuousWallCount = 0; // 壁が途切れたのでカウントリセット
                         break;
 
-                    default: // 設定されていない数値（空欄など）の場合
-                        continuousWallCount = 0; // 何もない空間なのでカウントリセット
-                        break;
                 }
             }
         }
