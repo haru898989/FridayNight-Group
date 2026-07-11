@@ -13,6 +13,12 @@ public class BearTrap : GimmickBase
     {
         Debug.Log("Bear trap activated");
 
+        // とらばさみ発動時の効果音を再生する
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(0);
+        }
+
         // プレイヤーを一定時間止める処理を開始する
         StartCoroutine(StopPlayer(playerObject));
     }
