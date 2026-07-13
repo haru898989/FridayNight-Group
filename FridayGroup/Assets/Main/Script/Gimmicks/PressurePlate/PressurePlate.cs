@@ -28,6 +28,12 @@ public class PressurePlate : MonoBehaviour
         {
             isPressed = true;
             Debug.Log(gameObject.name + " pressed");
+
+            // 感圧版を踏んだときの効果音を再生する
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySE(5);
+            }
         }
     }
 
@@ -36,11 +42,17 @@ public class PressurePlate : MonoBehaviour
     /// </summary>
     private void OnTriggerExit(Collider other)
     {
-        // Playerタグのオブジェクトが離れた場合、押されていない状態に戻す
+        // Playerタグのオブジェクトが離れた場合，押されていない状態に戻す
         if (other.CompareTag(playerTag))
         {
             isPressed = false;
             Debug.Log(gameObject.name + " released");
+
+            // 感圧版から離れたときの効果音を再生する
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySE(6);
+            }
         }
     }
 

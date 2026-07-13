@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Unity.AI.Navigation;
 
 // CSVからマップを自動生成する基礎を学ぶためのクラス
 public class MapGenerator : MonoBehaviour
@@ -22,6 +23,7 @@ public class MapGenerator : MonoBehaviour
     public float tileSize = 1f;         // 1マスのサイズ
     public float floorHeight = 3f;      // 1階層あたりの高さ（Y軸のオフセット）
     public Transform mapParent;         // 生成したブロックをまとめる親オブジェクト
+    public NavMeshSurface surface;
 
     void Start()
     {
@@ -29,6 +31,8 @@ public class MapGenerator : MonoBehaviour
         GenerateFloorMap(0);
         GenerateFloorMap(1);
         GenerateFloorMap(2);
+
+        surface.BuildNavMesh();
     }
 
     /// <summary>

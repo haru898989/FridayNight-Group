@@ -3,50 +3,65 @@ using UnityEngine;
 public class CrystalController : MonoBehaviour
 {
     [Header("Crystal Settings")]
-    [SerializeField] private CrystalElement currentElement = CrystalElement.Fire;
+    [SerializeField] private CrystalElement elementType = CrystalElement.Fire;
+
+    [Header("Visual Settings")]
+    [SerializeField] private Renderer crystalRenderer;
+    [SerializeField] private Material fireMaterial;
+    [SerializeField] private Material iceMaterial;
+    [SerializeField] private Material thunderMaterial;
 
     /// <summary>
-    /// 毎フレーム入力を確認し、クリスタルの属性を切り替える関数
+    /// クリスタルの見た目を属性に合わせて変更する関数
     /// </summary>
-    private void Update()
+    private void Start()
     {
-        // 1キーを押したら炎属性に切り替える
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        // Rendererが未設定なら自分自身から取得する
+        if (crystalRenderer == null)
         {
-            ChangeElement(CrystalElement.Fire);
+            crystalRenderer = GetComponent<Renderer>();
         }
 
-        // 2キーを押したら氷属性に切り替える
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            ChangeElement(CrystalElement.Ice);
-        }
-
-        // 3キーを押したら雷属性に切り替える
-        if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            ChangeElement(CrystalElement.Thunder);
-        }
+        // 属性に合わせて見た目を変更する
+        ChangeVisualByElement();
     }
 
     /// <summary>
-    /// クリスタルの属性を指定された属性に変更する関数
+    /// このクリスタルの属性を返す関数
     /// </summary>
-    public void ChangeElement(CrystalElement newElement)
+    public CrystalElement GetElementType()
     {
-        // 現在の属性を新しい属性に変更する
-        currentElement = newElement;
-
-        // 現在の属性を確認しやすいようにConsoleへ表示する
-        Debug.Log("Crystal element changed : " + currentElement);
+        // クリスタルに設定されている属性を返す
+        return elementType;
     }
 
     /// <summary>
-    /// 現在のクリスタル属性を取得する関数
+    /// 属性に合わせてMaterialを変更する関数
     /// </summary>
-    public CrystalElement GetCurrentElement()
+    private void ChangeVisualByElement()
     {
-        // 現在設定されている属性を返す
-        return currentElement;
+        // Rendererがない場合は処理しない
+        if (crystalRenderer == null)
+        {
+            return;
+        }
+
+        // 火属性の見た目に変更する
+        if (elementType == CrystalElement.Fire && fireMaterial != null)
+        {
+            crystalRenderer.material = fireMaterial;
+        }
+
+        // 氷属性の見た目に変更する
+        if (elementType == CrystalElement.Ice && iceMaterial != null)
+        {
+            crystalRenderer.material = iceMaterial;
+        }
+
+        // 電気属性の見た目に変更する
+        if (elementType == CrystalElement.Thunder && thunderMaterial != null)
+        {
+            crystalRenderer.material = thunderMaterial;
+        }
     }
 }

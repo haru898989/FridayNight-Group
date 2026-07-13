@@ -7,6 +7,15 @@ public class Pitfall : GimmickBase
     [SerializeField] private StageController stageController;
     [SerializeField] private float fallTime = 1.0f;
     [SerializeField] private float fallDistance = 3.0f;
+    [SerializeField] private float landSoundDelay = 0.2f;
+
+    [Header("Camera Settings")]
+    [SerializeField] private PitfallCameraController pitfallCameraController;
+    [SerializeField] private Transform entryCameraPoint;
+    [SerializeField] private Transform fallingCameraPoint;
+    [SerializeField] private Transform landCameraPoint;
+    [SerializeField] private float entryCameraWaitTime = 0.3f;
+    [SerializeField] private float landCameraWaitTime = 0.6f;
 
     private bool isWarping = false;
 
@@ -21,12 +30,12 @@ public class Pitfall : GimmickBase
             return;
         }
 
-        // プレイヤーを落下させてからワープさせる処理を開始する
+        // プレイヤーを落下させてからワープする処理を開始する
         StartCoroutine(FallAndWarp(playerObject));
     }
 
     /// <summary>
-    /// プレイヤーを下に落とす演出を行い、その後ステージ側で設定した座標へワープさせる関数
+    /// プレイヤーを下に落とし，指定地点へワープさせる関数
     /// </summary>
     private IEnumerator FallAndWarp(GameObject playerObject)
     {
@@ -34,20 +43,42 @@ public class Pitfall : GimmickBase
 
         Debug.Log("Pitfall started");
 
+        // 落とし穴演出用カメラに切り替える
+        if (pitfallCameraController != null)
+        {
+            pitfallCameraController.StartPitfallCamera();
+            pitfallCameraController.MoveToCameraPoint(entryCameraPoint);
+        }
+
+        // 落とし穴に入った瞬間のカメラを少し見せる
+        yield return new WaitForSeconds(entryCameraWaitTime);
+
+        // 落下開始と同時に効果音を鳴らす
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(1);
+        }
+
         Collider playerCollider = playerObject.GetComponent<Collider>();
         Rigidbody playerRigidbody = playerObject.GetComponent<Rigidbody>();
 
-        // 落下中に床や他のオブジェクトに引っかからないようにColliderを一時的に無効化する
+        // 落下中に引っかからないようにColliderを一時的に無効化する
         if (playerCollider != null)
         {
             playerCollider.enabled = false;
         }
 
-        // 落下前にプレイヤーの速度と回転を止める
+        // 落下前に速度を止める
         if (playerRigidbody != null)
         {
             playerRigidbody.velocity = Vector3.zero;
             playerRigidbody.angularVelocity = Vector3.zero;
+        }
+
+        // 落下中のカメラアングルに切り替える
+        if (pitfallCameraController != null)
+        {
+            pitfallCameraController.MoveToCameraPoint(fallingCameraPoint);
         }
 
         // 現在位置を落下開始位置として保存する
@@ -58,7 +89,7 @@ public class Pitfall : GimmickBase
 
         float timer = 0.0f;
 
-        // fallTime秒かけて、開始位置から落下先まで少しずつ移動させる
+        // fallTime秒かけて下に落とす
         while (timer < fallTime)
         {
             timer += Time.deltaTime;
@@ -69,7 +100,7 @@ public class Pitfall : GimmickBase
             yield return null;
         }
 
-        // StageControllerが設定されていない場合は、ワープできないので処理を終了する
+        // StageControllerが設定されていない場合は終了する
         if (stageController == null)
         {
             Debug.LogWarning("StageController is not set");
@@ -79,30 +110,61 @@ public class Pitfall : GimmickBase
                 playerCollider.enabled = true;
             }
 
+            if (pitfallCameraController != null)
+            {
+                pitfallCameraController.EndPitfallCamera();
+            }
+
             isWarping = false;
             yield break;
         }
 
-        // ステージ側から落とし穴のワープ先座標を取得する
+        // ワープ先を取得する
         Vector3 warpPosition = stageController.GetPitfallWarpPosition();
 
-        PlayerWarp playerWarp = playerObject.GetComponent<PlayerWarp>();
 
-        // PlayerWarpがある場合は、x, y, zの座標を引数として渡してワープさせる
-        if (playerWarp != null)
+        // Rigidbodyがある場合は，Rigidbodyの位置を直接変更する
+        if (playerRigidbody != null)
         {
-            playerWarp.WarpToPosition(warpPosition.x, warpPosition.y, warpPosition.z);
-        }
-        else
-        {
-            // PlayerWarpがない場合は、直接Transformの座標を変更する
-            playerObject.transform.position = warpPosition;
+            playerRigidbody.velocity = Vector3.zero;
+            playerRigidbody.angularVelocity = Vector3.zero;
+            playerRigidbody.position = warpPosition;
         }
 
-        // ワープ後にColliderを有効化し、通常の当たり判定に戻す
+        // Transformの位置も直接変更して，確実にワープさせる
+        playerObject.transform.position = warpPosition;
+
+        // 物理演算とTransformの位置を同期する
+        Physics.SyncTransforms();
+
+
+        // 着地時のカメラアングルに切り替える
+        if (pitfallCameraController != null)
+        {
+            pitfallCameraController.MoveToCameraPoint(landCameraPoint);
+        }
+
+        // Colliderを戻す
         if (playerCollider != null)
         {
             playerCollider.enabled = true;
+        }
+
+        // ワープ直後ではなく，少し待ってから着地音を鳴らす
+        yield return new WaitForSeconds(landSoundDelay);
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(2);
+        }
+
+        // 着地カメラを少し見せる
+        yield return new WaitForSeconds(landCameraWaitTime);
+
+        // 通常の一人称カメラへ戻す
+        if (pitfallCameraController != null)
+        {
+            pitfallCameraController.EndPitfallCamera();
         }
 
         Debug.Log("Pitfall finished");
