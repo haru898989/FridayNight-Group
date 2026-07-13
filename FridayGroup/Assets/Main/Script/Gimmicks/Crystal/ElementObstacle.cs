@@ -1,64 +1,102 @@
 using UnityEngine;
 
-public class ElementObstacle : GimmickBase
+public class ElementObstacle : MonoBehaviour
 {
-    [Header("Element Obstacle Settings")]
+    [Header("Obstacle Settings")]
     [SerializeField] private CrystalElement requiredElement = CrystalElement.Fire;
-    [SerializeField] private bool isDestroyOnSuccess = true;
     [SerializeField] private GameObject targetObject;
+    [SerializeField] private bool destroyOnCorrect = true;
+
+    private bool isCleared = false;
 
     /// <summary>
-    /// プレイヤーが属性障害物に触れたときに呼ばれる関数
+    /// 対象オブジェクトが未設定の場合，自分自身を対象にする関数
     /// </summary>
-    protected override void OnPlayerHit(GameObject playerObject)
+    private void Start()
     {
-        // プレイヤーからCrystalControllerを取得する
-        CrystalController crystalController = playerObject.GetComponent<CrystalController>();
-
-        // CrystalControllerが付いていない場合は、属性判定ができないので処理を終了する
-        if (crystalController == null)
+        // targetObjectが未設定なら，このオブジェクト自身を解除対象にする
+        if (targetObject == null)
         {
-            Debug.LogWarning("CrystalController is not set on player");
-            return;
-        }
-
-        // 現在の属性が、障害物に必要な属性と一致しているか確認する
-        if (crystalController.GetCurrentElement() == requiredElement)
-        {
-            ActivateObstacle();
-        }
-        else
-        {
-            // 属性が違う場合は障害物を突破できない
-            Debug.Log("Wrong element");
+            targetObject = gameObject;
         }
     }
 
     /// <summary>
-    /// 必要な属性が一致したときに、障害物を突破する関数
+    /// TriggerでPlayerが触れたときに呼ばれる関数
     /// </summary>
-    private void ActivateObstacle()
+    private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Element obstacle activated : " + requiredElement);
+        // 接触したオブジェクトで解除判定を行う
+        TryClearObstacle(other.gameObject);
+    }
 
-        // 操作対象が設定されている場合は、そのオブジェクトを対象にする
-        GameObject objectToControl = targetObject;
+    /// <summary>
+    /// CollisionでPlayerが触れたときに呼ばれる関数
+    /// </summary>
+    private void OnCollisionEnter(Collision collision)
+    {
+        // 衝突したオブジェクトで解除判定を行う
+        TryClearObstacle(collision.gameObject);
+    }
 
-        // 操作対象が未設定の場合は、このオブジェクト自身を対象にする
-        if (objectToControl == null)
+    /// <summary>
+    /// Playerが持っているクリスタル属性を確認し，正しければ障害物を解除する関数
+    /// </summary>
+    private void TryClearObstacle(GameObject playerObject)
+    {
+        // すでに解除済みなら処理しない
+        if (isCleared)
         {
-            objectToControl = gameObject;
+            return;
         }
 
-        // 成功時に削除する設定なら、対象オブジェクトを削除する
-        if (isDestroyOnSuccess)
+        // Playerタグ以外なら処理しない
+        if (playerObject.CompareTag("Player") == false)
         {
-            Destroy(objectToControl);
+            return;
+        }
+
+        PlayerCrystalHolder holder = playerObject.GetComponent<PlayerCrystalHolder>();
+
+        // PlayerCrystalHolderが付いていない場合は処理しない
+        if (holder == null)
+        {
+            Debug.LogWarning("PlayerCrystalHolder is not attached to Player");
+            return;
+        }
+
+        // クリスタル属性をまだ持っていない場合は処理しない
+        if (holder.HasCrystalElement() == false)
+        {
+            Debug.Log("Player does not have crystal element");
+            return;
+        }
+
+        CrystalElement currentElement = holder.GetCurrentElement();
+
+        // 必要属性と一致しているか確認する
+        if (currentElement == requiredElement)
+        {
+            isCleared = true;
+
+            Debug.Log("Correct element. Obstacle cleared: " + requiredElement);
+
+            // 正解なら対象オブジェクトを消す
+            if (targetObject != null)
+            {
+                if (destroyOnCorrect)
+                {
+                    Destroy(targetObject);
+                }
+                else
+                {
+                    targetObject.SetActive(false);
+                }
+            }
         }
         else
         {
-            // 削除しない場合は非表示にして、装置起動のような挙動にする
-            objectToControl.SetActive(false);
+            Debug.Log("Wrong element. Need: " + requiredElement + " / Current: " + currentElement);
         }
     }
 }

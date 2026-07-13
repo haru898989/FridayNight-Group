@@ -2,8 +2,9 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections;
+using Fusion;
 
-public class PlayerBase : MonoBehaviour
+public class PlayerBase : NetworkBehaviour
 {
     private PlayerInputAction testplayerControl;
     public float moveSpeed = 5f; // 移動速度
@@ -25,10 +26,13 @@ public class PlayerBase : MonoBehaviour
     [SerializeField]
     private Animator animator;
 
+    protected virtual bool UsePlayerInput => true;
+
 
     // Start is called before the first frame update
-    protected virtual void Start()
+    public override void Spawned()
     {
+        if (!HasInputAuthority) return;
 
         testplayerControl = new PlayerInputAction();
         testplayerControl.Player.OnActionB.started += OnBStarted;
@@ -44,17 +48,40 @@ public class PlayerBase : MonoBehaviour
         Debug.Log(animator.gameObject.name);
         Debug.Log(animator.runtimeAnimatorController.name);
         for (int i = 0; i < stampObjects.Length; i++)
-        {
-            stampObjects[i].SetActive(false);
-        }
 
-        testplayerControl.Enable();
+        if (UsePlayerInput) if (!HasInputAuthority) return;
+
+        {
+
+            testplayerControl = new PlayerInputAction();
+
+            testplayerControl.Player.OnActionB.started += OnBStarted;
+            testplayerControl.Player.OnActionB.canceled += OnBCanceled;
+            testplayerControl.Player.Stamp.started += OnStampStarted;
+            testplayerControl.Player.Stamp.canceled += OnStampCanceled;
+
+            if (stampMenu != null)
+            {
+                stampMenu.SetActive(false);
+            }
+
+            for (int i = 0; i < stampObjects.Length; i++)
+            {
+                stampObjects[i].SetActive(false);
+            }
+
+            testplayerControl.Enable();
+            playerCamera = Camera.main.transform;
+        }
     }
 
     // Update is called once per frame
-    public virtual void Update()
+    public override void FixedUpdateNetwork()
     {
-        Vector2 input = Vector2.zero;
+        if (!UsePlayerInput) return;
+        if (!HasInputAuthority) return;
+        if (testplayerControl == null) return;
+
         // スタンプ選択中のみ十字キーを読む
         if (isSelectingStamp)
         {
@@ -82,7 +109,7 @@ public class PlayerBase : MonoBehaviour
             return;
         }
         //移動
-        input = testplayerControl.Player.Move.ReadValue<Vector2>();
+        Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
         Debug.Log(input);
         float speed = input.magnitude;
         animator.SetBool("run", speed > 0.1f);
@@ -261,16 +288,43 @@ public class PlayerBase : MonoBehaviour
     /// <param name="context"></param>
     private void OnStampStarted(InputAction.CallbackContext context)
     {
+
         isSelectingStamp = !isSelectingStamp;
         stampMenu.SetActive(isSelectingStamp);
+
+        isSelectingStamp = true;
+
+        if (stampMenu != null)
+        {
+            stampMenu.SetActive(true);
+        }
+
+
         Debug.Log("スタンプ選択開始");
     }
 
 
     private void OnStampCanceled(InputAction.CallbackContext context)
     {
+
         //何もしない
+
+        isSelectingStamp = false;
+
+        if (stampMenu != null)
+        {
+            stampMenu.SetActive(false);
+        }
+
         Debug.Log("スタンプ選択終了");
     }
+
     //大塚駅北口は空いてないby Taiga Sato
+    private void OnDisable()
+    {
+        if (testplayerControl != null)
+        {
+            testplayerControl.Disable();
+        }
+    }
 }
