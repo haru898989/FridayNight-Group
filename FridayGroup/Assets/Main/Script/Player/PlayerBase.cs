@@ -22,6 +22,7 @@ public class PlayerBase : MonoBehaviour
     public GameObject[] stampObjects;//スタンプの数
     public float stampDisplayTime = 2f;   // スタンプ表示時間（秒）
     private Coroutine stampCoroutine;     // コルーチン管理用
+    [SerializeField]
     private Animator animator;
 
 
@@ -35,12 +36,13 @@ public class PlayerBase : MonoBehaviour
         testplayerControl.Player.Stamp.started += OnStampStarted;
         testplayerControl.Player.Stamp.canceled += OnStampCanceled;
         stampMenu.SetActive(false);
-        animator = GetComponent<Animator>();
-        if(animator == null)
+        if (animator == null)
         {
             Debug.LogError("Animatorがありません");
+            return;
         }
-
+        Debug.Log(animator.gameObject.name);
+        Debug.Log(animator.runtimeAnimatorController.name);
         for (int i = 0; i < stampObjects.Length; i++)
         {
             stampObjects[i].SetActive(false);
@@ -81,8 +83,9 @@ public class PlayerBase : MonoBehaviour
         }
         //移動
         input = testplayerControl.Player.Move.ReadValue<Vector2>();
+        Debug.Log(input);
         float speed = input.magnitude;
-        animator.SetFloat("Speed", speed, 0.1f, Time.deltaTime);
+        animator.SetBool("run", speed > 0.1f);
         Vector3 move = transform.forward * input.y + transform.right * input.x;
         transform.position += move * moveSpeed * Time.deltaTime;
         Vector2 lookInput = testplayerControl.Player.Look.ReadValue<Vector2>();
@@ -92,6 +95,9 @@ public class PlayerBase : MonoBehaviour
         cameraRotationX -= lookInput.y * lookSpeed * Time.deltaTime;
         cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f);
         playerCamera.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
+        animator.SetBool("run", speed > 0.1f);
+        Debug.Log(animator.GetBool("run"));
+        Debug.Log(animator.runtimeAnimatorController.name);
     }
     /// <summary>
     /// 長押しの処理
@@ -122,7 +128,6 @@ public class PlayerBase : MonoBehaviour
             {
                 Debug.Log("物を持っているので短押し無効");
             }
-
         }
     }
 
