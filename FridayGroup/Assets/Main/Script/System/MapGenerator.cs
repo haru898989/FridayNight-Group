@@ -12,12 +12,19 @@ public class MapGenerator : MonoBehaviour
     [Header("生成するブロックのプレハブ")]
     public GameObject[] floorB1;          //[11]地下床 
     public GameObject[] floor1;           //[12]床
-    public GameObject[] pitfall;          //[13]落とし穴
+    //public GameObject[] pitfall;          //[13]落とし穴
 
     public GameObject[] normalWallPrefab; // [21]壁
     public GameObject[] lampWallPrefab;   // [22]ランプ付きの壁
     public GameObject[] door;             // [23]扉
     public GameObject[] dark;             // []未定
+
+    public GameObject[] BearTrap;         //[31]
+    public GameObject[] Crystal;          //[32]
+    public GameObject[] pitfall;          //[33]
+    public GameObject[] PressurePlate;    //[34]
+    public GameObject[] RollingRock;      //[35]
+    public GameObject[] StoneTablet;      //[36]
 
     [Header("マップ設定")]
     public float tileSize = 1f;         // 1マスのサイズ
@@ -135,6 +142,35 @@ public class MapGenerator : MonoBehaviour
                             case 3: // 扉
                                     Instantiate(door[0], spawnPos, Quaternion.identity, mapParent);
                                     continuousWallCount = 0; // 壁が途切れたのでカウントリセット
+                            break;
+                        }
+                        break;
+
+                    case 3: //ギミック
+                        switch (type)
+                        {
+                            case 1: //
+                                Instantiate(BearTrap[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 2: //
+                                Instantiate(Crystal[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 3: //
+                                Instantiate(pitfall[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 4: //
+                                Instantiate(PressurePlate[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 5: //
+                                Instantiate(RollingRock[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 6: //
+                                Instantiate(StoneTablet[0], spawnPos, Quaternion.identity, mapParent);
                             break;
                         }
                         break;
