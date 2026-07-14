@@ -15,8 +15,8 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] pitfall;          //[13]落とし穴
 
     public GameObject[] normalWallPrefab; // [21]壁
-    public GameObject[] lampWallPrefab;   //     ランプ付きの壁
-    public GameObject[] door;             // [22]扉
+    public GameObject[] lampWallPrefab;   // [22]ランプ付きの壁
+    public GameObject[] door;             // [23]扉
     public GameObject[] dark;             // []未定
 
     [Header("マップ設定")]
@@ -31,6 +31,12 @@ public class MapGenerator : MonoBehaviour
         GenerateFloorMap(0);
         GenerateFloorMap(1);
         GenerateFloorMap(2);
+        GenerateFloorMap(3);
+        GenerateFloorMap(4);
+        GenerateFloorMap(5);
+        GenerateFloorMap(6);
+        GenerateFloorMap(7);
+        GenerateFloorMap(8);
 
         surface.BuildNavMesh();
     }
@@ -53,13 +59,16 @@ public class MapGenerator : MonoBehaviour
         string[] rows = csvText.Trim().Split('\n');
 
         int height = rows.Length;
+        int width = rows[0].Trim().Split(',').Length;
+
+        
 
         // Y軸（行）のループ
         for (int y = 0; y < height; y++)
         {
             // カンマ(',')で区切って1マスずつのデータ(列)に分割
-            string[] columns = rows[y].Trim().Split(',');
-            int width = columns.Length;
+            string[] columns = rows[y].Replace("\r", "").Split(',');
+            //int width = columns.Length;
 
             // ★重要ポイント：連続した壁をカウントするための変数（新しい行に行くたびにリセット）
             int continuousWallCount = 0;
@@ -68,7 +77,14 @@ public class MapGenerator : MonoBehaviour
             for (int x = 0; x < width; x++)
             {
                 // 文字列を整数に変換
-                int key = int.Parse(columns[x]);
+                string cell = columns[x].Trim();
+
+                if (string.IsNullOrEmpty(cell))
+                {
+                    continue;
+                }
+
+                int key = int.Parse(cell);
 
 
                 // 生成する位置を計算
@@ -106,21 +122,17 @@ public class MapGenerator : MonoBehaviour
                     case 2: // 壁チーム
                         switch (type)
                         {
-                            case 1: // 壁ブロックの場合
-                                continuousWallCount++; // 壁が連続しているのでカウントアップ！
-
-                                // 「3個おき」の判定：カウントが3で割り切れる時だけランプ付きにする
-                                if (continuousWallCount % 3 == 0)
-                                {
-                                    Instantiate(lampWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
-                                }
-                                else
-                                {
+                            case 1: // 壁
                                     Instantiate(normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
-                                }
-                                break;
+                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
+                            break;
 
-                            case 2: // 扉
+                            case 2: // 明かり付きの壁
+                                    Instantiate(lampWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
+                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
+                            break;
+
+                            case 3: // 扉
                                     Instantiate(door[0], spawnPos, Quaternion.identity, mapParent);
                                     continuousWallCount = 0; // 壁が途切れたのでカウントリセット
                             break;
