@@ -363,7 +363,7 @@ MonoBehaviour:
   dark:
   - {fileID: 3815228208322897781, guid: dd0ce49098fb0144aa98f76b23e004af, type: 3}
   tileSize: 1
-  floorHeight: 3
+  floorHeight: 1
   mapParent: {fileID: 0}
   surface: {fileID: 0}
 --- !u!4 &2122392841
