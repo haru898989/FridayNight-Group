@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Main/Scene/Main.unity
-    guid: fc12122381ff5b844ba1fb4b94580359
+    path: Assets/Main/Script/Player/add_playermove.unity
+    guid: 863576ed4a12d304e86cce7931c5a4a0
   m_configObjects: {}

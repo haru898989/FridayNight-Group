@@ -1,18 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class Keep_PlayerInfo : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    /// <summary>
+    /// シーンを移動してもプレイヤー情報を保持するための初期化関数
+    /// </summary>
+    private void Awake()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        // シーンを移動してもこのオブジェクトを削除しない
+        DontDestroyOnLoad(gameObject);
     }
 }
