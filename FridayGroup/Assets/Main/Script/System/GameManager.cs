@@ -44,14 +44,13 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// プレイヤーがルームに参加したときにホスト/サーバー側で呼ばれるコールバック（完全版）
+    /// プレイヤーがルームに参加したときにホスト/サーバー側で呼ばれるコールバック
     /// </summary>
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        // 1. サーバー（またはホスト）だけがSpawnを実行する権限を持ちます
+        // サーバー（またはホスト）だけがSpawnを実行する権限を持ちます
         if (!runner.IsServer) return;
 
-        // 2. 空いているデータ枠（スロット）を取得
         int index = GetEmptyPlayerIndex();
 
         if (index == -1)
@@ -60,7 +59,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // 3. 基本情報の保存
+        // 基本情報の保存
         players[index].playerID = index + 1;
         players[index].playerRef = player;
 
@@ -77,7 +76,7 @@ public class GameManager : MonoBehaviour
             players[index].objectName = "B";
         }
 
-        // 4. 1Pと2Pで生成するプレハブを分岐
+        // 1Pと2Pで生成するプレハブを分岐
         NetworkPrefabRef prefab = (index == 0) ? playerPrefabA : playerPrefabB;
 
         if (spawnPoint == null)
@@ -86,7 +85,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // 5. プレイヤーの生成（最後の引数で入力権限: Input Authority を割り当て）
+        // プレイヤーの生成（最後の引数で入力権限: Input Authority を割り当て）
         NetworkObject playerObject = runner.Spawn(
             prefab,
             spawnPoint.position,
@@ -94,22 +93,6 @@ public class GameManager : MonoBehaviour
             player // ← ここで入力権限（Input Authority）を割り当て！
         );
 
-        // 6. 生成したプレイヤーオブジェクトへデバイス設定を反映（エラー防止用のNullチェック付き）
-        if (playerObject != null)
-        {
-            PlayerBase playerBase = playerObject.GetComponent<PlayerBase>();
-            if (playerBase != null)
-            {
-                // PlayerBase側の SetPlayerDevice(int playerId, bool useController) を呼び出し
-                playerBase.SetPlayerDevice(players[index].playerID, players[index].useController);
-            }
-            else
-            {
-                Debug.LogWarning($"生成されたオブジェクト '{playerObject.name}' に 'PlayerBase' コンポーネントが見つかりません。設定の同期をスキップします。");
-            }
-        }
-
-        // 7. ログ出力
         Debug.Log($"プレイヤー {player.PlayerId} のオブジェクトを生成しました（{players[index].playerID}Pとして登録）");
         Debug.Log($"{players[index].playerID}P設定: Controller={players[index].useController}, Object={players[index].objectName}");
     }
