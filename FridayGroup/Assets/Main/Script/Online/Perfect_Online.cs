@@ -18,7 +18,7 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 
         if (startButtonUI != null)
         {
-            startButtonUI.SetActive(false);
+            startButtonUI.SetActive(true);
         }
 
         _runner = gameObject.AddComponent<NetworkRunner>();

@@ -104,7 +104,7 @@ public class PlayerBase : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
-        Debug.Log("Authority : " + Object.HasStateAuthority);
+        //Debug.Log("Authority : " + Object.HasStateAuthority);
 
         if (!UsePlayerInput) return;
         if (!HasInputAuthority) return;
