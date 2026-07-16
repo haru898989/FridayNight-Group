@@ -9,20 +9,20 @@ public class PlayerBase : NetworkBehaviour
     private PlayerInputAction testplayerControl;
     public float moveSpeed = 5f; // 移動速度
     public Transform playerCamera;
-    public float lookSpeed = 100f;//視点の移動の速度
-    private float cameraRotationX = 0f;//カメラの位置
-    public float holdThreshold = 0.5f;//ボタンの長押し判定
+    public float lookSpeed = 100f; // 視点の移動の速度
+    private float cameraRotationX = 0f; // カメラの位置
+    public float holdThreshold = 0.5f; // ボタンの長押し判定
     private float pressStartTime;
     private bool isSelectingStamp = false;
-    private GameObject heldObject;    // 持っている物
-    public GameObject nearbyObject;   // 近くにある持てる物
-    public GameObject selectableObject;    // 決定できる対象
-    public float groundY = 0f; //地面の座標
-    public Sprite[] stampSprites;//スタンプ画像
-    public GameObject stampMenu;//スタンプの選択
-    public GameObject[] stampObjects;//スタンプの数
-    public float stampDisplayTime = 2f;   // スタンプ表示時間（秒）
-    private Coroutine stampCoroutine;     // コルーチン管理用
+    private GameObject heldObject; // 持っている物
+    public GameObject nearbyObject; // 近くにある持てる物
+    public GameObject selectableObject; // 決定できる対象
+    public float groundY = 0f; // 地面の座標
+    public Sprite[] stampSprites; // スタンプ画像
+    public GameObject stampMenu; // スタンプの選択
+    public GameObject[] stampObjects; // スタンプの数
+    public float stampDisplayTime = 2f; // スタンプ表示時間（秒）
+    private Coroutine stampCoroutine; // コルーチン管理用
     [SerializeField]
     private Animator animator;
 
@@ -34,32 +34,44 @@ public class PlayerBase : NetworkBehaviour
 
     public override void Spawned()
     {
+        Camera childCam = GetComponentInChildren<Camera>();
+        if (childCam != null)
+        {
+            // 自分が操作するキャラ(HasInputAuthorityがtrue)だけカメラをONにする
+            childCam.enabled = HasInputAuthority;
+
+            // Unityの警告防止のため、AudioListener（耳）も同様に設定する
+            AudioListener listener = childCam.GetComponent<AudioListener>();
+            if (listener != null)
+            {
+                listener.enabled = HasInputAuthority;
+            }
+        }
+
         // 入力権限がないクライアントは初期化しない
         if (!HasInputAuthority) return;
 
         testplayerControl = new PlayerInputAction();
-<<<<<<< HEAD
 
         // アクションのイベント登録
-=======
->>>>>>> develop
         testplayerControl.Player.OnActionB.started += OnBStarted;
         testplayerControl.Player.OnActionB.canceled += OnBCanceled;
         testplayerControl.Player.Stamp.started += OnStampStarted;
         testplayerControl.Player.Stamp.canceled += OnStampCanceled;
-<<<<<<< HEAD
 
         // UIなどの初期非表示設定
         if (stampMenu != null)
-=======
-        stampMenu.SetActive(false);
+            stampMenu.SetActive(false);
+
         if (animator == null)
->>>>>>> develop
         {
             Debug.LogError("Animatorがありません");
-            return;
         }
-<<<<<<< HEAD
+        else
+        {
+            Debug.Log(animator.gameObject.name);
+            Debug.Log(animator.runtimeAnimatorController?.name);
+        }
 
         if (stampObjects != null)
         {
@@ -75,54 +87,7 @@ public class PlayerBase : NetworkBehaviour
         testplayerControl.Enable();
         Debug.Log("PlayerBase入力開始");
 
-        // カメラの自動取得処理
-        if (playerCamera == null)
-        {
-            // まずは子オブジェクトからカメラを探す
-            Camera childCam = GetComponentInChildren<Camera>();
-            if (childCam != null)
-            {
-                playerCamera = childCam.transform;
-            }
-            // 子オブジェクトになければ、メインカメラを取得する
-            else if (Camera.main != null)
-            {
-                playerCamera = Camera.main.transform;
-            }
-            else
-            {
-                Debug.LogWarning("プレイヤーカメラが設定されておらず、シーン内にもカメラが見つかりません。");
-            }
-=======
-        Debug.Log(animator.gameObject.name);
-        Debug.Log(animator.runtimeAnimatorController.name);
-        for (int i = 0; i < stampObjects.Length; i++)
 
-        if (UsePlayerInput) if (!HasInputAuthority) return;
-
-        {
-
-            testplayerControl = new PlayerInputAction();
-
-            testplayerControl.Player.OnActionB.started += OnBStarted;
-            testplayerControl.Player.OnActionB.canceled += OnBCanceled;
-            testplayerControl.Player.Stamp.started += OnStampStarted;
-            testplayerControl.Player.Stamp.canceled += OnStampCanceled;
-
-            if (stampMenu != null)
-            {
-                stampMenu.SetActive(false);
-            }
-
-            for (int i = 0; i < stampObjects.Length; i++)
-            {
-                stampObjects[i].SetActive(false);
-            }
-
-            testplayerControl.Enable();
-            playerCamera = Camera.main.transform;
->>>>>>> develop
-        }
     }
 
     public override void FixedUpdateNetwork()
@@ -130,32 +95,6 @@ public class PlayerBase : NetworkBehaviour
         if (!UsePlayerInput) return;
         if (!HasInputAuthority) return;
         if (testplayerControl == null) return;
-<<<<<<< HEAD
-
-        // 移動・カメラ回転（スタンプ選択中でない場合のみ）
-        if (!isSelectingStamp)
-        {
-            // 移動処理
-            Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
-            Vector3 move = new Vector3(input.x, 0, input.y);
-            transform.position += move * moveSpeed * Runner.DeltaTime;
-
-            // 視点（カメラ回転）処理
-            if (playerCamera != null)
-            {
-                Vector2 lookInput = testplayerControl.Player.Look.ReadValue<Vector2>();
-
-                // 左右を見る（プレイヤー自身の回転）
-                transform.Rotate(Vector3.up * lookInput.x * lookSpeed * Runner.DeltaTime);
-
-                // 上下を見る（カメラ単体の回転）
-                cameraRotationX -= lookInput.y * lookSpeed * Runner.DeltaTime;
-                cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f);
-                playerCamera.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
-            }
-        }
-=======
->>>>>>> develop
 
         // スタンプ選択中のみ十字キー（D-Pad）を読む
         if (isSelectingStamp)
@@ -181,28 +120,38 @@ public class PlayerBase : NetworkBehaviour
                 ShowStamp(3);
                 CloseStampMenu();
             }
+
+            // スタンプ選択中は移動処理を行わない
+            if (animator != null) animator.SetBool("run", false);
             return;
         }
-<<<<<<< HEAD
-=======
-        //移動
+
+        // --- 移動処理 ---
         Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
-        Debug.Log(input);
         float speed = input.magnitude;
-        animator.SetBool("run", speed > 0.1f);
+
+        if (animator != null)
+        {
+            animator.SetBool("run", speed > 0.1f);
+        }
+
+        // プレイヤーの向きを基準にした移動 (Time.deltaTime ではなく Runner.DeltaTime を使用)
         Vector3 move = transform.forward * input.y + transform.right * input.x;
-        transform.position += move * moveSpeed * Time.deltaTime;
-        Vector2 lookInput = testplayerControl.Player.Look.ReadValue<Vector2>();
-        // 左右を見る（プレイヤー回転）
-        transform.Rotate(Vector3.up * lookInput.x * lookSpeed * Time.deltaTime);
-        // 上下を見る（カメラ回転）
-        cameraRotationX -= lookInput.y * lookSpeed * Time.deltaTime;
-        cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f);
-        playerCamera.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
-        animator.SetBool("run", speed > 0.1f);
-        Debug.Log(animator.GetBool("run"));
-        Debug.Log(animator.runtimeAnimatorController.name);
->>>>>>> develop
+        transform.position += move * moveSpeed * Runner.DeltaTime;
+
+        // --- 視点（カメラ回転）処理 ---
+        if (playerCamera != null)
+        {
+            Vector2 lookInput = testplayerControl.Player.Look.ReadValue<Vector2>();
+
+            // 左右を見る（プレイヤー自身の回転）
+            transform.Rotate(Vector3.up * lookInput.x * lookSpeed * Runner.DeltaTime);
+
+            // 上下を見る（カメラ単体の回転）
+            cameraRotationX -= lookInput.y * lookSpeed * Runner.DeltaTime;
+            cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f);
+            playerCamera.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
+        }
     }
 
     /// <summary>
@@ -327,17 +276,10 @@ public class PlayerBase : NetworkBehaviour
     /// スタンプの実装部分
     /// </summary>
     void ShowStamp(int index)
-<<<<<<< HEAD
     {
-        if (stampSprites == null || index < 0 || index >= stampSprites.Length)
+        if (stampObjects == null || index < 0 || index >= stampObjects.Length)
             return;
 
-        if (stampObjects == null || index < 0 || index >= stampObjects.Length)
-=======
-    {   
-        if (index < 0 || index >= stampObjects.Length)
->>>>>>> develop
-            return;
         // 全部非表示
         for (int i = 0; i < stampObjects.Length; i++)
         {
@@ -359,20 +301,20 @@ public class PlayerBase : NetworkBehaviour
     void CloseStampMenu()
     {
         isSelectingStamp = false;
-        stampMenu.SetActive(false);
+
+        if (stampMenu != null)
+        {
+            stampMenu.SetActive(false);
+        }
 
         Debug.Log("スタンプ決定");
     }
 
     IEnumerator HideStampAfterTime()
     {
-<<<<<<< HEAD
-        yield return new WaitForSeconds(2f);
-        if (stampObjects != null)
-=======
         yield return new WaitForSeconds(stampDisplayTime);
-        for (int i = 0; i < stampObjects.Length; i++)
->>>>>>> develop
+
+        if (stampObjects != null)
         {
             for (int i = 0; i < stampObjects.Length; i++)
             {
@@ -389,17 +331,12 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     private void OnStampStarted(InputAction.CallbackContext context)
     {
-
         isSelectingStamp = !isSelectingStamp;
-        stampMenu.SetActive(isSelectingStamp);
-
-        isSelectingStamp = true;
 
         if (stampMenu != null)
         {
-            stampMenu.SetActive(true);
+            stampMenu.SetActive(isSelectingStamp);
         }
-
 
         Debug.Log("スタンプ選択開始");
     }
@@ -409,9 +346,7 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     private void OnStampCanceled(InputAction.CallbackContext context)
     {
-
-        //何もしない
-
+        // 何もしない
         isSelectingStamp = false;
 
         if (stampMenu != null)
@@ -424,10 +359,7 @@ public class PlayerBase : NetworkBehaviour
 
     /// <summary>
     /// GameManagerなどからプレイヤー情報を受け取るメソッド
-    /// （コンパイルエラーを防ぐために引数を int, bool に統一しています）
     /// </summary>
-    /// <param name="playerId">プレイヤーのID（1Pか2Pか）</param>
-    /// <param name="useController">コントローラー（ゲームパッド）を使用するかどうか</param>
     public void SetPlayerDevice(int playerId, bool useController)
     {
         this.myPlayerId = playerId;
