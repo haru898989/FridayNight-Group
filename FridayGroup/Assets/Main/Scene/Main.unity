@@ -424,7 +424,7 @@ MonoBehaviour:
     RawGuidValue: c44eb908b79e5f440a08ae5808a85245
   playerPrefabB:
     RawGuidValue: c44eb908b79e5f440a08ae5808a85245
-  spawnPoint: {fileID: 0}
+  spawnPoint: {fileID: 399838462}
 --- !u!4 &552898643
 Transform:
   m_ObjectHideFlags: 0
