@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
         public bool useController;    // Controllerならtrue
         public string objectName;     // A / B
         public PlayerRef playerRef;   // Fusion Player（デフォルト値は PlayerRef.None）
+        public NetworkObject playerObject;
     }
 
     // 2人分のデータを保存
@@ -48,10 +49,11 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        // サーバー（またはホスト）だけがSpawnを実行する権限を持ちます
-        if (!runner.IsServer) return;
+        Debug.Log("GameManager.OnPlayerJoined開始");
 
         int index = GetEmptyPlayerIndex();
+
+        Debug.Log("空きスロット:" + index);
 
         if (index == -1)
         {
@@ -85,13 +87,28 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // プレイヤーの生成（最後の引数で入力権限: Input Authority を割り当て）
+        Debug.Log($"Spawn開始: {player.PlayerId}P, Prefab={prefab}");
+
         NetworkObject playerObject = runner.Spawn(
             prefab,
             spawnPoint.position,
             Quaternion.identity,
-            player // ← ここで入力権限（Input Authority）を割り当て！
+            player
         );
+
+        Debug.Log($"生成完了: {playerObject}");
+
+        players[index].playerObject = playerObject;
+
+        PlayerBase playerBase = playerObject.GetComponent<PlayerBase>();
+
+        if (playerBase != null)
+        {
+            playerBase.SetPlayerDevice(
+                players[index].playerID,
+                players[index].useController
+            );
+        }
 
         Debug.Log($"プレイヤー {player.PlayerId} のオブジェクトを生成しました（{players[index].playerID}Pとして登録）");
         Debug.Log($"{players[index].playerID}P設定: Controller={players[index].useController}, Object={players[index].objectName}");
@@ -109,10 +126,19 @@ public class GameManager : MonoBehaviour
             if (players[i].playerRef == player)
             {
                 Debug.Log($"{players[i].playerID}P (Player {player.PlayerId}) が退出したためデータをクリアします。");
+
+                // ←ここに追加
+                if (players[i].playerObject != null)
+                {
+                    runner.Despawn(players[i].playerObject);
+                    players[i].playerObject = null;
+                }
+
                 players[i].playerID = 0;
                 players[i].playerRef = PlayerRef.None;
                 players[i].useController = false;
                 players[i].objectName = string.Empty;
+
                 break;
             }
         }

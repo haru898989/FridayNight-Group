@@ -107,6 +107,7 @@ GameObject:
   - component: {fileID: 2260150791756846443}
   - component: {fileID: 6678687509293379510}
   - component: {fileID: -8260474027413664194}
+  - component: {fileID: 1990411384012666183}
   m_Layer: 0
   m_Name: player_A
   m_TagString: Untagged
@@ -221,6 +222,7 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6678687509293379510}
+  - {fileID: 1990411384012666183}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6678687509293379510
 MonoBehaviour:
@@ -265,3 +267,28 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1990411384012666183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3519235181358692956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cccea3c729875d4da8e9aab04a40712, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 5
+  playerCamera: {fileID: 1406829160193047413}
+  lookSpeed: 100
+  holdThreshold: 0.5
+  nearbyObject: {fileID: 0}
+  selectableObject: {fileID: 0}
+  groundY: 0
+  stampSprites: []
+  stampMenu: {fileID: 0}
+  stampObjects: []
+  stampDisplayTime: 2
+  animator: {fileID: 0}
+  playerID: 0

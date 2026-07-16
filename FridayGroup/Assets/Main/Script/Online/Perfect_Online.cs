@@ -3,22 +3,14 @@ using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 {
     private NetworkRunner _runner;
     public NetworkRunner Runner => _runner;
 
-    [Header("生成するプレイヤーのプレハブ")]
-    [SerializeField] private NetworkPrefabRef playerPrefab;
-
     [Header("ロビーUI（スタートボタン）")]
     [SerializeField] private GameObject startButtonUI;
-
-    // 接続しているプレイヤーのオブジェクト管理用辞書
-    private Dictionary<PlayerRef, NetworkObject> _spawnedPlayers
-        = new Dictionary<PlayerRef, NetworkObject>();
 
     private async void Start()
     {
@@ -63,66 +55,16 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
     // プレイヤーが参加したとき（ローカルプレイヤーなら自身のキャラを生成）
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        Debug.Log($"参加 PlayerID : {player.PlayerId}");
+        Debug.Log("参加：" + player);
 
-        // GameManagerへ同期・通知
         if (GameManager.Instance != null)
         {
+            Debug.Log("GameManager発見");
             GameManager.Instance.OnPlayerJoined(runner, player);
         }
         else
         {
-            Debug.LogWarning("GameManagerが存在しません。マルチプレイヤー情報の登録をスキップします。");
-        }
-
-        if (player == runner.LocalPlayer)
-        {
-            Debug.Log("自分のプレイヤー生成");
-
-            Vector3 spawnPosition = new Vector3(
-                UnityEngine.Random.Range(-3f, 3f),
-                1f,
-                UnityEngine.Random.Range(-3f, 3f)
-            );
-
-            NetworkObject playerObj = runner.Spawn(
-                playerPrefab,
-                spawnPosition,
-                Quaternion.identity,
-                player
-            );
-
-            if (playerObj != null)
-            {
-                _spawnedPlayers.Add(player, playerObj);
-
-                PlayerBase playerBase = playerObj.GetComponent<PlayerBase>();
-                if (playerBase != null)
-                {
-                    int playerType = (player.PlayerId == 1) ? 1 : 2;
-
-                    // コントローラー（ゲームパッド）の接続有無を検知
-                    bool useController = false;
-                    if (Gamepad.all.Count > 0)
-                    {
-                        useController = true;
-                        Debug.Log("コントローラー検知");
-                    }
-                    else
-                    {
-                        Debug.Log("キーボード操作");
-                    }
-
-                    // PlayerBaseへデバイス設定を反映
-                    playerBase.SetPlayerDevice(playerType, useController);
-                }
-            }
-
-            // ホストプレイヤーかつボタンUIが存在する場合のみスタートボタンを表示
-            if (runner.IsSharedModeMasterClient && startButtonUI != null)
-            {
-                startButtonUI.SetActive(true);
-            }
+            Debug.LogError("GameManager.Instanceがnullです");
         }
     }
 
@@ -131,13 +73,9 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"退出 PlayerID : {player.PlayerId}");
 
-        if (_spawnedPlayers.TryGetValue(player, out NetworkObject obj))
+        if (GameManager.Instance != null)
         {
-            if (obj != null)
-            {
-                runner.Despawn(obj);
-            }
-            _spawnedPlayers.Remove(player);
+            GameManager.Instance.OnPlayerLeft(runner, player);
         }
     }
 

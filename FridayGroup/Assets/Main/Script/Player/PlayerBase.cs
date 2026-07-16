@@ -34,6 +34,8 @@ public class PlayerBase : NetworkBehaviour
 
     public override void Spawned()
     {
+        Debug.Log($"Spawned実行: {gameObject.name}, InputAuthority={HasInputAuthority}");
+
         Camera childCam = GetComponentInChildren<Camera>();
         if (childCam != null)
         {
@@ -48,8 +50,14 @@ public class PlayerBase : NetworkBehaviour
             }
         }
 
+        Debug.Log($"Spawned実行 Player={gameObject.name}, InputAuthority={HasInputAuthority}");
+
         // 入力権限がないクライアントは初期化しない
-        if (!HasInputAuthority) return;
+        if (!HasInputAuthority)
+        {
+            Debug.Log("入力権限がないためPlayerBase初期化終了");
+            return;
+        }
 
         testplayerControl = new PlayerInputAction();
 
@@ -59,13 +67,17 @@ public class PlayerBase : NetworkBehaviour
         testplayerControl.Player.Stamp.started += OnStampStarted;
         testplayerControl.Player.Stamp.canceled += OnStampCanceled;
 
+        testplayerControl.Player.Enable();
+
+        Debug.Log("PlayerBase入力開始");
+
         // UIなどの初期非表示設定
         if (stampMenu != null)
             stampMenu.SetActive(false);
 
         if (animator == null)
         {
-            Debug.LogError("Animatorがありません");
+            Debug.Log("Animatorがありません。アニメーションなしで続行します。");
         }
         else
         {
@@ -92,6 +104,8 @@ public class PlayerBase : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
+        Debug.Log("Authority : " + Object.HasStateAuthority);
+
         if (!UsePlayerInput) return;
         if (!HasInputAuthority) return;
         if (testplayerControl == null) return;
@@ -128,7 +142,13 @@ public class PlayerBase : NetworkBehaviour
 
         // --- 移動処理 ---
         Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
+
+        if (input != Vector2.zero)
+        {
+            Debug.Log($"Move入力:{input}");
+        }
         float speed = input.magnitude;
+
 
         if (animator != null)
         {
