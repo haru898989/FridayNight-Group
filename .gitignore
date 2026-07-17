@@ -129,3 +129,6 @@ InitTestScene*.unity*
 *.aab
 *.unitypackage
 *.app
+FridayGroup/.vscode/extensions.json
+FridayGroup/.vscode/launch.json
+FridayGroup/.vscode/settings.json
