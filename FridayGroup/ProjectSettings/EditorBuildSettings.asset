@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Main/Scene/OnlineConnect.unity
+    guid: a0a4d75192141414fb40e4b7381b6ccf
+  - enabled: 1
+    path: Assets/Main/Scene/Main.unity
+    guid: 309858baf11829a4b85284faded05370
+  - enabled: 1
     path: Assets/Main/Script/Player/add_playermove.unity
     guid: 863576ed4a12d304e86cce7931c5a4a0
   m_configObjects: {}

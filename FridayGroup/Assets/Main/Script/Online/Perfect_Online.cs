@@ -45,6 +45,8 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
     // Startボタンから呼び出し（マスタークライアントのみシーン遷移可能）
     public void OnStartButtonClicked()
     {
+        Debug.Log("Startボタンが押されました");
+
         if (_runner != null && _runner.IsSharedModeMasterClient)
         {
             Debug.Log("Mainシーンへ移動");
