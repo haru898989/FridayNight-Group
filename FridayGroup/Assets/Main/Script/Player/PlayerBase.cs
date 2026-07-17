@@ -7,61 +7,114 @@ using Fusion;
 public class PlayerBase : NetworkBehaviour
 {
     private PlayerInputAction testplayerControl;
-    public float moveSpeed = 5f; // ˆÚ“®‘¬“x
+    public float moveSpeed = 5f; // ç§»å‹•é€Ÿåº¦
     public Transform playerCamera;
-    public float lookSpeed = 100f; // ‹“_‚ÌˆÚ“®‚Ì‘¬“x
-    private float cameraRotationX = 0f; // ƒJƒƒ‰‚ÌˆÊ’u
-    public float holdThreshold = 0.5f; // ƒ{ƒ^ƒ“‚Ì’·‰Ÿ‚µ”»’è
+    public float lookSpeed = 100f; // è¦–ç‚¹ã®ç§»å‹•ã®é€Ÿåº¦
+    private float cameraRotationX = 0f; // ã‚«ãƒ¡ãƒ©ã®ä½ç½®
+    public float holdThreshold = 0.5f; // ãƒœã‚¿ãƒ³ã®é•·æŠ¼ã—åˆ¤å®š
     private float pressStartTime;
     private bool isSelectingStamp = false;
-    private GameObject heldObject; // ‚Á‚Ä‚¢‚é•¨
-    public GameObject nearbyObject; // ‹ß‚­‚É‚ ‚é‚Ä‚é•¨
-    public GameObject selectableObject; // Œˆ’è‚Å‚«‚é‘ÎÛ
-    public float groundY = 0f; // ’n–Ê‚ÌÀ•W
-    public Sprite[] stampSprites; // ƒXƒ^ƒ“ƒv‰æ‘œ
-    public GameObject stampMenu; // ƒXƒ^ƒ“ƒv‚Ì‘I‘ğ
-    public GameObject[] stampObjects; // ƒXƒ^ƒ“ƒv‚Ì”
-    public float stampDisplayTime = 2f; // ƒXƒ^ƒ“ƒv•\¦ŠÔi•bj
-    private Coroutine stampCoroutine; // ƒRƒ‹[ƒ`ƒ“ŠÇ——p
+    private GameObject heldObject; // æŒã£ã¦ã„ã‚‹ç‰©
+    public GameObject nearbyObject; // è¿‘ãã«ã‚ã‚‹æŒã¦ã‚‹ç‰©
+    public GameObject selectableObject; // æ±ºå®šã§ãã‚‹å¯¾è±¡
+    public float groundY = 0f; // åœ°é¢ã®åº§æ¨™
+    public Sprite[] stampSprites; // ã‚¹ã‚¿ãƒ³ãƒ—ç”»åƒ
+    public GameObject stampMenu; // ã‚¹ã‚¿ãƒ³ãƒ—ã®é¸æŠ
+    public GameObject[] stampObjects; // ã‚¹ã‚¿ãƒ³ãƒ—ã®æ•°
+    public float stampDisplayTime = 2f; // ã‚¹ã‚¿ãƒ³ãƒ—è¡¨ç¤ºæ™‚é–“ï¼ˆç§’ï¼‰
+    private Coroutine stampCoroutine; // ã‚³ãƒ«ãƒ¼ãƒãƒ³ç®¡ç†ç”¨
     [SerializeField]
     private Animator animator;
 
+    [Header("Character Visual")]
+    [SerializeField] private GameObject characterModelPrefab;
+    [SerializeField] private Vector3 characterModelLocalPosition = new Vector3(0f, -1f, 0f);
+    [SerializeField] private Vector3 characterModelLocalEulerAngles = Vector3.zero;
+    [SerializeField] private Vector3 characterModelLocalScale = Vector3.one;
+
+    private CharacterController characterController;
+    private Rigidbody playerRigidbody;
+    private Camera playerViewCamera;
+    private AudioListener playerViewAudioListener;
+    private PitfallCameraController[] pitfallCameraControllers;
+    private GameObject characterModelInstance;
+    private Vector3 previousRenderPosition;
+    private bool hasPreviousRenderPosition;
+
     protected virtual bool UsePlayerInput => true;
 
-    // GameManager‚©‚ç“¯Šú‚³‚ê‚éî•ñ‚ÌŠi”[—p•Ï”
+    // GameManagerã‹ã‚‰åŒæœŸã•ã‚Œã‚‹æƒ…å ±ã®æ ¼ç´ç”¨å¤‰æ•°
     private int myPlayerId;
     private bool usesGamepad;
 
     public override void Spawned()
     {
-        Debug.Log($"SpawnedÀs: {gameObject.name}, InputAuthority={HasInputAuthority}");
+        Debug.Log($"Spawnedå®Ÿè¡Œ: {gameObject.name}, InputAuthority={HasInputAuthority}");
+
+        characterController = GetComponent<CharacterController>();
+        playerRigidbody = GetComponent<Rigidbody>();
+
+        // å„ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã§ã¯ã€è‡ªåˆ†ãŒæ“ä½œã™ã‚‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã ã‘ã‚’ã‚®ãƒŸãƒƒã‚¯ã®å¯¾è±¡ã«ã™ã‚‹ã€‚
+        // ã“ã‚Œã«ã‚ˆã‚Šãƒªãƒ¢ãƒ¼ãƒˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ¥è§¦ã§ãƒ­ãƒ¼ã‚«ãƒ«æ¼”å‡ºãŒäºŒé‡èµ·å‹•ã™ã‚‹ã®ã‚’é˜²ãã€‚
+        gameObject.tag = HasInputAuthority ? "Player" : "Untagged";
+
+        CreateCharacterVisual();
+        previousRenderPosition = transform.position;
+        hasPreviousRenderPosition = true;
+
+        // å…¥åŠ›ã‚’æŒãŸãªã„ãƒªãƒ¢ãƒ¼ãƒˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒã€ãƒ­ãƒ¼ã‚«ãƒ«ã®ã‚­ãƒ¼å…¥åŠ›ã§
+        // çŸ³æ¿ã‚„ã‚¯ãƒªã‚¹ã‚¿ãƒ«ã‚’æ“ä½œã—ãªã„ã‚ˆã†ã«ã™ã‚‹ã€‚
+        StoneTabletCarrier tabletCarrier = GetComponent<StoneTabletCarrier>();
+        if (tabletCarrier != null)
+        {
+            tabletCarrier.enabled = HasInputAuthority;
+        }
+
+        PlayerCrystalHolder crystalHolder = GetComponent<PlayerCrystalHolder>();
+        if (crystalHolder != null)
+        {
+            crystalHolder.enabled = HasInputAuthority;
+        }
 
         Camera childCam = GetComponentInChildren<Camera>();
         if (childCam != null)
         {
-            // ©•ª‚ª‘€ì‚·‚éƒLƒƒƒ‰(HasInputAuthority‚ªtrue)‚¾‚¯ƒJƒƒ‰‚ğON‚É‚·‚é
+            // è‡ªåˆ†ãŒæ“ä½œã™ã‚‹ã‚­ãƒ£ãƒ©(HasInputAuthorityãŒtrue)ã ã‘ã‚«ãƒ¡ãƒ©ã‚’ONã«ã™ã‚‹
             childCam.enabled = HasInputAuthority;
 
-            // Unity‚ÌŒx–h~‚Ì‚½‚ßAAudioListeneri¨j‚à“¯—l‚Éİ’è‚·‚é
+            if (HasInputAuthority)
+            {
+                playerViewCamera = childCam;
+                pitfallCameraControllers = FindObjectsOfType<PitfallCameraController>(true);
+                DisableOtherMainCameras(childCam);
+                childCam.gameObject.tag = "MainCamera";
+            }
+
+            // Unityã®è­¦å‘Šé˜²æ­¢ã®ãŸã‚ã€AudioListenerï¼ˆè€³ï¼‰ã‚‚åŒæ§˜ã«è¨­å®šã™ã‚‹
             AudioListener listener = childCam.GetComponent<AudioListener>();
             if (listener != null)
             {
                 listener.enabled = HasInputAuthority;
+
+                if (HasInputAuthority)
+                {
+                    playerViewAudioListener = listener;
+                }
             }
         }
 
-        Debug.Log($"SpawnedÀs Player={gameObject.name}, InputAuthority={HasInputAuthority}");
+        Debug.Log($"Spawnedå®Ÿè¡Œ Player={gameObject.name}, InputAuthority={HasInputAuthority}");
 
-        // “ü—ÍŒ ŒÀ‚ª‚È‚¢ƒNƒ‰ƒCƒAƒ“ƒg‚Í‰Šú‰»‚µ‚È‚¢
+        // å…¥åŠ›æ¨©é™ãŒãªã„ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã¯åˆæœŸåŒ–ã—ãªã„
         if (!HasInputAuthority)
         {
-            Debug.Log("“ü—ÍŒ ŒÀ‚ª‚È‚¢‚½‚ßPlayerBase‰Šú‰»I—¹");
+            Debug.Log("å…¥åŠ›æ¨©é™ãŒãªã„ãŸã‚PlayerBaseåˆæœŸåŒ–çµ‚äº†");
             return;
         }
 
         testplayerControl = new PlayerInputAction();
 
-        // ƒAƒNƒVƒ‡ƒ“‚ÌƒCƒxƒ“ƒg“o˜^
+        // ã‚¢ã‚¯ã‚·ãƒ§ãƒ³ã®ã‚¤ãƒ™ãƒ³ãƒˆç™»éŒ²
         testplayerControl.Player.OnActionB.started += OnBStarted;
         testplayerControl.Player.OnActionB.canceled += OnBCanceled;
         testplayerControl.Player.Stamp.started += OnStampStarted;
@@ -69,15 +122,15 @@ public class PlayerBase : NetworkBehaviour
 
         testplayerControl.Player.Enable();
 
-        Debug.Log("PlayerBase“ü—ÍŠJn");
+        Debug.Log("PlayerBaseå…¥åŠ›é–‹å§‹");
 
-        // UI‚È‚Ç‚Ì‰Šú”ñ•\¦İ’è
+        // UIãªã©ã®åˆæœŸéè¡¨ç¤ºè¨­å®š
         if (stampMenu != null)
             stampMenu.SetActive(false);
 
         if (animator == null)
         {
-            Debug.Log("Animator‚ª‚ ‚è‚Ü‚¹‚ñBƒAƒjƒ[ƒVƒ‡ƒ“‚È‚µ‚Å‘±s‚µ‚Ü‚·B");
+            Debug.Log("AnimatorãŒã‚ã‚Šã¾ã›ã‚“ã€‚ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãªã—ã§ç¶šè¡Œã—ã¾ã™ã€‚");
         }
         else
         {
@@ -97,20 +150,132 @@ public class PlayerBase : NetworkBehaviour
         }
 
         testplayerControl.Enable();
-        Debug.Log("PlayerBase“ü—ÍŠJn");
+        Debug.Log("PlayerBaseå…¥åŠ›é–‹å§‹");
 
 
     }
 
+    private void LateUpdate()
+    {
+        if (playerViewCamera == null)
+        {
+            return;
+        }
+
+        bool isPitfallCameraActive = false;
+        if (pitfallCameraControllers != null)
+        {
+            for (int i = 0; i < pitfallCameraControllers.Length; i++)
+            {
+                PitfallCameraController controller = pitfallCameraControllers[i];
+                Camera pitfallCamera = controller != null ? controller.GetComponent<Camera>() : null;
+
+                if (pitfallCamera != null && pitfallCamera.enabled)
+                {
+                    isPitfallCameraActive = true;
+                    break;
+                }
+            }
+        }
+
+        playerViewCamera.enabled = !isPitfallCameraActive;
+
+        if (playerViewAudioListener != null)
+        {
+            playerViewAudioListener.enabled = !isPitfallCameraActive;
+        }
+    }
+
+    public override void Render()
+    {
+        if (animator == null || HasInputAuthority)
+        {
+            return;
+        }
+
+        if (!hasPreviousRenderPosition)
+        {
+            previousRenderPosition = transform.position;
+            hasPreviousRenderPosition = true;
+            return;
+        }
+
+        float movedDistance = (transform.position - previousRenderPosition).sqrMagnitude;
+        animator.SetBool("run", movedDistance > 0.000001f);
+        previousRenderPosition = transform.position;
+    }
+
+    private void CreateCharacterVisual()
+    {
+        if (characterModelPrefab == null || characterModelInstance != null)
+        {
+            return;
+        }
+
+        characterModelInstance = Instantiate(characterModelPrefab, transform);
+        characterModelInstance.name = characterModelPrefab.name + "_Visual";
+        characterModelInstance.transform.localPosition = characterModelLocalPosition;
+        characterModelInstance.transform.localRotation = Quaternion.Euler(characterModelLocalEulerAngles);
+        characterModelInstance.transform.localScale = characterModelLocalScale;
+
+        // è¦‹ãŸç›®ç”¨ãƒ¢ãƒ‡ãƒ«å´ã®ç‰©ç†ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã¯Playerãƒ«ãƒ¼ãƒˆã®åˆ¤å®šã¨é‡è¤‡ã•ã›ãªã„ã€‚
+        Collider[] visualColliders = characterModelInstance.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < visualColliders.Length; i++)
+        {
+            visualColliders[i].enabled = false;
+        }
+
+        Rigidbody[] visualRigidbodies = characterModelInstance.GetComponentsInChildren<Rigidbody>(true);
+        for (int i = 0; i < visualRigidbodies.Length; i++)
+        {
+            visualRigidbodies[i].isKinematic = true;
+            visualRigidbodies[i].detectCollisions = false;
+        }
+
+        Animator modelAnimator = characterModelInstance.GetComponentInChildren<Animator>(true);
+        if (modelAnimator != null)
+        {
+            animator = modelAnimator;
+            animator.SetBool("run", false);
+            animator.Play("Idle", 0, 0f);
+            animator.Update(0f);
+        }
+
+        MeshRenderer placeholderRenderer = GetComponent<MeshRenderer>();
+        if (placeholderRenderer != null)
+        {
+            placeholderRenderer.enabled = false;
+        }
+    }
+
+    private static void DisableOtherMainCameras(Camera ownedCamera)
+    {
+        Camera[] cameras = FindObjectsOfType<Camera>(true);
+        for (int i = 0; i < cameras.Length; i++)
+        {
+            Camera sceneCamera = cameras[i];
+            if (sceneCamera == null || sceneCamera == ownedCamera || !sceneCamera.CompareTag("MainCamera"))
+            {
+                continue;
+            }
+
+            sceneCamera.enabled = false;
+
+            AudioListener listener = sceneCamera.GetComponent<AudioListener>();
+            if (listener != null)
+            {
+                listener.enabled = false;
+            }
+        }
+    }
+
     public override void FixedUpdateNetwork()
     {
-        Debug.Log("Authority : " + Object.HasStateAuthority);
-
         if (!UsePlayerInput) return;
         if (!HasInputAuthority) return;
         if (testplayerControl == null) return;
 
-        // ƒXƒ^ƒ“ƒv‘I‘ğ’†‚Ì‚İ\šƒL[iD-Padj‚ğ“Ç‚Ş
+        // ã‚¹ã‚¿ãƒ³ãƒ—é¸æŠä¸­ã®ã¿åå­—ã‚­ãƒ¼ï¼ˆD-Padï¼‰ã‚’èª­ã‚€
         if (isSelectingStamp)
         {
             Vector2 stampInput = testplayerControl.Player.StampSelect.ReadValue<Vector2>();
@@ -135,17 +300,17 @@ public class PlayerBase : NetworkBehaviour
                 CloseStampMenu();
             }
 
-            // ƒXƒ^ƒ“ƒv‘I‘ğ’†‚ÍˆÚ“®ˆ—‚ğs‚í‚È‚¢
+            // ã‚¹ã‚¿ãƒ³ãƒ—é¸æŠä¸­ã¯ç§»å‹•å‡¦ç†ã‚’è¡Œã‚ãªã„
             if (animator != null) animator.SetBool("run", false);
             return;
         }
 
-        // --- ˆÚ“®ˆ— ---
+        // --- ç§»å‹•å‡¦ç† ---
         Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
 
         if (input != Vector2.zero)
         {
-            Debug.Log($"Move“ü—Í:{input}");
+            Debug.Log($"Moveå…¥åŠ›:{input}");
         }
         float speed = input.magnitude;
 
@@ -155,19 +320,38 @@ public class PlayerBase : NetworkBehaviour
             animator.SetBool("run", speed > 0.1f);
         }
 
-        // ƒvƒŒƒCƒ„[‚ÌŒü‚«‚ğŠî€‚É‚µ‚½ˆÚ“® (Time.deltaTime ‚Å‚Í‚È‚­ Runner.DeltaTime ‚ğg—p)
         Vector3 move = transform.forward * input.y + transform.right * input.x;
-        transform.position += move * moveSpeed * Runner.DeltaTime;
 
-        // --- ‹“_iƒJƒƒ‰‰ñ“]jˆ— ---
+        // BearTrapã¯Rigidbodyã‚’FreezeAllã«ã™ã‚‹ãŸã‚ã€åŒã˜çŠ¶æ…‹ã‚’
+        // CharacterControllerç§»å‹•ã«ã‚‚åæ˜ ã—ã¦ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’åœæ­¢ã•ã›ã‚‹ã€‚
+        if (playerRigidbody != null && playerRigidbody.constraints == RigidbodyConstraints.FreezeAll)
+        {
+            if (animator != null) animator.SetBool("run", false);
+            return;
+        }
+
+        // ==========================================
+        // â†“â†“â†“ å¤‰æ›´å‰ï¼ˆå£ã‚’ã™ã‚ŠæŠœã‘ã‚‹ï¼‰ â†“â†“â†“
+        // transform.position += move * moveSpeed * Runner.DeltaTime;
+        // ==========================================
+
+        // ==========================================
+        // â†“â†“â†“ å¤‰æ›´å¾Œï¼ˆå£ã§ã¡ã‚ƒã‚“ã¨æ­¢ã¾ã‚‹ï¼‰ â†“â†“â†“
+        // ==========================================
+        if (characterController != null && characterController.enabled)
+        {
+            // transform.positionã®ä»£ã‚ã‚Šã«ã€cc.Moveã‚’ä½¿ã†ã ã‘ï¼
+            characterController.Move(move * moveSpeed * Runner.DeltaTime);
+        }
+        // --- è¦–ç‚¹ï¼ˆã‚«ãƒ¡ãƒ©å›è»¢ï¼‰å‡¦ç† ---
         if (playerCamera != null)
         {
             Vector2 lookInput = testplayerControl.Player.Look.ReadValue<Vector2>();
 
-            // ¶‰E‚ğŒ©‚éiƒvƒŒƒCƒ„[©g‚Ì‰ñ“]j
+            // å·¦å³ã‚’è¦‹ã‚‹ï¼ˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼è‡ªèº«ã®å›è»¢ï¼‰
             transform.Rotate(Vector3.up * lookInput.x * lookSpeed * Runner.DeltaTime);
 
-            // ã‰º‚ğŒ©‚éiƒJƒƒ‰’P‘Ì‚Ì‰ñ“]j
+            // ä¸Šä¸‹ã‚’è¦‹ã‚‹ï¼ˆã‚«ãƒ¡ãƒ©å˜ä½“ã®å›è»¢ï¼‰
             cameraRotationX -= lookInput.y * lookSpeed * Runner.DeltaTime;
             cameraRotationX = Mathf.Clamp(cameraRotationX, -80f, 80f);
             playerCamera.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
@@ -175,7 +359,7 @@ public class PlayerBase : NetworkBehaviour
     }
 
     /// <summary>
-    /// ’·‰Ÿ‚µ‚Ì”»’èiƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½uŠÔj
+    /// é•·æŠ¼ã—ã®åˆ¤å®šï¼ˆãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸç¬é–“ï¼‰
     /// </summary>
     private void OnBStarted(InputAction.CallbackContext context)
     {
@@ -183,7 +367,7 @@ public class PlayerBase : NetworkBehaviour
     }
 
     /// <summary>
-    /// ’·‰Ÿ‚µ‚Ì”»’èiƒ{ƒ^ƒ“‚ª—£‚³‚ê‚½uŠÔj
+    /// é•·æŠ¼ã—ã®åˆ¤å®šï¼ˆãƒœã‚¿ãƒ³ãŒé›¢ã•ã‚ŒãŸç¬é–“ï¼‰
     /// </summary>
     private void OnBCanceled(InputAction.CallbackContext context)
     {
@@ -192,25 +376,25 @@ public class PlayerBase : NetworkBehaviour
 
         if (pressDuration >= holdThreshold)
         {
-            Debug.Log("B’·‰Ÿ‚µ");
+            Debug.Log("Bé•·æŠ¼ã—");
             HoldObject();
         }
         else
         {
             if (!isHolding)
             {
-                Debug.Log("B’Z‰Ÿ‚µ");
+                Debug.Log("BçŸ­æŠ¼ã—");
                 ConfirmSelection();
             }
             else
             {
-                Debug.Log("•¨‚ğ‚Á‚Ä‚¢‚é‚Ì‚Å’Z‰Ÿ‚µ–³Œø");
+                Debug.Log("ç‰©ã‚’æŒã£ã¦ã„ã‚‹ã®ã§çŸ­æŠ¼ã—ç„¡åŠ¹");
             }
         }
     }
 
     /// <summary>
-    /// ƒIƒuƒWƒFƒNƒg‚ÌŠ‚ÆƒIƒuƒWƒFƒNƒg‚Æ‚Ì‹——£ŒvZ
+    /// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ‰€æŒã¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¨ã®è·é›¢è¨ˆç®—
     /// </summary>
     void HoldObject()
     {
@@ -225,7 +409,7 @@ public class PlayerBase : NetworkBehaviour
 
                 if (distance > 2f)
                 {
-                    Debug.Log("‰“‚·‚¬‚Ä‚Ä‚È‚¢");
+                    Debug.Log("é ã™ãã¦æŒã¦ãªã„");
                     return;
                 }
 
@@ -237,7 +421,7 @@ public class PlayerBase : NetworkBehaviour
                 if (col != null)
                     col.enabled = false;
 
-                Debug.Log("•¨‚ğ‚Á‚½");
+                Debug.Log("ç‰©ã‚’æŒã£ãŸ");
             }
         }
         else
@@ -252,7 +436,7 @@ public class PlayerBase : NetworkBehaviour
             heldObject.transform.position = pos;
             heldObject = null;
 
-            Debug.Log("•¨‚ğ—£‚µ‚½");
+            Debug.Log("ç‰©ã‚’é›¢ã—ãŸ");
         }
     }
 
@@ -260,25 +444,25 @@ public class PlayerBase : NetworkBehaviour
     {
         if (selectableObject != null)
         {
-            Debug.Log("Œˆ’èI");
-            // —á: ƒhƒAŠJ‚¯‚éA‰ï˜b‚·‚é
+            Debug.Log("æ±ºå®šï¼");
+            // ä¾‹: ãƒ‰ã‚¢é–‹ã‘ã‚‹ã€ä¼šè©±ã™ã‚‹
         }
     }
 
     /// <summary>
-    /// ƒIƒuƒWƒFƒNƒg‚É‹ß‚¢‚Æ‚«‚Ì‚İ‚Ä‚é
+    /// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã«è¿‘ã„ã¨ãã®ã¿æŒã¦ã‚‹
     /// </summary>
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Pickup"))
         {
             nearbyObject = other.gameObject;
-            Debug.Log("Pickup‚ÉÚG");
+            Debug.Log("Pickupã«æ¥è§¦");
         }
     }
 
     /// <summary>
-    /// ƒIƒuƒWƒFƒNƒg‚ª‰“‚¢‚Æ‚Ä‚È‚¢
+    /// ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒé ã„ã¨æŒã¦ãªã„
     /// </summary>
     private void OnTriggerExit(Collider other)
     {
@@ -287,20 +471,20 @@ public class PlayerBase : NetworkBehaviour
             if (nearbyObject == other.gameObject)
             {
                 nearbyObject = null;
-                Debug.Log("Pickup‚©‚ç—£‚ê‚½");
+                Debug.Log("Pickupã‹ã‚‰é›¢ã‚ŒãŸ");
             }
         }
     }
 
     /// <summary>
-    /// ƒXƒ^ƒ“ƒv‚ÌÀ‘••”•ª
+    /// ã‚¹ã‚¿ãƒ³ãƒ—ã®å®Ÿè£…éƒ¨åˆ†
     /// </summary>
     void ShowStamp(int index)
     {
         if (stampObjects == null || index < 0 || index >= stampObjects.Length)
             return;
 
-        // ‘S•””ñ•\¦
+        // å…¨éƒ¨éè¡¨ç¤º
         for (int i = 0; i < stampObjects.Length; i++)
         {
             if (stampObjects[i] != null)
@@ -308,13 +492,13 @@ public class PlayerBase : NetworkBehaviour
                 stampObjects[i].SetActive(i == index);
             }
         }
-        // ‘O‚ÌƒRƒ‹[ƒ`ƒ“‚ğ’â~
+        // å‰ã®ã‚³ãƒ«ãƒ¼ãƒãƒ³ã‚’åœæ­¢
         if (stampCoroutine != null)
         {
             StopCoroutine(stampCoroutine);
         }
 
-        // V‚µ‚­•\¦ŠÔ‚ğƒJƒEƒ“ƒg
+        // æ–°ã—ãè¡¨ç¤ºæ™‚é–“ã‚’ã‚«ã‚¦ãƒ³ãƒˆ
         stampCoroutine = StartCoroutine(HideStampAfterTime());
     }
 
@@ -327,7 +511,7 @@ public class PlayerBase : NetworkBehaviour
             stampMenu.SetActive(false);
         }
 
-        Debug.Log("ƒXƒ^ƒ“ƒvŒˆ’è");
+        Debug.Log("ã‚¹ã‚¿ãƒ³ãƒ—æ±ºå®š");
     }
 
     IEnumerator HideStampAfterTime()
@@ -347,7 +531,7 @@ public class PlayerBase : NetworkBehaviour
     }
 
     /// <summary>
-    /// ƒXƒ^ƒ“ƒv‘I‘ğŠJn
+    /// ã‚¹ã‚¿ãƒ³ãƒ—é¸æŠé–‹å§‹
     /// </summary>
     private void OnStampStarted(InputAction.CallbackContext context)
     {
@@ -358,15 +542,15 @@ public class PlayerBase : NetworkBehaviour
             stampMenu.SetActive(isSelectingStamp);
         }
 
-        Debug.Log("ƒXƒ^ƒ“ƒv‘I‘ğŠJn");
+        Debug.Log("ã‚¹ã‚¿ãƒ³ãƒ—é¸æŠé–‹å§‹");
     }
 
     /// <summary>
-    /// ƒXƒ^ƒ“ƒv‘I‘ğI—¹
+    /// ã‚¹ã‚¿ãƒ³ãƒ—é¸æŠçµ‚äº†
     /// </summary>
     private void OnStampCanceled(InputAction.CallbackContext context)
     {
-        // ‰½‚à‚µ‚È‚¢
+        // ä½•ã‚‚ã—ãªã„
         isSelectingStamp = false;
 
         if (stampMenu != null)
@@ -374,21 +558,21 @@ public class PlayerBase : NetworkBehaviour
             stampMenu.SetActive(false);
         }
 
-        Debug.Log("ƒXƒ^ƒ“ƒv‘I‘ğI—¹");
+        Debug.Log("ã‚¹ã‚¿ãƒ³ãƒ—é¸æŠçµ‚äº†");
     }
 
     /// <summary>
-    /// GameManager‚È‚Ç‚©‚çƒvƒŒƒCƒ„[î•ñ‚ğó‚¯æ‚éƒƒ\ƒbƒh
+    /// GameManagerãªã©ã‹ã‚‰ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æƒ…å ±ã‚’å—ã‘å–ã‚‹ãƒ¡ã‚½ãƒƒãƒ‰
     /// </summary>
     public void SetPlayerDevice(int playerId, bool useController)
     {
         this.myPlayerId = playerId;
         this.usesGamepad = useController;
 
-        Debug.Log($"PlayerBase: ƒvƒŒƒCƒ„[ {myPlayerId}P ‚ÌƒfƒoƒCƒXİ’è‚ğ“K—p‚µ‚Ü‚µ‚½BController={usesGamepad}");
+        Debug.Log($"PlayerBase: ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ {myPlayerId}P ã®ãƒ‡ãƒã‚¤ã‚¹è¨­å®šã‚’é©ç”¨ã—ã¾ã—ãŸã€‚Controller={usesGamepad}");
     }
 
-    // ‘å’Ë‰w–kŒû‚Í‹ó‚¢‚Ä‚È‚¢by Taiga Sato
+    // å¤§å¡šé§…åŒ—å£ã¯ç©ºã„ã¦ãªã„by Taiga Sato
     private void OnDisable()
     {
         if (testplayerControl != null)
