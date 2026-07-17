@@ -150,7 +150,7 @@ Transform:
   m_GameObject: {fileID: 1455449260142286872}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.62790585, y: 0.33805418, z: 2}
+  m_LocalPosition: {x: -0.62790585, y: 0.8380542, z: -2}
   m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -184,7 +184,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 86b2616ed4d79734ca59b98fc78e3408, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -241,9 +241,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementType: 2
   crystalRenderer: {fileID: 0}
-  fireMaterial: {fileID: 0}
-  iceMaterial: {fileID: 0}
-  thunderMaterial: {fileID: 0}
+  fireMaterial: {fileID: 2100000, guid: e76e4488955447d4487b7fb243a077b7, type: 2}
+  iceMaterial: {fileID: 2100000, guid: a139f0d25a40f794691eb459f3a41308, type: 2}
+  thunderMaterial: {fileID: 2100000, guid: 86b2616ed4d79734ca59b98fc78e3408, type: 2}
 --- !u!1 &5385457961539594050
 GameObject:
   m_ObjectHideFlags: 0
@@ -273,7 +273,7 @@ Transform:
   m_GameObject: {fileID: 5385457961539594050}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.6279058, y: 0.33805418, z: 2}
+  m_LocalPosition: {x: -1.6279058, y: 0.8380542, z: -2}
   m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -307,7 +307,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a139f0d25a40f794691eb459f3a41308, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -364,9 +364,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementType: 1
   crystalRenderer: {fileID: 0}
-  fireMaterial: {fileID: 0}
-  iceMaterial: {fileID: 0}
-  thunderMaterial: {fileID: 0}
+  fireMaterial: {fileID: 2100000, guid: e76e4488955447d4487b7fb243a077b7, type: 2}
+  iceMaterial: {fileID: 2100000, guid: a139f0d25a40f794691eb459f3a41308, type: 2}
+  thunderMaterial: {fileID: 2100000, guid: 86b2616ed4d79734ca59b98fc78e3408, type: 2}
 --- !u!1 &5700477021275604529
 GameObject:
   m_ObjectHideFlags: 0
@@ -501,7 +501,7 @@ Transform:
   m_GameObject: {fileID: 7498909423724382548}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.6279058, y: 0.33805418, z: 2}
+  m_LocalPosition: {x: -2.6279058, y: 0.8380542, z: -2}
   m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -535,7 +535,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: e76e4488955447d4487b7fb243a077b7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -592,9 +592,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementType: 0
   crystalRenderer: {fileID: 0}
-  fireMaterial: {fileID: 0}
-  iceMaterial: {fileID: 0}
-  thunderMaterial: {fileID: 0}
+  fireMaterial: {fileID: 2100000, guid: e76e4488955447d4487b7fb243a077b7, type: 2}
+  iceMaterial: {fileID: 2100000, guid: a139f0d25a40f794691eb459f3a41308, type: 2}
+  thunderMaterial: {fileID: 2100000, guid: 86b2616ed4d79734ca59b98fc78e3408, type: 2}
 --- !u!1 &9160415608544669642
 GameObject:
   m_ObjectHideFlags: 0

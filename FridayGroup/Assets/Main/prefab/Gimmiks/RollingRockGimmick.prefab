@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 52700650517666991}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.37209415, y: -0.16194582, z: 0}
+  m_LocalPosition: {x: 0.37209415, y: 0.5, z: 0}
   m_LocalScale: {x: 2, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -118,7 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0da585cf8b80c6a4588f04ffe87efc77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTag: Player
+  playerTag: SharedGimmickPlayer
   isOnlyOnce: 1
   rollingRock: {fileID: 4680701685500038002}
 --- !u!1 &442090833970964258

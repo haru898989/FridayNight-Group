@@ -1,38 +1,40 @@
-using Fusion;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
+[RequireComponent(typeof(Button))]
 public class StartGameButton : MonoBehaviour
 {
     [SerializeField] private Perfect_Online online;
+
+    private Button button;
+
+    private void Awake()
+    {
+        button = GetComponent<Button>();
+        button.onClick.AddListener(StartGame);
+    }
+
+    private void OnDestroy()
+    {
+        if (button != null)
+        {
+            button.onClick.RemoveListener(StartGame);
+        }
+    }
 
     public void StartGame()
     {
         if (online == null)
         {
-            Debug.LogError("Perfect_Online が設定されていません");
-            return;
+            online = Perfect_Online.Instance;
         }
 
-        NetworkRunner runner = online.Runner;
-
-        if (runner == null)
+        if (online == null)
         {
-            Debug.LogError("NetworkRunner がありません");
+            Debug.LogError("Perfect_Online縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ");
             return;
         }
 
-        // Scene Authority(1P)だけがシーンを切り替える
-        if (!runner.IsSceneAuthority)
-        {
-            Debug.Log("SceneAuthorityではないため開始できません");
-            return;
-        }
-
-        int buildIndex = SceneUtility.GetBuildIndexByScenePath("Assets/Main/Scene/Main.unity");
-
-        runner.LoadScene(SceneRef.FromIndex(buildIndex), LoadSceneMode.Single);
-
-        Debug.Log("ゲーム開始！");
+        online.LoadMap();
     }
 }

@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.AI.Navigation;
 
 // CSVからマップを自動生成する基礎を学ぶためのクラス
 public class MapGenerator : MonoBehaviour
 {
+    private const float PlayerSpawnHeight = 1.5f;
+
     [Header("マップデータ（階層ごとにセット）")]
     // 複数の「シート（階層）」を表現するために、配列でCSVを持たせます
     // [0]地下 [1]1階 [2]2階 のようにInspectorから設定します
@@ -32,6 +34,9 @@ public class MapGenerator : MonoBehaviour
     public Transform mapParent;         // 生成したブロックをまとめる親オブジェクト
     public NavMeshSurface surface;
 
+    private int playerSpawnCount = 0;
+    private Vector3 playerSpawnPosition;
+
     void Start()
     {
         // テストとして、ゲーム開始時に「1階（配列の1番目）」と「2階（2番目）」を生成してみる
@@ -46,6 +51,23 @@ public class MapGenerator : MonoBehaviour
         GenerateFloorMap(8);
 
         surface.BuildNavMesh();
+
+        // CSVの100で指定された位置をGameManagerへ渡す
+        if (playerSpawnCount == 1)
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.SetMapSpawnPosition(playerSpawnPosition);
+            }
+            else
+            {
+                Debug.LogError("GameManagerが見つかりません！");
+            }
+        }
+        else
+        {
+            Debug.LogError($"プレイヤー生成位置100は全CSVに1個必要です。現在: {playerSpawnCount}個");
+        }
     }
 
     /// <summary>
@@ -97,6 +119,20 @@ public class MapGenerator : MonoBehaviour
                 // 生成する位置を計算
                 // floorIndex * floorHeight で、階層ごとにマップのY座標（高さ）を変えます
                 Vector3 spawnPos = new Vector3(x * tileSize, floorIndex * floorHeight, y * tileSize);
+
+                // 100はPlayerの生成位置。足元には通常床を生成する
+                if (key == 100)
+                {
+                    Instantiate(floor1[0], spawnPos, Quaternion.identity, mapParent);
+                    playerSpawnCount++;
+
+                    if (playerSpawnCount == 1)
+                    {
+                        playerSpawnPosition = spawnPos + Vector3.up * PlayerSpawnHeight;
+                    }
+
+                    continue;
+                }
 
                 // 読み込んだ数値（key）によって生成するブロックを変える
 
