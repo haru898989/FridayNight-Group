@@ -10,6 +10,7 @@ public class TimeManager : MonoBehaviour
     public TMP_Text timerText;
 
     private float currentTime;
+    private bool isTimeUp = false;
 
     void Start()
     {
@@ -18,6 +19,8 @@ public class TimeManager : MonoBehaviour
 
     void Update()
     {
+        if (isTimeUp) return;
+
         if (currentTime > 0)
         {
             currentTime -= Time.deltaTime;
@@ -25,7 +28,8 @@ public class TimeManager : MonoBehaviour
             if (currentTime <= 0)
             {
                 currentTime = 0;
-                Debug.Log("ŽžŠÔØ‚êI");
+                isTimeUp = true;
+                TimeUp();
             }
         }
 
@@ -38,5 +42,17 @@ public class TimeManager : MonoBehaviour
         int seconds = Mathf.FloorToInt(currentTime % 60);
 
         timerText.text = $"{minutes:00}:{seconds:00}";
+    }
+
+    void TimeUp()
+    {
+        Debug.Log("ŽžŠÔØ‚ê");
+
+        PlayerBase[] players = FindObjectsByType<PlayerBase>(FindObjectsSortMode.None);
+
+        foreach (PlayerBase player in players)
+        {
+            player.canMove = false;
+        }
     }
 }

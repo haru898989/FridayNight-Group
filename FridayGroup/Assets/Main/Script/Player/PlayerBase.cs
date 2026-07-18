@@ -41,6 +41,8 @@ public class PlayerBase : NetworkBehaviour
     private Vector3 previousRenderPosition;
     private bool hasPreviousRenderPosition;
 
+    public bool canMove = true;
+
     protected virtual bool UsePlayerInput => true;
 
     // GameManagerから同期される情報の格納用変数
@@ -274,6 +276,7 @@ public class PlayerBase : NetworkBehaviour
         if (!UsePlayerInput) return;
         if (!HasInputAuthority) return;
         if (testplayerControl == null) return;
+        if (!canMove) return;
 
         // スタンプ選択中のみ十字キー（D-Pad）を読む
         if (isSelectingStamp)
