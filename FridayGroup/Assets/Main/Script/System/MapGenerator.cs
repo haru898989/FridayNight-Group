@@ -28,6 +28,8 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] RollingRock;      //[35]
     public GameObject[] StoneTablet;      //[36]
 
+    public GameObject[] Goal;             //[90]
+
     [Header("マップ設定")]
     public float tileSize = 1f;         // 1マスのサイズ
     public float floorHeight = 3f;      // 1階層あたりの高さ（Y軸のオフセット）
@@ -131,6 +133,13 @@ public class MapGenerator : MonoBehaviour
                         playerSpawnPosition = spawnPos + Vector3.up * PlayerSpawnHeight;
                     }
 
+                    continue;
+                }
+
+                // 90はゴール
+                if (key == 90)
+                {
+                    Instantiate(Goal[0], spawnPos, Quaternion.identity, mapParent);
                     continue;
                 }
 
