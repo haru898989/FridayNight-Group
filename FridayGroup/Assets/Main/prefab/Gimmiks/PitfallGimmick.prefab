@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1674742417528867539}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.3020935, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0, y: -2.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -61,7 +61,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.55, z: 0}
-  m_LocalScale: {x: 1.6, y: 0.2, z: 1.6}
+  m_LocalScale: {x: 1, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7750061937437823826}
@@ -135,7 +135,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 10, z: 1}
+  m_Size: {x: 0.02, y: 10, z: 0.02}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &617063826948502733
 MonoBehaviour:
@@ -153,13 +153,13 @@ MonoBehaviour:
   isOnlyOnce: 1
   stageController: {fileID: 900100000000000001}
   fallTime: 1
-  fallDistance: 3
+  fallDistance: 4
   landSoundDelay: 0.2
   pitfallCameraController: {fileID: 8650666412512932477}
   entryCameraPoint: {fileID: 2445778164145052391}
   fallingCameraPoint: {fileID: 2364998230499876163}
   landCameraPoint: {fileID: 5586309491411285844}
-  entryCameraWaitTime: 0.3
+  entryCameraWaitTime: 0
   landCameraWaitTime: 0.6
 --- !u!1 &4087351076526735586
 GameObject:
@@ -186,7 +186,7 @@ Transform:
   m_GameObject: {fileID: 4087351076526735586}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.3020935, y: 2, z: -3}
+  m_LocalPosition: {x: 0, y: -2, z: -3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

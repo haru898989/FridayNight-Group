@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Fusion;
 
 public class Pitfall : GimmickBase
 {
@@ -42,6 +43,20 @@ public class Pitfall : GimmickBase
         isWarping = true;
 
         Debug.Log("Pitfall started");
+
+        // Stop CharacterController movement immediately and align the player with
+        // the center of the hole before starting the vertical fall.
+        CharacterController playerController = playerObject.GetComponent<CharacterController>();
+        if (playerController != null)
+        {
+            playerController.enabled = false;
+        }
+
+        Vector3 centeredPosition = playerObject.transform.position;
+        centeredPosition.x = transform.position.x;
+        centeredPosition.z = transform.position.z;
+        playerObject.transform.position = centeredPosition;
+        Physics.SyncTransforms();
 
         // 落とし穴演出用カメラに切り替える
         if (pitfallCameraController != null)
@@ -121,6 +136,15 @@ public class Pitfall : GimmickBase
 
         // ワープ先を取得する
         Vector3 warpPosition = stageController.GetPitfallWarpPosition();
+
+        // NetworkTransform must also be teleported, otherwise Fusion can restore
+        // the last falling position after the normal Transform assignment.
+        NetworkObject networkObject = playerObject.GetComponent<NetworkObject>();
+        NetworkTransform networkTransform = playerObject.GetComponent<NetworkTransform>();
+        if (networkObject != null && networkObject.HasStateAuthority && networkTransform != null)
+        {
+            networkTransform.Teleport(warpPosition, playerObject.transform.rotation);
+        }
 
 
         // Rigidbodyがある場合は，Rigidbodyの位置を直接変更する
