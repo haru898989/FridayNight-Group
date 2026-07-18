@@ -9,7 +9,7 @@ public class PlayerBase : NetworkBehaviour
     private PlayerInputAction testplayerControl;
     public float moveSpeed = 5f; // 移動速度
     public Transform playerCamera;
-    public float lookSpeed = 100f; // 視点の移動の速度
+    public float lookSpeed = 80f; // 視点の移動の速度
     private float cameraRotationX = 0f; // カメラの位置
     public float holdThreshold = 0.5f; // ボタンの長押し判定
     private float pressStartTime;
