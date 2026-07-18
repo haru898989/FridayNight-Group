@@ -5,6 +5,6 @@ public class ResultManager : MonoBehaviour
 {
     public void BackToTitle()
     {
-        SceneManager.LoadScene("OnlineConnect");
+        SceneManager.LoadScene("Title");
     }
 }
