@@ -8,6 +8,7 @@ public class TimeManager : MonoBehaviour
 
     [Header("タイマー表示")]
     public TMP_Text timerText;
+    public GameObject timeUpText;
 
     private float currentTime;
     private bool isTimeUp = false;
@@ -47,6 +48,10 @@ public class TimeManager : MonoBehaviour
     void TimeUp()
     {
         Debug.Log("時間切れ");
+        if (timeUpText != null)
+        {
+            timeUpText.SetActive(true);
+        }
 
         PlayerBase[] players = FindObjectsByType<PlayerBase>(FindObjectsSortMode.None);
 
