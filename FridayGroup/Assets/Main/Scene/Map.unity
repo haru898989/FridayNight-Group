@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aaed355b0f71c994e869f9dc7f4d295d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pitfallWarpPoint: {fileID: 1588365119}
+  pitfallWarpPoint: {fileID: 1907147296}
 --- !u!4 &62794439
 Transform:
   m_ObjectHideFlags: 0
@@ -1121,10 +1121,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 152046638893475278, guid: c196055dc8a5df84ea294220389f268c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 152046638893475278, guid: c196055dc8a5df84ea294220389f268c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 152046638893475278, guid: c196055dc8a5df84ea294220389f268c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 617063826948502733, guid: c196055dc8a5df84ea294220389f268c, type: 3}
       propertyPath: stageController
       value: 
       objectReference: {fileID: 62794438}
+    - target: {fileID: 7070805157134923148, guid: c196055dc8a5df84ea294220389f268c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 27
+      objectReference: {fileID: 0}
+    - target: {fileID: 7070805157134923148, guid: c196055dc8a5df84ea294220389f268c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7070805157134923148, guid: c196055dc8a5df84ea294220389f268c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 7750061937437823826, guid: c196055dc8a5df84ea294220389f268c, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.37209415
@@ -1199,11 +1223,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pitfallWarpPoint: {fileID: 0}
---- !u!4 &1588365119 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 152046638893475278, guid: c196055dc8a5df84ea294220389f268c, type: 3}
-  m_PrefabInstance: {fileID: 1588365116}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1658374585
 GameObject:
   m_ObjectHideFlags: 0
@@ -1360,6 +1379,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2303054065200176159, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 14
+      objectReference: {fileID: 0}
+    - target: {fileID: 2303054065200176159, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 2303054065200176159, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 2706305975079308196, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
       propertyPath: m_Name
       value: PressurePlateDoorGimmick
@@ -1367,6 +1398,18 @@ PrefabInstance:
     - target: {fileID: 2706305975079308196, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3687552955818235485, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 3687552955818235485, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3687552955818235485, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4543074323151896479, guid: b2778dfb31917564dbcd9e76d5c7cc98, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1478,6 +1521,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7b8c7b7d44e4ab340a253649332a1e1c, type: 3}
+--- !u!1 &1907147295
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1907147296}
+  m_Layer: 0
+  m_Name: PitfallWarpPoint_new
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1907147296
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1907147295}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.55, y: 1.53, z: 7.55}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1929706485
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1895,3 +1969,4 @@ SceneRoots:
   - {fileID: 1658374589}
   - {fileID: 1283119975}
   - {fileID: 7253315080706156880}
+  - {fileID: 1907147296}
