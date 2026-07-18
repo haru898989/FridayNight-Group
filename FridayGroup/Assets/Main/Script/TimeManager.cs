@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class TimeManager : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class TimeManager : MonoBehaviour
     [Header("タイマー表示")]
     public TMP_Text timerText;
     public GameObject timeUpText;
+
+    [Header("遷移先シーン")]
+    public string nextSceneName = "Result";
 
     private float currentTime;
     private bool isTimeUp = false;
@@ -59,5 +63,11 @@ public class TimeManager : MonoBehaviour
         {
             player.canMove = false;
         }
+        Invoke(nameof(ChangeScene), 2f);
+    }
+    
+    void ChangeScene()
+    {
+        SceneManager.LoadScene(nextSceneName);
     }
 }
