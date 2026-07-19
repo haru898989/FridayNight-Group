@@ -1,5 +1,62 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &200100000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 200400000000000001}
+  - component: {fileID: 200114000000000001}
+  m_Layer: 0
+  m_Name: TwoPlayerDoorGimmick
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &200400000000000001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200100000000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 200400000000000002}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!114 &200114000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 200100000000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be7f417619b80074591ad1d9479b7965, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  firstPlate: {fileID: 0}
+  secondPlate: {fileID: 0}
+  puzzleId: two-player-door-1
+  channelId: 1
+  requiredPlateCount: 2
+  doorPanel: {fileID: 200400000000000002}
+  openOffset: {x: 0, y: 2.2, z: 0}
+  leftHinge: {fileID: 0}
+  rightHinge: {fileID: 0}
+  openAngle: 90
+  openSpeed: 120
+  slideSpeed: 2.5
 --- !u!1 &200100000000000002
 GameObject:
   m_ObjectHideFlags: 0
@@ -105,59 +162,3 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!1 &200100000000000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 200400000000000001}
-  - component: {fileID: 200114000000000001}
-  m_Layer: 0
-  m_Name: TwoPlayerDoorGimmick
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &200400000000000001
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 200100000000000001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 200400000000000002}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &200114000000000001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 200100000000000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be7f417619b80074591ad1d9479b7965, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  firstPlate: {fileID: 0}
-  secondPlate: {fileID: 0}
-  puzzleId: two-player-door-1
-  requiredPlateCount: 2
-  doorPanel: {fileID: 200400000000000002}
-  openOffset: {x: 0, y: 2.2, z: 0}
-  leftHinge: {fileID: 0}
-  rightHinge: {fileID: 0}
-  openAngle: 90
-  openSpeed: 120
-  slideSpeed: 2.5

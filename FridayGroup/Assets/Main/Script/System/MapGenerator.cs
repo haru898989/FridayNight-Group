@@ -278,8 +278,13 @@ public class MapGenerator : MonoBehaviour
     private void InstantiateChannelDoor(int floorIndex, Vector3 spawnPos, int channelId)
     {
         InstantiateGimmickFloor(floorIndex, spawnPos);
-        GameObject doorObject = Instantiate(TwoPlayerDoor[0], spawnPos, Quaternion.identity, mapParent);
-        TwoPlayerDoor linkedDoor = doorObject.GetComponentInChildren<TwoPlayerDoor>(true);
+        GameObject doorObject =
+            Instantiate(
+                TwoPlayerDoor[0],
+                spawnPos,
+                Quaternion.Euler(0f, 90f, 0f),
+                mapParent
+            ); TwoPlayerDoor linkedDoor = doorObject.GetComponentInChildren<TwoPlayerDoor>(true);
 
         if (linkedDoor == null)
         {

@@ -1782,15 +1782,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapFloorData:
-  - {fileID: 4900000, guid: b7c2e4a18f5d4c6aa903d71e2b84f650, type: 3}
-  - {fileID: 4900000, guid: c8d3f5b29a6e4d7bb014e82f3c95a761, type: 3}
-  - {fileID: 4900000, guid: c8d3f5b29a6e4d7bb014e82f3c95a761, type: 3}
-  - {fileID: 4900000, guid: c8d3f5b29a6e4d7bb014e82f3c95a761, type: 3}
-  - {fileID: 4900000, guid: d9e406c3ab7f4e8cc125f9304da6b872, type: 3}
-  - {fileID: 4900000, guid: eaf517d4bc804f9dd2360a415eb7c983, type: 3}
-  - {fileID: 4900000, guid: eaf517d4bc804f9dd2360a415eb7c983, type: 3}
-  - {fileID: 4900000, guid: eaf517d4bc804f9dd2360a415eb7c983, type: 3}
-  - {fileID: 4900000, guid: fb0628e5cd9150aee3471b526fc8da94, type: 3}
+  - {fileID: 4900000, guid: 23bc225c9c0152b4699da8c7d104f985, type: 3}
+  - {fileID: 4900000, guid: 943823a85c1027f4983191b20cb0547e, type: 3}
+  - {fileID: 4900000, guid: 943823a85c1027f4983191b20cb0547e, type: 3}
+  - {fileID: 4900000, guid: 943823a85c1027f4983191b20cb0547e, type: 3}
+  - {fileID: 4900000, guid: d9ebfb69425160243adaa7b92952d647, type: 3}
+  - {fileID: 4900000, guid: 6347d4d04dbf6d343b9503abe5376881, type: 3}
+  - {fileID: 4900000, guid: e4a341866a552314da1c5efe05997ffc, type: 3}
+  - {fileID: 4900000, guid: 6347d4d04dbf6d343b9503abe5376881, type: 3}
+  - {fileID: 4900000, guid: 37bec5890328c0f4fb19a9770576e9c1, type: 3}
   floorB1:
   - {fileID: 919132149155446097, guid: b4356dd0d7cf1e74e9864d8ef6ace1be, type: 3}
   floor1:
