@@ -25,6 +25,7 @@ public class PlayerBase : NetworkBehaviour
     private Coroutine stampCoroutine; // コルーチン管理用
     [SerializeField]
     private Animator animator;
+    private int selectedIndex = 0;
 
     [Header("Character Visual")]
     [SerializeField] private GameObject characterModelPrefab;
@@ -282,24 +283,18 @@ public class PlayerBase : NetworkBehaviour
         if (isSelectingStamp)
         {
             Vector2 stampInput = testplayerControl.Player.StampSelect.ReadValue<Vector2>();
-            if (stampInput.y > 0.5f)
+            if (stampInput.magnitude > 0.5f)
             {
-                ShowStamp(0);
-                CloseStampMenu();
-            }
-            else if (stampInput.y < -0.5f)
-            {
-                ShowStamp(1);
-                CloseStampMenu();
-            }
-            else if (stampInput.x < -0.5f)
-            {
-                ShowStamp(2);
-                CloseStampMenu();
-            }
-            else if (stampInput.x > 0.5f)
-            {
-                ShowStamp(3);
+                float angle = Mathf.Atan2(stampInput.y, stampInput.x) * Mathf.Rad2Deg;
+
+                if (angle < 0)
+                    angle += 360;
+
+                int index = Mathf.FloorToInt(angle / (360f / stampObjects.Length));
+
+                HighlightStamp(index);
+
+                ShowStamp(selectedIndex);
                 CloseStampMenu();
             }
 
@@ -307,6 +302,7 @@ public class PlayerBase : NetworkBehaviour
             if (animator != null) animator.SetBool("run", false);
             return;
         }
+
 
         // --- 移動処理 ---
         Vector2 input = testplayerControl.Player.Move.ReadValue<Vector2>();
@@ -564,6 +560,18 @@ public class PlayerBase : NetworkBehaviour
         Debug.Log("スタンプ選択終了");
     }
 
+    void HighlightStamp(int index)
+    {
+        selectedIndex = index;
+
+        for (int i = 0; i < stampObjects.Length; i++)
+        {
+            stampObjects[i].transform.localScale =
+                (i == index) ?
+                Vector3.one * 1.3f :
+                Vector3.one;
+        }
+    }
     /// <summary>
     /// GameManagerなどからプレイヤー情報を受け取るメソッド
     /// </summary>
