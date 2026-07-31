@@ -327,22 +327,22 @@
                 },
                 {
                     "name": "",
-                    "id": "b67e3088-1364-4321-bdf7-bb30f88d7df2",
-                    "path": "<Gamepad>/leftStick",
+                    "id": "1df992a1-831a-420e-8161-8a63ef323933",
+                    "path": "<Mouse>/scroll",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Keyboard&Mouse",
                     "action": "StampSelect",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "1df992a1-831a-420e-8161-8a63ef323933",
-                    "path": "<Mouse>/scroll",
+                    "id": "bf28bbae-a3fa-4755-9829-ec9d9bb57f51",
+                    "path": "<Gamepad>/dpad",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "",
                     "action": "StampSelect",
                     "isComposite": false,
                     "isPartOfComposite": false
