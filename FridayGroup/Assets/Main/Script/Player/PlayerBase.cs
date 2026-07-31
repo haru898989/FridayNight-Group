@@ -20,18 +20,23 @@ public class PlayerBase : NetworkBehaviour
     public float groundY = 0f; // 地面の座標
     public Sprite[] stampSprites; // スタンプ画像
     public GameObject stampMenu; // スタンプの選択
-    public GameObject[] stampObjects; // スタンプの数
+    private GameObject stampDisplay;
+    //public GameObject[] stampObjects; // スタンプの数
     public float stampDisplayTime = 2f; // スタンプ表示時間（秒）
     private Coroutine stampCoroutine; // コルーチン管理用
     [SerializeField]
     private Animator animator;
     private int selectedIndex = 0;
+    private GameObject[] stampMenuObjects;//UIようのはいれつ
 
     [Header("Character Visual")]
     [SerializeField] private GameObject characterModelPrefab;
     [SerializeField] private Vector3 characterModelLocalPosition = new Vector3(0f, -1f, 0f);
     [SerializeField] private Vector3 characterModelLocalEulerAngles = Vector3.zero;
     [SerializeField] private Vector3 characterModelLocalScale = Vector3.one;
+    [SerializeField] private Transform stampAnchor;
+    [SerializeField] private GameObject[] stampObjects;
+    [SerializeField] private GameObject[] stampMenuIcons;
 
     private CharacterController characterController;
     private Rigidbody playerRigidbody;
@@ -56,6 +61,52 @@ public class PlayerBase : NetworkBehaviour
 
         characterController = GetComponent<CharacterController>();
         playerRigidbody = GetComponent<Rigidbody>();
+
+        // StampAnchorを自動取得
+        Transform[] children = GetComponentsInChildren<Transform>(true);
+
+        foreach (Transform t in children)
+        {
+            if (t.name == "StampAnchor")
+            {
+                stampAnchor = t;
+                break;
+            }
+        }
+
+        if (stampAnchor == null)
+        {
+            Debug.LogError("StampAnchorが見つかりません");
+        }
+        else
+        {
+            // 子オブジェクトを自動登録
+            stampObjects = new GameObject[stampAnchor.childCount];
+
+            for (int i = 0; i < stampAnchor.childCount; i++)
+            {
+                stampObjects[i] = stampAnchor.GetChild(i).gameObject;
+                stampObjects[i].SetActive(false);
+            }
+
+            Debug.Log($"スタンプを {stampObjects.Length} 個登録しました");
+        }
+
+        GameObject[] objs = FindObjectsOfType<GameObject>(true);
+
+        foreach (GameObject obj in objs)
+        {
+            if (obj.name.Contains("Stamp"))
+            {
+                Debug.Log("見つかった: " + obj.name);
+            }
+        }
+        for (int i = 0; i < stampObjects.Length; i++)
+        {
+            if (stampObjects[i] != null)
+                stampObjects[i].SetActive(false);
+        }
+        stampDisplay = GameObject.Find("StampDisplay");
 
         // 各クライアントでは、自分が操作するプレイヤーだけをギミックの対象にする。
         // これによりリモートプレイヤーの接触でローカル演出が二重起動するのを防ぐ。
@@ -91,6 +142,33 @@ public class PlayerBase : NetworkBehaviour
                 pitfallCameraControllers = FindObjectsOfType<PitfallCameraController>(true);
                 DisableOtherMainCameras(childCam);
                 childCam.gameObject.tag = "MainCamera";
+                stampMenu = GameObject.Find("PlayerStampMenu");
+
+                if (stampMenu == null)
+                {
+                    Debug.LogError("PlayerStampMenuが見つかりません");
+                    return;
+                }
+                Debug.Log("StampMenu = " + stampMenu.name);
+                Debug.Log("子オブジェクト数 = " + stampMenu.transform.childCount);
+
+                for (int i = 0; i < stampMenu.transform.childCount; i++)
+                {
+                    Debug.Log($"子[{i}] = {stampMenu.transform.GetChild(i).name}");
+                }
+                stampMenuObjects = new GameObject[stampMenu.transform.childCount - 1];
+
+                int menuIndex = 0;
+
+                foreach (Transform child in stampMenu.transform)
+                {
+                    if (child.name == "StampBackground")
+                        continue;
+
+                    stampMenuObjects[menuIndex] = child.gameObject;
+                    menuIndex++;
+                }
+
             }
 
             // Unityの警告防止のため、AudioListener（耳）も同様に設定する
@@ -103,6 +181,10 @@ public class PlayerBase : NetworkBehaviour
                 {
                     playerViewAudioListener = listener;
                 }
+            }
+            if (stampMenu == null)
+            {
+                stampMenu = GameObject.Find("StampMenu");
             }
         }
 
@@ -283,6 +365,7 @@ public class PlayerBase : NetworkBehaviour
         if (isSelectingStamp)
         {
             Vector2 stampInput = testplayerControl.Player.StampSelect.ReadValue<Vector2>();
+            Debug.Log("StampInput = " + stampInput);
             if (stampInput.magnitude > 0.5f)
             {
                 float angle = Mathf.Atan2(stampInput.y, stampInput.x) * Mathf.Rad2Deg;
@@ -292,10 +375,10 @@ public class PlayerBase : NetworkBehaviour
 
                 int index = Mathf.FloorToInt(angle / (360f / stampObjects.Length));
 
-                HighlightStamp(index);
+                selectedIndex = index;
 
-                ShowStamp(selectedIndex);
-                CloseStampMenu();
+                HighlightStamp(index);
+                Debug.Log("Highlight : " + index);
             }
 
             // スタンプ選択中は移動処理を行わない
@@ -475,30 +558,43 @@ public class PlayerBase : NetworkBehaviour
         }
     }
 
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    private void RPC_ShowStamp(int index)
+    {
+        ShowStamp(index);
+    }
+
     /// <summary>
     /// スタンプの実装部分
     /// </summary>
     void ShowStamp(int index)
     {
-        if (stampObjects == null || index < 0 || index >= stampObjects.Length)
-            return;
-
-        // 全部非表示
-        for (int i = 0; i < stampObjects.Length; i++)
+        foreach (GameObject obj in stampObjects)
         {
-            if (stampObjects[i] != null)
-            {
-                stampObjects[i].SetActive(i == index);
-            }
+            if (obj != null)
+                Debug.Log($"OFF : {obj.name}");
+            obj.SetActive(false);
         }
+
+        // 選択したスタンプだけ表示
+        if (index >= 0 && index < stampObjects.Length)
+        {
+            stampObjects[index].SetActive(true);
+        }
+
         // 前のコルーチンを停止
         if (stampCoroutine != null)
         {
             StopCoroutine(stampCoroutine);
         }
 
-        // 新しく表示時間をカウント
-        stampCoroutine = StartCoroutine(HideStampAfterTime());
+        if (index >= 0 &&
+        index < stampObjects.Length &&
+        stampObjects[index] != null)
+        {
+            stampObjects[index].SetActive(true);
+            stampCoroutine = StartCoroutine(HideStampAfterTime());
+        }
     }
 
     void CloseStampMenu()
@@ -508,6 +604,11 @@ public class PlayerBase : NetworkBehaviour
         if (stampMenu != null)
         {
             stampMenu.SetActive(false);
+
+            selectedIndex = -1;
+
+            HighlightStamp(selectedIndex);
+
         }
 
         Debug.Log("スタンプ決定");
@@ -517,15 +618,10 @@ public class PlayerBase : NetworkBehaviour
     {
         yield return new WaitForSeconds(stampDisplayTime);
 
-        if (stampObjects != null)
+        foreach (GameObject obj in stampObjects)
         {
-            for (int i = 0; i < stampObjects.Length; i++)
-            {
-                if (stampObjects[i] != null)
-                {
-                    stampObjects[i].SetActive(false);
-                }
-            }
+            if (obj != null)
+                obj.SetActive(false);
         }
     }
 
@@ -536,9 +632,12 @@ public class PlayerBase : NetworkBehaviour
     {
         isSelectingStamp = !isSelectingStamp;
 
+        Debug.Log("Stampボタンが押された");
+
         if (stampMenu != null)
         {
             stampMenu.SetActive(isSelectingStamp);
+            Debug.Log("StampMenu active = " + stampMenu.activeSelf);
         }
 
         Debug.Log("スタンプ選択開始");
@@ -549,6 +648,7 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     private void OnStampCanceled(InputAction.CallbackContext context)
     {
+        Debug.Log("selectedStampIndex = " + selectedIndex);
         // 何もしない
         isSelectingStamp = false;
 
@@ -558,18 +658,19 @@ public class PlayerBase : NetworkBehaviour
         }
 
         Debug.Log("スタンプ選択終了");
+        Debug.Log($"決定したIndex = {selectedIndex}");
+        RPC_ShowStamp(selectedIndex);
+        CloseStampMenu();
     }
 
     void HighlightStamp(int index)
     {
-        selectedIndex = index;
-
-        for (int i = 0; i < stampObjects.Length; i++)
+        for (int i = 0; i < stampMenuObjects.Length; i++)
         {
-            stampObjects[i].transform.localScale =
-                (i == index) ?
-                Vector3.one * 1.3f :
-                Vector3.one;
+            if (stampMenuObjects[i] == null) continue;
+
+            stampMenuObjects[i].transform.localScale =
+                (i == index) ? Vector3.one * 1.3f : Vector3.one;
         }
     }
     /// <summary>
