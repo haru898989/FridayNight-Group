@@ -1752,8 +1752,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pitfallWarpPoint: {fileID: 0}
-<<<<<<< HEAD
-=======
 --- !u!4 &1588365119 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 152046638893475278, guid: c196055dc8a5df84ea294220389f268c, type: 3}
@@ -1834,7 +1832,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1607552145}
   m_CullTransparentMesh: 1
->>>>>>> add_plyaer_move
 --- !u!1 &1658374585
 GameObject:
   m_ObjectHideFlags: 0
