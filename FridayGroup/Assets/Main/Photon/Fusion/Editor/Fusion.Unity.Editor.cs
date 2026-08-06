@@ -1734,8 +1734,9 @@ namespace Fusion.Editor {
   using UnityEditor;
   using UnityEditor.Compilation;
   using UnityEngine;
+  using System.Collections.Generic;
 
-  [InitializeOnLoad]
+    [InitializeOnLoad]
   public static class EditorRecompileHook {
     static EditorRecompileHook() {
       
@@ -1754,17 +1755,28 @@ namespace Fusion.Editor {
       CompilationPipeline.compilationStarted    += _ => StoreConfigPath();
     }
 
-    static void ShutdownRunners() {
-      var runners = NetworkRunner.GetInstancesEnumerator();
+    static void ShutdownRunners()
+    {
+        // Shutdown() により Runner 一覧が変化するため、
+        // 先に一覧をコピーしてから停止する。
+        var runnersToShutdown = new List<NetworkRunner>();
+        var runners = NetworkRunner.GetInstancesEnumerator();
 
-      while (runners.MoveNext()) {
-        if (runners.Current) {
-          runners.Current.Shutdown();
+        while (runners.MoveNext())
+        {
+            if (runners.Current)
+            {
+                runnersToShutdown.Add(runners.Current);
+            }
         }
-      }
+
+        foreach (var runner in runnersToShutdown)
+        {
+            runner.Shutdown();
+        }
     }
 
-    static void StoreConfigPath() {
+        static void StoreConfigPath() {
       const string ConfigPathCachePath = "Temp/FusionILWeaverConfigPath.txt";
 
       var configPath = NetworkProjectConfigUtilities.GetGlobalConfigPath();

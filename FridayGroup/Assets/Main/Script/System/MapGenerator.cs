@@ -44,29 +44,34 @@ public class MapGenerator : MonoBehaviour
 
     void Start()
     {
-        // テストとして、ゲーム開始時に「1階（配列の1番目）」と「2階（2番目）」を生成してみる
-        GenerateFloorMap(0);
-        GenerateFloorMap(1);
-        GenerateFloorMap(2);
-        GenerateFloorMap(3);
-        GenerateFloorMap(4);
-        GenerateFloorMap(5);
-        GenerateFloorMap(6);
-        GenerateFloorMap(7);
-        GenerateFloorMap(8);
+        // --- 1. GameManager の取得と安全確認 ---
+        if (GameManager.Instance == null)
+        {
+            // Instance で取れなかった場合の念のための型検索
+            var foundGM = FindObjectOfType<GameManager>();
+            if (foundGM == null)
+            {
+                // エラーではなく警告（Warning）にしておくことで、map単体テスト再生時にも処理が止まらないようにします
+                Debug.LogWarning("GameManagerが見つかりません（タイトル未経由の単体テスト実行中の可能性があります）");
+            }
+        }
+
+        // --- 2. マップ生成処理 ---
+        // テストとして、ゲーム開始時に「1階（配列の1番目）」〜「9階（9番目）」を生成
+        for (int i = 0; i <= 8; i++)
+        {
+            GenerateFloorMap(i);
+        }
 
         surface.BuildNavMesh();
 
-        // CSVの100で指定された位置をGameManagerへ渡す
+        // --- 3. CSVの100で指定された位置をGameManagerへ渡す ---
         if (playerSpawnCount == 1)
         {
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.SetMapSpawnPosition(playerSpawnPosition);
-            }
-            else
-            {
-                Debug.LogError("GameManagerが見つかりません！");
+                Debug.Log("GameManagerへプレイヤー生成位置を渡しました。");
             }
         }
         else

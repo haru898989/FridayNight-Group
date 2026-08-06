@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
+using Photon.Voice;
+using Photon.Voice.Fusion;
+using Photon.Voice.Unity;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -17,6 +20,7 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 
     private NetworkRunner runner;
     private bool isLoadingMap;
+    private bool isReturningToTitle;
 
     public NetworkRunner Runner => runner;
 
@@ -30,6 +34,15 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // VoiceNetworkObject must use the same NetworkRunner as the gameplay session.
+        // FusionVoiceClient adds the required NetworkRunner before Start() if it is absent.
+        FusionVoiceClient voiceClient = GetComponent<FusionVoiceClient>();
+        if (voiceClient == null)
+        {
+            voiceClient = gameObject.AddComponent<FusionVoiceClient>();
+            voiceClient.PrimaryRecorder = FindObjectOfType<Recorder>();
+        }
     }
 
     private async void Start()
@@ -113,6 +126,34 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 
         Debug.Log("OnlineConnectからMapへ移動します");
         runner.LoadScene(SceneRef.FromIndex(buildIndex), LoadSceneMode.Single);
+    }
+
+    public async void ReturnToTitle()
+    {
+        if (isReturningToTitle)
+        {
+            return;
+        }
+
+        isReturningToTitle = true;
+        SetStartButtonVisible(false);
+
+        if (runner != null && runner.IsRunning)
+        {
+            await runner.Shutdown();
+        }
+
+        runner = null;
+
+        // The Recorder is kept alive while playing Map, but must not survive into
+        // the next OnlineConnect session or a duplicate VoiceManager is created.
+        foreach (KeepVoiceAlive voiceManager in FindObjectsByType<KeepVoiceAlive>(FindObjectsSortMode.None))
+        {
+            Destroy(voiceManager.gameObject);
+        }
+
+        SceneManager.LoadScene("Title");
+        Destroy(gameObject);
     }
 
     public void OnPlayerJoined(NetworkRunner networkRunner, PlayerRef player)
