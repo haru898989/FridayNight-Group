@@ -1807,20 +1807,24 @@ MonoBehaviour:
   - {fileID: 3815228208322897781, guid: dd0ce49098fb0144aa98f76b23e004af, type: 3}
   BearTrap:
   - {fileID: 4120665723640104151, guid: 778ba5fe0a15bd345be047f7742d2467, type: 3}
-  Crystal:
-  - {fileID: 9160415608544669642, guid: 1367419522b4983428f974bea0ef98dc, type: 3}
-  pitfall:
-  - {fileID: 8009389776029903469, guid: c196055dc8a5df84ea294220389f268c, type: 3}
-  PressurePlate:
-  - {fileID: 100100000000000001, guid: 2302db79fe184487b19b33f30f1b9093, type: 3}
   RollingRock:
   - {fileID: 1297723599093166745, guid: b4fc16d97eeebf74c82f1fd8094e4839, type: 3}
-  StoneTablet:
-  - {fileID: 2665031892057820297, guid: 43a6d6ce21629d244b21ff3d3785090e, type: 3}
-  TwoPlayerDoor:
-  - {fileID: 200100000000000001, guid: f8d795969dd642d3951e2f1c17a01a8d, type: 3}
   Ladder:
   - {fileID: 300100000000000001, guid: 56cf55d7687f4a97ace0ad29cc6903c7, type: 3}
+  PressurePlate:
+  - {fileID: 100100000000000001, guid: 2302db79fe184487b19b33f30f1b9093, type: 3}
+  TwoPlayerDoor:
+  - {fileID: 200100000000000001, guid: f8d795969dd642d3951e2f1c17a01a8d, type: 3}
+  Crystal:
+  - {fileID: 9160415608544669642, guid: 1367419522b4983428f974bea0ef98dc, type: 3}
+  CrystalGear:
+  - {fileID: 1941901000641287810, guid: c9ad76dc5810d344387441da6dff9120, type: 3}
+  - {fileID: 9190102766935313774, guid: fc75d7d9839d7134c9c94c770e1dfa87, type: 3}
+  - {fileID: 697624977152396158, guid: 5bd1a99d5c283c844908ce648541822b, type: 3}
+  pitfall:
+  - {fileID: 8009389776029903469, guid: c196055dc8a5df84ea294220389f268c, type: 3}
+  StoneTablet:
+  - {fileID: 2665031892057820297, guid: 43a6d6ce21629d244b21ff3d3785090e, type: 3}
   Goal:
   - {fileID: 7843857928857660836, guid: 5408b050233175b4cbee322aea898457, type: 3}
   tileSize: 1

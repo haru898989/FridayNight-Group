@@ -9,6 +9,10 @@ public class TwoPlayerDoor : MonoBehaviour
     [SerializeField] private string puzzleId = "two-player-door-1";
     [SerializeField] private int channelId = 1;
     [SerializeField] private int requiredPlateCount = 2;
+    public int ChannelId
+    {
+        get { return channelId; }
+    }
 
     [Header("Sliding Door Settings")]
     [SerializeField] private Transform doorPanel;
@@ -42,6 +46,23 @@ public class TwoPlayerDoor : MonoBehaviour
         ApplyChannelColor(channelColor);
     }
 
+    /// <summary>
+    /// 外部のギミックから扉を開く
+    /// </summary>
+    public void OpenDoor()
+    {
+        if (isOpen)
+        {
+            return;
+        }
+
+        isOpen = true;
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlaySE(7);
+        }
+    }
     /// <summary>
     /// 左右のドアの閉じた角度と開いた角度を設定する関数
     /// </summary>
@@ -80,11 +101,9 @@ public class TwoPlayerDoor : MonoBehaviour
                 nextPlateRefreshTime = Time.time + 1.0f;
             }
 
-            isOpen = CountDistinctActivators() >= requiredPlateCount;
-
-            if (isOpen && SoundManager.Instance != null)
+            if (CountDistinctActivators() >= requiredPlateCount)
             {
-                SoundManager.Instance.PlaySE(7);
+                OpenDoor();
             }
         }
 
