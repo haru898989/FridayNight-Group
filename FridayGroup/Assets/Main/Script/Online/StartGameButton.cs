@@ -12,6 +12,7 @@ public class StartGameButton : MonoBehaviour
     {
         button = GetComponent<Button>();
         button.onClick.AddListener(StartGame);
+        OnlineStageFlow.EnsureExists(gameObject);
     }
 
     private void OnDestroy()
@@ -35,6 +36,10 @@ public class StartGameButton : MonoBehaviour
             return;
         }
 
-        online.LoadMap();
+        OnlineStageFlow stageFlow = OnlineStageFlow.EnsureExists(gameObject);
+        if (stageFlow == null || !stageFlow.LoadStageSelect())
+        {
+            Debug.LogError("ステージ選択画面へ移動できません");
+        }
     }
 }

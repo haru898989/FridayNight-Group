@@ -62,6 +62,11 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = GameMode.Shared,
             SessionName = SessionName,
             PlayerCount = 2,
+            SessionProperties = new Dictionary<string, SessionProperty>
+            {
+                { "StageCursor", "NONE" },
+                { "SelectedStage", "NONE" }
+            },
             SceneManager = sceneManager
         });
 

@@ -46,6 +46,11 @@ public class MapGenerator : MonoBehaviour
 
     void Start()
     {
+        if (!TryApplySelectedStageData())
+        {
+            return;
+        }
+
         // テストとして、ゲーム開始時に「1階（配列の1番目）」と「2階（2番目）」を生成してみる
         GenerateFloorMap(0);
         GenerateFloorMap(1);
@@ -75,6 +80,29 @@ public class MapGenerator : MonoBehaviour
         {
             Debug.LogError($"プレイヤー生成位置100は全CSVに1個必要です。現在: {playerSpawnCount}個");
         }
+    }
+
+    private bool TryApplySelectedStageData()
+    {
+        if (!StageSelectionContext.HasSelection)
+        {
+            return true;
+        }
+
+        TextAsset[] selectedStageData = StageCatalog.LoadMapFloorData(
+            StageSelectionContext.SelectedStageResourcePath
+        );
+
+        
+        if (selectedStageData.Length != 9)
+        {
+            Debug.LogError($"選択ステージのCSVは9層必要です。現在: {selectedStageData.Length}層");
+            return false;
+        }
+
+        mapFloorData = selectedStageData;
+        Debug.Log($"選択ステージを読み込みます: {StageSelectionContext.SelectedStageResourcePath}");
+        return true;
     }
 
     /// <summary>
