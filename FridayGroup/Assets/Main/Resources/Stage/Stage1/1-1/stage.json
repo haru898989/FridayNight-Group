@@ -1,0 +1,16 @@
+{
+  "displayName": "1-1 GOAL WALK",
+  "description": "SHORT WALK TO GOAL - DEBUG",
+  "previewFile": "",
+  "csvOrder": [
+    "BF",
+    "B1Walls",
+    "B1Walls",
+    "B1Walls",
+    "1F",
+    "1FWallsOuter",
+    "1FWallsLamp",
+    "1FWallsOuter",
+    "Roof"
+  ]
+}

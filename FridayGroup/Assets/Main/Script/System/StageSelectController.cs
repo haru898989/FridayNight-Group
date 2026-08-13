@@ -428,8 +428,7 @@ public sealed class StageSelectController : MonoBehaviour
     private bool CanControlSelection()
     {
         return stageFlow != null &&
-               stageFlow.IsSharedModeMasterClient &&
-               stageFlow.ConnectedPlayerCount >= stageFlow.NeededPlayerCount;
+               stageFlow.CanControlStageSelection;
     }
 
     private void MoveStageContent(bool immediate)

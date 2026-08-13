@@ -20,9 +20,11 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private const string ResultScenePath = "Assets/Main/Scene/Result.unity";
     private const string GameCompleteScenePath = "Assets/Main/Scene/GameComplete.unity";
     private const string TitleScenePath = "Assets/Main/Scene/Title.unity";
-    private const int RequiredPlayerCount = 2;
+    private const int MinimumPlayerCountToStart = 1;
+    private const int SessionPlayerCapacity = 2;
     private const string SelectedStageSessionProperty = "SelectedStage";
     private const string StageCursorSessionProperty = "StageCursor";
+    private const string EmptyStageSessionValue = "NONE";
 
     private const string CursorMessagePrefix = "CURSOR|";
     private const string SelectionMessagePrefix = "SELECT|";
@@ -54,14 +56,16 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     public bool IsConnected => runner != null && runner.IsRunning;
     public bool IsSharedModeMasterClient => IsConnected && runner.IsSharedModeMasterClient;
     public int ConnectedPlayerCount => CountActivePlayers();
-    public int NeededPlayerCount => RequiredPlayerCount;
+    public int NeededPlayerCount => SessionPlayerCapacity;
     public string OperationMessage => operationMessage;
     public string CurrentStageCursorResourcePath => currentStageCursorResourcePath;
-    public bool CanOpenStageSelect =>
+    public bool CanControlStageSelection =>
         IsSharedModeMasterClient &&
-        ConnectedPlayerCount >= RequiredPlayerCount &&
-        SceneManager.GetActiveScene().name == OnlineConnectSceneName &&
+        ConnectedPlayerCount >= MinimumPlayerCountToStart &&
         !isLoadingScene;
+    public bool CanOpenStageSelect =>
+        CanControlStageSelection &&
+        SceneManager.GetActiveScene().name == OnlineConnectSceneName;
 
     public static OnlineStageFlow EnsureExists(GameObject stageSelectButton = null)
     {
@@ -161,9 +165,9 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             return false;
         }
 
-        if (ConnectedPlayerCount < RequiredPlayerCount)
+        if (ConnectedPlayerCount < MinimumPlayerCountToStart)
         {
-            SetOperationMessage($"WAITING FOR PLAYER... ({ConnectedPlayerCount}/{RequiredPlayerCount})");
+            SetOperationMessage($"WAITING FOR PLAYER... ({ConnectedPlayerCount}/{MinimumPlayerCountToStart})");
             return false;
         }
 
@@ -397,7 +401,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             return false;
         }
 
-        if (ConnectedPlayerCount < RequiredPlayerCount)
+        if (ConnectedPlayerCount < MinimumPlayerCountToStart)
         {
             SetOperationMessage("PLAYER DISCONNECTED");
             return false;
@@ -451,7 +455,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
         while (pendingStageAcknowledgements.Count > 0 && Time.realtimeSinceStartup < timeoutAt)
         {
-            if (!IsConnected || ConnectedPlayerCount < RequiredPlayerCount)
+            if (!IsConnected || ConnectedPlayerCount < MinimumPlayerCountToStart)
             {
                 SetOperationMessage("PLAYER DISCONNECTED");
                 stageLoadCoroutine = null;
@@ -467,7 +471,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             yield return null;
         }
 
-        if (ConnectedPlayerCount < RequiredPlayerCount)
+        if (ConnectedPlayerCount < MinimumPlayerCountToStart)
         {
             SetOperationMessage("PLAYER DISCONNECTED");
             stageLoadCoroutine = null;
@@ -571,16 +575,16 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
         if (IsConnected && activeSceneName == OnlineConnectSceneName)
         {
-            if (count >= RequiredPlayerCount)
+            if (count >= MinimumPlayerCountToStart)
             {
                 SetOperationMessage(IsSharedModeMasterClient ? "READY - PRESS STAGE SELECT" : "READY - WAITING FOR HOST");
             }
             else
             {
-                SetOperationMessage($"WAITING FOR PLAYER... ({count}/{RequiredPlayerCount})");
+                SetOperationMessage($"WAITING FOR PLAYER... ({count}/{MinimumPlayerCountToStart})");
             }
         }
-        else if (IsConnected && activeSceneName == StageSelectSceneName && count < RequiredPlayerCount)
+        else if (IsConnected && activeSceneName == StageSelectSceneName && count < MinimumPlayerCountToStart)
         {
             SetOperationMessage("PLAYER DISCONNECTED");
         }
@@ -652,7 +656,9 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
     private static void TryRestoreSelectedStageFromSession(NetworkRunner networkRunner)
     {
-        if (networkRunner == null || networkRunner.SessionInfo == null)
+        if (networkRunner == null ||
+            networkRunner.SessionInfo == null ||
+            StageSelectionContext.HasSelection)
         {
             return;
         }
@@ -663,7 +669,8 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             stageProperty.IsString)
         {
             string selectedStage = stageProperty;
-            if (!string.IsNullOrWhiteSpace(selectedStage))
+            if (!string.IsNullOrWhiteSpace(selectedStage) &&
+                !string.Equals(selectedStage, EmptyStageSessionValue, StringComparison.OrdinalIgnoreCase))
             {
                 StageSelectionContext.SetSelectedStage(selectedStage);
             }
