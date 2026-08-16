@@ -3,7 +3,14 @@
     "description": "stage1-1 TORABASAMI BASIC",
     "previewFile": "",
     "csvOrder": [
+        "Empty",
+        "Empty",
+        "Empty",
+        "Empty",
         "1-1Floor",
-        "1-1Wall"
+        "1-1Wall",
+        "1-1BFfloor",
+        "1-1BFwall",
+        "Roof"
     ]
 }
