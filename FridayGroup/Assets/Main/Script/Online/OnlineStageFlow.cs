@@ -15,6 +15,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 {
     private const string OnlineConnectSceneName = "OnlineConnect";
     private const string StageSelectSceneName = "StageSelect";
+    private const string MapSceneName = "Map";
     private const string StageSelectScenePath = "Assets/Main/Scene/StageSelect.unity";
     private const string MapScenePath = "Assets/Main/Scene/Map.unity";
     private const string ResultScenePath = "Assets/Main/Scene/Result.unity";
@@ -22,6 +23,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private const string TitleScenePath = "Assets/Main/Scene/Title.unity";
     private const int MinimumPlayerCountToStart = 1;
     private const int SessionPlayerCapacity = 2;
+    private const float GoalCelebrationDelaySeconds = 2.7f;
     private const string SelectedStageSessionProperty = "SelectedStage";
     private const string StageCursorSessionProperty = "StageCursor";
     private const string EmptyStageSessionValue = "NONE";
@@ -35,10 +37,12 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private const string TitleRequestMessage = "FLOW|TITLE_REQUEST";
 
     private readonly HashSet<int> pendingStageAcknowledgements = new HashSet<int>();
+    private readonly HashSet<int> playersAtGoal = new HashSet<int>();
 
     private NetworkRunner runner;
     private Coroutine stageLoadCoroutine;
     private Coroutine disconnectCoroutine;
+    private Coroutine stageClearCoroutine;
     private bool isInitialized;
     private bool isLoadingScene;
     private int reliableMessageSequence;
@@ -189,13 +193,120 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
+        RegisterPlayerAtGoal(runner.LocalPlayer);
+
         if (IsSharedModeMasterClient)
         {
-            OpenStageClearDestination();
+            TryOpenStageClearDestinationWhenEveryoneReachedGoal();
             return;
         }
 
         SendReliableMessage(runner.GetMasterClient(), StageClearRequestMessage);
+    }
+
+    public void ReportPlayerReachedGoal(PlayerRef player)
+    {
+        if (!IsConnected || isLoadingScene)
+        {
+            return;
+        }
+
+        RegisterPlayerAtGoal(player);
+
+        if (IsSharedModeMasterClient)
+        {
+            TryOpenStageClearDestinationWhenEveryoneReachedGoal();
+        }
+    }
+
+    private void RegisterPlayerAtGoal(PlayerRef player)
+    {
+        if (player == PlayerRef.None || !IsActivePlayer(player))
+        {
+            return;
+        }
+
+        if (playersAtGoal.Add(player.PlayerId))
+        {
+            Debug.Log($"Player {player.PlayerId} reached the goal.");
+        }
+    }
+
+    private bool IsActivePlayer(PlayerRef player)
+    {
+        if (!IsConnected)
+        {
+            return false;
+        }
+
+        foreach (PlayerRef activePlayer in runner.ActivePlayers)
+        {
+            if (activePlayer == player)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void TryOpenStageClearDestinationWhenEveryoneReachedGoal()
+    {
+        if (!IsSharedModeMasterClient ||
+            isLoadingScene ||
+            SceneManager.GetActiveScene().name != MapSceneName)
+        {
+            return;
+        }
+
+        int activePlayerCount = 0;
+        int reachedGoalCount = 0;
+
+        foreach (PlayerRef activePlayer in runner.ActivePlayers)
+        {
+            activePlayerCount++;
+
+            if (playersAtGoal.Contains(activePlayer.PlayerId))
+            {
+                reachedGoalCount++;
+            }
+        }
+
+        if (activePlayerCount == 0 || reachedGoalCount < activePlayerCount)
+        {
+            SetOperationMessage($"WAITING FOR PLAYERS... ({reachedGoalCount}/{activePlayerCount})");
+            return;
+        }
+
+        if (stageClearCoroutine == null)
+        {
+            stageClearCoroutine = StartCoroutine(OpenStageClearAfterCelebration());
+        }
+    }
+
+    private IEnumerator OpenStageClearAfterCelebration()
+    {
+        SetOperationMessage("ALL PLAYERS REACHED GOAL");
+        yield return new WaitForSecondsRealtime(GoalCelebrationDelaySeconds);
+        stageClearCoroutine = null;
+
+        if (!IsSharedModeMasterClient ||
+            isLoadingScene ||
+            SceneManager.GetActiveScene().name != MapSceneName)
+        {
+            yield break;
+        }
+
+        foreach (PlayerRef activePlayer in runner.ActivePlayers)
+        {
+            if (!playersAtGoal.Contains(activePlayer.PlayerId))
+            {
+                TryOpenStageClearDestinationWhenEveryoneReachedGoal();
+                yield break;
+            }
+        }
+
+        OpenStageClearDestination();
     }
 
     public void ReturnToStageSelect()
@@ -623,11 +734,25 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerLeft(NetworkRunner networkRunner, PlayerRef player)
     {
         pendingStageAcknowledgements.Remove(player.PlayerId);
+        playersAtGoal.Remove(player.PlayerId);
+
+        if (networkRunner.IsSharedModeMasterClient)
+        {
+            TryOpenStageClearDestinationWhenEveryoneReachedGoal();
+        }
+
         RefreshState();
     }
 
     public void OnSceneLoadStart(NetworkRunner networkRunner)
     {
+        if (stageClearCoroutine != null)
+        {
+            StopCoroutine(stageClearCoroutine);
+            stageClearCoroutine = null;
+        }
+
+        playersAtGoal.Clear();
         TryRestoreSelectedStageFromSession(networkRunner);
         TryRestoreStageCursorFromSession(networkRunner);
     }
@@ -657,8 +782,15 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private static void TryRestoreSelectedStageFromSession(NetworkRunner networkRunner)
     {
         if (networkRunner == null ||
-            networkRunner.SessionInfo == null ||
-            StageSelectionContext.HasSelection)
+            networkRunner.SessionInfo == null)
+        {
+            return;
+        }
+
+        // The master sets its local selection before the session property has
+        // necessarily propagated. Keep that newest local value. Other players
+        // must always replace the previous stage with the master's current one.
+        if (networkRunner.IsSharedModeMasterClient && StageSelectionContext.HasSelection)
         {
             return;
         }
@@ -714,7 +846,8 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
         {
             if (message == StageClearRequestMessage)
             {
-                OpenStageClearDestination();
+                RegisterPlayerAtGoal(player);
+                TryOpenStageClearDestinationWhenEveryoneReachedGoal();
                 return;
             }
 

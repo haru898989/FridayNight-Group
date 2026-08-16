@@ -228,6 +228,12 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        PlayerBase playerBase = playerObject.GetComponent<PlayerBase>();
+        if (playerBase != null)
+        {
+            playerBase.ResetGoalSpectatorMode();
+        }
+
         ApplySpawnTransform(playerObject, GetSpawnPosition(index));
     }
 

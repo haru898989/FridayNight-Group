@@ -13,7 +13,16 @@ public class Goal : MonoBehaviour
 
             if (OnlineStageFlow.Instance != null && OnlineStageFlow.Instance.IsConnected)
             {
-                OnlineStageFlow.Instance.RequestStageClear();
+                PlayerBase player = other.GetComponentInParent<PlayerBase>();
+                if (player != null)
+                {
+                    player.BeginGoalSpectatorMode();
+                    player.ReportGoalReachedToAllPlayers();
+                }
+                else
+                {
+                    OnlineStageFlow.Instance.RequestStageClear();
+                }
                 return;
             }
 
