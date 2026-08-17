@@ -9,8 +9,8 @@
         "Empty",
         "1-1Floor",
         "1-1Wall",
-        "1-1BFfloor",
-        "1-1BFwall",
+        "1-1Wall",
+        "1-1Wall",
         "Roof"
     ]
 }
