@@ -21,6 +21,7 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] door;             // [23]扉
     public GameObject[] B1normalWallPrefab; //[24]
     public GameObject[] dark;             // []未定
+    public GameObject[] lantern;             //[25]ランタン
 
     public GameObject[] BearTrap;         //[31]
     public GameObject[] Crystal;          //[32]
@@ -197,10 +198,15 @@ public class MapGenerator : MonoBehaviour
                                     continuousWallCount = 0; // 壁が途切れたのでカウントリセット
                             break;
 
-                            case 4: // 扉
+                            case 4: // 地下壁
                                     Instantiate(B1normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
                                     continuousWallCount = 0; // 壁が途切れたのでカウントリセット
                             break;
+
+                            case 5: // ランタン
+                                    Instantiate(lantern[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+                            
                         }
                         break;
 
