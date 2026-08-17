@@ -1,0 +1,16 @@
+{
+    "displayName": "1-3 KANNATSUBAN BASIC TEST",
+    "description": "KANNATSUBAN STAGEÅ@BASIC",
+    "previewFile": "",
+    "csvOrder": [
+        "1-3BFfloor",
+        "1-3BFwall",
+        "1-3BFwall",
+        "1-3BFwall",
+        "1-3Floor",
+        "1-3Wall",
+        "1-3Wall",
+        "1-3Wall",
+        "Roof"
+    ]
+}

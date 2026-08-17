@@ -1,0 +1,16 @@
+{
+    "displayName": "2-5 OTOSHIANA AND CRYSTAL ADVANCE TEST",
+    "description": "OTOSHIANA AND CRYSTAL STAGE ADVANCE",
+    "previewFile": "",
+    "csvOrder": [
+        "2-5BFfloor",
+        "2-5BFwall",
+        "2-5BFwall",
+        "2-5BFwall",
+        "2-5Floor",
+        "2-5Wall",
+        "2-5Wall",
+        "2-5Wall",
+        "Roof"
+    ]
+}
