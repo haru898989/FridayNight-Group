@@ -7,6 +7,9 @@ TagManager:
   - Item
   - Wall
   - Gimmick
+  - Player
+  - Pickup
+  - SharedGimmickPlayer
   layers:
   - Default
   - TransparentFX

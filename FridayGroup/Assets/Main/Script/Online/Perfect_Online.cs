@@ -1,37 +1,198 @@
-using UnityEngine;
+using System;
+using System.Collections.Generic;
 using Fusion;
+using Fusion.Sockets;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class Test : MonoBehaviour
+public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 {
-    private NetworkRunner _runner;
+    private const string MapScenePath = "Assets/Main/Scene/Map.unity";
+    private const string SessionName = "Fusion_Test_Room_2026";
 
-    //ƒQ[ƒ€ŠJn‚ÉÚ‘±ƒeƒXƒg‚ğÀs async:”ñ“¯Šú
+    public static Perfect_Online Instance { get; private set; }
+
+    [Header("ãƒ­ãƒ“ãƒ¼UIï¼ˆã‚¹ã‚¿ãƒ¼ãƒˆãƒœã‚¿ãƒ³ï¼‰")]
+    [SerializeField] private GameObject startButtonUI;
+
+    private NetworkRunner runner;
+    private bool isLoadingMap;
+
+    public NetworkRunner Runner => runner;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
     private async void Start()
     {
-        Debug.Log("Ú‘±ƒeƒXƒg‚ğŠJn");
-
-        //ƒlƒbƒgƒ[ƒN‚ğŠÇ—‚·‚éRunner‚ğì¬
-        _runner = gameObject.AddComponent<NetworkRunner>();
-        _runner.ProvideInput = true;
-
-        //Sharedƒ‚[ƒh‚ÅÚ‘±‚ğ‚İ‚é
-        var result = await _runner.StartGame(new StartGameArgs()
+        if (runner != null)
         {
-            GameMode = GameMode.Shared,           //Sharedƒ‚[ƒh
-            SessionName = "Fusion_Test_Room_2026", //ƒeƒXƒg—p‚Ì•”‰®–¼
-            SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>() //‰æ–ÊŠÇ—
+            return;
+        }
+
+        SetStartButtonVisible(false);
+        Debug.Log("Fusion Sharedæ¥ç¶šã‚’é–‹å§‹ã—ã¾ã™");
+
+        runner = GetComponent<NetworkRunner>();
+        if (runner == null)
+        {
+            runner = gameObject.AddComponent<NetworkRunner>();
+        }
+
+        runner.AddCallbacks(this);
+        runner.ProvideInput = true;
+
+        NetworkSceneManagerDefault sceneManager = GetComponent<NetworkSceneManagerDefault>();
+        if (sceneManager == null)
+        {
+            sceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>();
+        }
+
+        StartGameResult result = await runner.StartGame(new StartGameArgs
+        {
+            GameMode = GameMode.Shared,
+            SessionName = SessionName,
+            PlayerCount = 2,
+            SessionProperties = new Dictionary<string, SessionProperty>
+            {
+                { "StageCursor", "NONE" },
+                { "SelectedStage", "NONE" }
+            },
+            SceneManager = sceneManager
         });
 
-        //Œ‹‰Ê
-        if (result.Ok)
+        if (!result.Ok)
         {
-            Debug.Log("Ú‘±ƒeƒXƒg‚É¬Œ÷!");
-            Debug.Log($"Œ»İ‚Ìƒ‹[ƒ€–¼: {_runner.SessionInfo.Name}");
+            Debug.LogError($"æ¥ç¶šã«å¤±æ•—ã—ã¾ã—ãŸ: {result.ShutdownReason}");
+            return;
         }
-        else
+
+        Debug.Log("Fusion Sharedã¸ã®æ¥ç¶šãŒå®Œäº†ã—ã¾ã—ãŸ");
+        GameManager.Instance?.SetRunner(runner);
+        RefreshStartButtonVisibility();
+    }
+
+    public void OnStartButtonClicked()
+    {
+        LoadMap();
+    }
+
+    public void LoadMap()
+    {
+        if (runner == null || !runner.IsRunning)
         {
-            Debug.LogError($"Ú‘±‚É¸”s ——R: {result.ShutdownReason}");
-            Debug.LogError("AppID‚ªŠÔˆá‚Á‚Ä‚¢‚é‚©A³‚µ‚­İ’è‚³‚ê‚Ä‚¢‚È‚¢‰Â”\«‚ª‚ ‚è‚Ü‚·B");
+            Debug.LogError("NetworkRunnerãŒæ¥ç¶šã•ã‚Œã¦ã„ã¾ã›ã‚“");
+            return;
+        }
+
+        if (!runner.IsSharedModeMasterClient)
+        {
+            Debug.Log("Mapã¸ç§»å‹•ã§ãã‚‹ã®ã¯Shared Mode Master Clientã ã‘ã§ã™");
+            return;
+        }
+
+        if (isLoadingMap)
+        {
+            return;
+        }
+
+        int buildIndex = SceneUtility.GetBuildIndexByScenePath(MapScenePath);
+        if (buildIndex < 0)
+        {
+            Debug.LogError($"Mapã‚·ãƒ¼ãƒ³ãŒBuild Settingsã«ç™»éŒ²ã•ã‚Œã¦ã„ã¾ã›ã‚“: {MapScenePath}");
+            return;
+        }
+
+        isLoadingMap = true;
+        SetStartButtonVisible(false);
+        GameManager.Instance?.SetMapNotReady();
+
+        Debug.Log("OnlineConnectã‹ã‚‰Mapã¸ç§»å‹•ã—ã¾ã™");
+        runner.LoadScene(SceneRef.FromIndex(buildIndex), LoadSceneMode.Single);
+    }
+
+    public void OnPlayerJoined(NetworkRunner networkRunner, PlayerRef player)
+    {
+        Debug.Log($"ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒå‚åŠ ã—ã¾ã—ãŸ: {player.PlayerId}");
+
+        if (GameManager.Instance == null)
+        {
+            Debug.LogError("GameManagerãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“");
+            return;
+        }
+
+        GameManager.Instance.OnPlayerJoined(networkRunner, player);
+        RefreshStartButtonVisibility();
+    }
+
+    public void OnPlayerLeft(NetworkRunner networkRunner, PlayerRef player)
+    {
+        Debug.Log($"ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒé€€å‡ºã—ã¾ã—ãŸ: {player.PlayerId}");
+        GameManager.Instance?.OnPlayerLeft(networkRunner, player);
+        RefreshStartButtonVisibility();
+    }
+
+    public void OnSceneLoadStart(NetworkRunner networkRunner)
+    {
+        GameManager.Instance?.SetMapNotReady();
+    }
+
+    public void OnSceneLoadDone(NetworkRunner networkRunner)
+    {
+        isLoadingMap = false;
+        GameManager.Instance?.SetRunner(networkRunner);
+        Debug.Log($"Fusionã®ã‚·ãƒ¼ãƒ³èª­ã¿è¾¼ã¿ãŒå®Œäº†ã—ã¾ã—ãŸ: {SceneManager.GetActiveScene().name}");
+    }
+
+    public void OnShutdown(NetworkRunner networkRunner, ShutdownReason shutdownReason)
+    {
+        Debug.LogWarning($"ã‚»ãƒƒã‚·ãƒ§ãƒ³ãŒçµ‚äº†ã—ã¾ã—ãŸ: {shutdownReason}");
+        SetStartButtonVisible(false);
+    }
+
+    public void OnConnectedToServer(NetworkRunner networkRunner)
+    {
+        Debug.Log("ã‚µãƒ¼ãƒãƒ¼æ¥ç¶šå®Œäº†");
+    }
+
+    private void RefreshStartButtonVisibility()
+    {
+        SetStartButtonVisible(
+            runner != null &&
+            runner.IsRunning &&
+            runner.IsSharedModeMasterClient &&
+            !isLoadingMap
+        );
+    }
+
+    private void SetStartButtonVisible(bool isVisible)
+    {
+        if (startButtonUI != null)
+        {
+            startButtonUI.SetActive(isVisible);
         }
     }
+
+    public void OnInput(NetworkRunner networkRunner, NetworkInput input) { }
+    public void OnInputMissing(NetworkRunner networkRunner, PlayerRef player, NetworkInput input) { }
+    public void OnConnectRequest(NetworkRunner networkRunner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
+    public void OnConnectFailed(NetworkRunner networkRunner, NetAddress remoteAddress, NetConnectFailedReason reason) { }
+    public void OnDisconnectedFromServer(NetworkRunner networkRunner, NetDisconnectReason reason) { }
+    public void OnUserSimulationMessage(NetworkRunner networkRunner, SimulationMessagePtr message) { }
+    public void OnSessionListUpdated(NetworkRunner networkRunner, List<SessionInfo> sessionList) { }
+    public void OnCustomAuthenticationResponse(NetworkRunner networkRunner, Dictionary<string, object> data) { }
+    public void OnHostMigration(NetworkRunner networkRunner, HostMigrationToken hostMigrationToken) { }
+    public void OnReliableDataReceived(NetworkRunner networkRunner, PlayerRef player, ReliableKey key, ArraySegment<byte> data) { }
+    public void OnReliableDataProgress(NetworkRunner networkRunner, PlayerRef player, ReliableKey key, float progress) { }
+    public void OnObjectEnterAOI(NetworkRunner networkRunner, NetworkObject obj, PlayerRef player) { }
+    public void OnObjectExitAOI(NetworkRunner networkRunner, NetworkObject obj, PlayerRef player) { }
 }

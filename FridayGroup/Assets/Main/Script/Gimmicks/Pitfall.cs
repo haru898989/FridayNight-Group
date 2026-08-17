@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Fusion;
 
 public class Pitfall : GimmickBase
 {
@@ -18,6 +19,25 @@ public class Pitfall : GimmickBase
     [SerializeField] private float landCameraWaitTime = 0.6f;
 
     private bool isWarping = false;
+
+    /// <summary>
+    /// MapシーンのStageControllerを取得する関数
+    /// </summary>
+    private void Awake()
+    {
+        GameObject stageControllerObject = GameObject.Find("StageController");
+
+        if (stageControllerObject != null)
+        {
+            stageController =
+                stageControllerObject.GetComponent<StageController>();
+        }
+
+        if (stageController == null)
+        {
+            Debug.LogError("現在のシーンにStageControllerが見つかりません");
+        }
+    }
 
     /// <summary>
     /// プレイヤーが落とし穴に触れたときに呼ばれる関数
@@ -42,6 +62,20 @@ public class Pitfall : GimmickBase
         isWarping = true;
 
         Debug.Log("Pitfall started");
+
+        // Stop CharacterController movement immediately and align the player with
+        // the center of the hole before starting the vertical fall.
+        CharacterController playerController = playerObject.GetComponent<CharacterController>();
+        if (playerController != null)
+        {
+            playerController.enabled = false;
+        }
+
+        Vector3 centeredPosition = playerObject.transform.position;
+        centeredPosition.x = transform.position.x;
+        centeredPosition.z = transform.position.z;
+        playerObject.transform.position = centeredPosition;
+        Physics.SyncTransforms();
 
         // 落とし穴演出用カメラに切り替える
         if (pitfallCameraController != null)
@@ -69,7 +103,7 @@ public class Pitfall : GimmickBase
         }
 
         // 落下前に速度を止める
-        if (playerRigidbody != null)
+        if (playerRigidbody != null && !playerRigidbody.isKinematic)
         {
             playerRigidbody.velocity = Vector3.zero;
             playerRigidbody.angularVelocity = Vector3.zero;
@@ -122,12 +156,30 @@ public class Pitfall : GimmickBase
         // ワープ先を取得する
         Vector3 warpPosition = stageController.GetPitfallWarpPosition();
 
+        Debug.Log(
+            $"ワープ先={warpPosition}，" +
+            $"現在地={playerObject.transform.position}"
+        );
+        // NetworkTransform must also be teleported, otherwise Fusion can restore
+        // the last falling position after the normal Transform assignment.
+        NetworkObject networkObject = playerObject.GetComponent<NetworkObject>();
+        NetworkTransform networkTransform = playerObject.GetComponent<NetworkTransform>();
+        if (networkObject != null && networkObject.HasStateAuthority && networkTransform != null)
+        {
+            networkTransform.Teleport(warpPosition, playerObject.transform.rotation);
+        }
+
 
         // Rigidbodyがある場合は，Rigidbodyの位置を直接変更する
         if (playerRigidbody != null)
         {
-            playerRigidbody.velocity = Vector3.zero;
-            playerRigidbody.angularVelocity = Vector3.zero;
+            // Kinematicではない場合だけ速度を止める
+            if (!playerRigidbody.isKinematic)
+            {
+                playerRigidbody.velocity = Vector3.zero;
+                playerRigidbody.angularVelocity = Vector3.zero;
+            }
+
             playerRigidbody.position = warpPosition;
         }
 
@@ -149,7 +201,11 @@ public class Pitfall : GimmickBase
         {
             playerCollider.enabled = true;
         }
-
+        // CharacterControllerを戻す
+        if (playerController != null)
+        {
+            playerController.enabled = true;
+        }
         // ワープ直後ではなく，少し待ってから着地音を鳴らす
         yield return new WaitForSeconds(landSoundDelay);
 

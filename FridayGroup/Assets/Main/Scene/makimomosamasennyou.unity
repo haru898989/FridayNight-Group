@@ -259,6 +259,8 @@ MonoBehaviour:
   stampSprites: []
   stampMenu: {fileID: 0}
   stampObjects: []
+  stampDisplayTime: 2
+  animator: {fileID: 0}
   playerID: 0
 --- !u!65 &70845061
 BoxCollider:
@@ -347,66 +349,63 @@ Transform:
   - {fileID: 348283416}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &306288913
-GameObject:
+--- !u!1001 &279240988
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 306288915}
-  - component: {fileID: 306288914}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &306288914
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 306288913}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55f62ad76d5aa43409d019cdb8f5f420, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mapFloorData:
-  - {fileID: 4900000, guid: ba2eed0680815e0458e30a65067f8c80, type: 3}
-  - {fileID: 4900000, guid: ba2eed0680815e0458e30a65067f8c80, type: 3}
-  - {fileID: 4900000, guid: ba2eed0680815e0458e30a65067f8c80, type: 3}
-  floorB1: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  floor1: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  floorR: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  normalWallPrefab: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  lampWallPrefab: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  pitfall: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  door: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  dark: {fileID: 80143087930702964, guid: 2ec2c49dfab049d478031ff022055ae0, type: 3}
-  tileSize: 1
-  floorHeight: 5
-  mapParent: {fileID: 1897055689}
-  surface: {fileID: 1897055690}
---- !u!4 &306288915
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 306288913}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.23825395
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.49
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071067
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+      propertyPath: m_Name
+      value: 1F_floor
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
 --- !u!1 &348283413
 GameObject:
   m_ObjectHideFlags: 0
@@ -661,6 +660,78 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 932dddb11526f894087c2c3c3ae79310, type: 3}
+--- !u!1 &1790623755
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1790623757}
+  - component: {fileID: 1790623756}
+  m_Layer: 0
+  m_Name: GameObject (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1790623756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790623755}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a8e293d959d7c0f4aa555ada7e7ae154, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mapFloorData:
+  - {fileID: 4900000, guid: 23bc225c9c0152b4699da8c7d104f985, type: 3}
+  - {fileID: 4900000, guid: 943823a85c1027f4983191b20cb0547e, type: 3}
+  - {fileID: 4900000, guid: 943823a85c1027f4983191b20cb0547e, type: 3}
+  - {fileID: 4900000, guid: 943823a85c1027f4983191b20cb0547e, type: 3}
+  - {fileID: 4900000, guid: d9ebfb69425160243adaa7b92952d647, type: 3}
+  - {fileID: 4900000, guid: 6347d4d04dbf6d343b9503abe5376881, type: 3}
+  - {fileID: 4900000, guid: e4a341866a552314da1c5efe05997ffc, type: 3}
+  - {fileID: 4900000, guid: 6347d4d04dbf6d343b9503abe5376881, type: 3}
+  - {fileID: 4900000, guid: d9ebfb69425160243adaa7b92952d647, type: 3}
+  floorB1:
+  - {fileID: 6859942381066833967, guid: f1459c5196213664f9bea3b6a0079d1c, type: 3}
+  floor1:
+  - {fileID: 7019775517568846307, guid: 80350a493267dae46a5409a6dd95b773, type: 3}
+  pitfall:
+  - {fileID: 6135245709642292632, guid: 620ef9aeb91fa39469d7241f3a9c844d, type: 3}
+  normalWallPrefab:
+  - {fileID: 3923604046752031985, guid: 3210b89f3d9e5b94fb14dc83cb861252, type: 3}
+  lampWallPrefab:
+  - {fileID: 4191682033077274656, guid: 4c991c87c573de44fa8a45cf02e49248, type: 3}
+  door:
+  - {fileID: 7365950155207325642, guid: d58c9b06447e4544a95f9189a6dda407, type: 3}
+  dark:
+  - {fileID: 3815228208322897781, guid: dd0ce49098fb0144aa98f76b23e004af, type: 3}
+  tileSize: 1
+  floorHeight: 3
+  mapParent: {fileID: 1897055689}
+  surface: {fileID: 1897055690}
+--- !u!4 &1790623757
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1790623755}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 16.073496, y: 8.529337, z: 17.01363}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1871279113
 GameObject:
   m_ObjectHideFlags: 0
@@ -826,6 +897,8 @@ MonoBehaviour:
   stampSprites: []
   stampMenu: {fileID: 0}
   stampObjects: []
+  stampDisplayTime: 2
+  animator: {fileID: 0}
   patrolRadius: 8
   arriveDistance: 0.5
   searchRadius: 5
@@ -1012,10 +1085,11 @@ SceneRoots:
   m_Roots:
   - {fileID: 40519740}
   - {fileID: 1897055689}
-  - {fileID: 306288915}
   - {fileID: 7280985100538839189}
   - {fileID: 70845064}
   - {fileID: 1871279117}
   - {fileID: 1354339628}
   - {fileID: 6157581759224414592}
   - {fileID: 1489493400}
+  - {fileID: 1790623757}
+  - {fileID: 279240988}
