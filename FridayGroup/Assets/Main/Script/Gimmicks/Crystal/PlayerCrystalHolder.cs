@@ -38,16 +38,6 @@ public class PlayerCrystalHolder : MonoBehaviour
     }
 
     /// <summary>
-    /// 所持しているクリスタル属性を消費する関数
-    /// </summary>
-    public void RemoveCrystalElement()
-    {
-        hasCrystalElement = false;
-
-        Debug.Log("Player crystal element removed");
-    }
-
-    /// <summary>
     /// プレイヤーがクリスタルに触れたときに呼ばれる関数
     /// </summary>
     private void OnTriggerEnter(Collider other)

@@ -22,17 +22,15 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] B1normalWallPrefab; //[24]
     public GameObject[] dark;             // []未定
 
-    public GameObject[] BearTrap;         // [31] トラばさみ
-    public GameObject[] RollingRock;      // [35] 大岩
-    public GameObject[] Ladder;           // [38] 梯子
+    public GameObject[] BearTrap;         //[31]
+    public GameObject[] Crystal;          //[32]
+    public GameObject[] pitfall;          //[33]
+    public GameObject[] PressurePlate;    //[40-49] 一の位が連動チャンネル
+    public GameObject[] RollingRock;      //[35]
+    public GameObject[] StoneTablet;      //[36]
+    public GameObject[] TwoPlayerDoor;    //[50-59] 一の位が連動チャンネル
+    public GameObject[] Ladder;           //[38]
 
-    public GameObject[] PressurePlate;    // [40-49] 感圧板
-    public GameObject[] TwoPlayerDoor;    // [50-59] 連動ドア
-
-    public GameObject[] Crystal;          // [60-62] 炎・氷・雷
-    public GameObject[] CrystalGear;      // [63-65] 炎・氷・雷の歯車
-    public GameObject[] pitfall;          // [70] 落とし穴
-    public GameObject[] StoneTablet;      // [80-84] 石板
     public GameObject[] Goal;             //[90]
 
     [Header("マップ設定")]
@@ -46,63 +44,40 @@ public class MapGenerator : MonoBehaviour
 
     void Start()
     {
-        if (!TryApplySelectedStageData())
+        // --- 1. GameManager の取得と安全確認 ---
+        if (GameManager.Instance == null)
         {
-            return;
+            // Instance で取れなかった場合の念のための型検索
+            var foundGM = FindObjectOfType<GameManager>();
+            if (foundGM == null)
+            {
+                // エラーではなく警告（Warning）にしておくことで、map単体テスト再生時にも処理が止まらないようにします
+                Debug.LogWarning("GameManagerが見つかりません（タイトル未経由の単体テスト実行中の可能性があります）");
+            }
         }
 
-        // テストとして、ゲーム開始時に「1階（配列の1番目）」と「2階（2番目）」を生成してみる
-        GenerateFloorMap(0);
-        GenerateFloorMap(1);
-        GenerateFloorMap(2);
-        GenerateFloorMap(3);
-        GenerateFloorMap(4);
-        GenerateFloorMap(5);
-        GenerateFloorMap(6);
-        GenerateFloorMap(7);
-        GenerateFloorMap(8);
+        // --- 2. マップ生成処理 ---
+        // テストとして、ゲーム開始時に「1階（配列の1番目）」〜「9階（9番目）」を生成
+        for (int i = 0; i <= 8; i++)
+        {
+            GenerateFloorMap(i);
+        }
 
         surface.BuildNavMesh();
 
-        // CSVの100で指定された位置をGameManagerへ渡す
+        // --- 3. CSVの100で指定された位置をGameManagerへ渡す ---
         if (playerSpawnCount == 1)
         {
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.SetMapSpawnPosition(playerSpawnPosition);
-            }
-            else
-            {
-                Debug.LogError("GameManagerが見つかりません！");
+                Debug.Log("GameManagerへプレイヤー生成位置を渡しました。");
             }
         }
         else
         {
             Debug.LogError($"プレイヤー生成位置100は全CSVに1個必要です。現在: {playerSpawnCount}個");
         }
-    }
-
-    private bool TryApplySelectedStageData()
-    {
-        if (!StageSelectionContext.HasSelection)
-        {
-            return true;
-        }
-
-        TextAsset[] selectedStageData = StageCatalog.LoadMapFloorData(
-            StageSelectionContext.SelectedStageResourcePath
-        );
-
-        
-        if (selectedStageData.Length != 9)
-        {
-            Debug.LogError($"選択ステージのCSVは9層必要です。現在: {selectedStageData.Length}層");
-            return false;
-        }
-
-        mapFloorData = selectedStageData;
-        Debug.Log($"選択ステージを読み込みます: {StageSelectionContext.SelectedStageResourcePath}");
-        return true;
     }
 
     /// <summary>
@@ -229,39 +204,36 @@ public class MapGenerator : MonoBehaviour
                         }
                         break;
 
-                    case 3: // 単体ギミック
+                    case 3: //ギミック
                         switch (type)
                         {
-                            case 1: // 31：トラばさみ
-                                Instantiate(
-                                    BearTrap[0],
-                                    spawnPos,
-                                    Quaternion.identity,
-                                    mapParent
-                                );
-                                break;
+                            case 1: //
+                                Instantiate(BearTrap[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
 
-                            case 5: // 35：大岩
-                                Instantiate(
-                                    RollingRock[0],
-                                    spawnPos,
-                                    Quaternion.identity,
-                                    mapParent
-                                );
-                                break;
+                            case 2: //
+                                Instantiate(Crystal[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
 
-                            case 8: // 38：梯子
+                            case 3: //
+                                Instantiate(pitfall[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 5: //
+                                Instantiate(RollingRock[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 6: //
+                                Instantiate(StoneTablet[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
+
+                            case 8: // 地下から上階へ戻る梯子
                                 InstantiateGimmickFloor(floorIndex, spawnPos);
-
-                                Instantiate(
-                                    Ladder[0],
-                                    spawnPos,
-                                    Quaternion.identity,
-                                    mapParent
-                                );
-                                break;
+                                Instantiate(Ladder[0], spawnPos, Quaternion.identity, mapParent);
+                            break;
                         }
                         break;
+
                     case 4: // 40-49: 感圧板（一の位が連動チャンネル）
                         InstantiateChannelPressurePlate(floorIndex, spawnPos, type);
                         break;
@@ -270,71 +242,6 @@ public class MapGenerator : MonoBehaviour
                         InstantiateChannelDoor(floorIndex, spawnPos, type);
                         break;
 
-                    case 6: // 60～62：クリスタル、63～65：歯車
-
-                        InstantiateGimmickFloor(floorIndex, spawnPos);
-
-                        if (type <= 2)
-                        {
-                            Instantiate(
-                                Crystal[type],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
-                        }
-                        else if (type >= 3 && type <= 5)
-                        {
-                            Instantiate(
-                                CrystalGear[type - 3],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
-                        }
-                        break;
-
-                    case 7: // 70：落とし穴
-
-                        InstantiateGimmickFloor(floorIndex, spawnPos);
-
-                        if (pitfall != null &&
-                            pitfall.Length > 0 &&
-                            pitfall[0] != null)
-                        {
-                            Instantiate(
-                                pitfall[0],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
-                        }
-                        else
-                        {
-                            Debug.LogError("落とし穴Prefabが設定されていません。");
-                        }
-                        break;
-
-                    case 8: // 80～84：石板
-
-                        InstantiateGimmickFloor(floorIndex, spawnPos);
-
-                        if (StoneTablet != null &&
-                            type < StoneTablet.Length &&
-                            StoneTablet[type] != null)
-                        {
-                            Instantiate(
-                                StoneTablet[type],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
-                        }
-                        else
-                        {
-                            Debug.LogError($"石板Prefabが設定されていません。CSV番号: {key}");
-                        }
-                        break;
                 }
             }
         }

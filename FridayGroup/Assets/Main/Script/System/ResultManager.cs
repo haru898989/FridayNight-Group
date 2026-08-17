@@ -5,22 +5,12 @@ public class ResultManager : MonoBehaviour
 {
     public void BackToTitle()
     {
-        if (OnlineStageFlow.Instance != null && OnlineStageFlow.Instance.IsConnected)
+        if (Perfect_Online.Instance != null)
         {
-            OnlineStageFlow.Instance.ReturnToTitle();
+            Perfect_Online.Instance.ReturnToTitle();
             return;
         }
 
         SceneManager.LoadScene("Title");
-    }
-
-    public void BackToStageSelect()
-    {
-        OnlineStageFlow.Instance?.ReturnToStageSelect();
-    }
-
-    public void GoToNextStage()
-    {
-        OnlineStageFlow.Instance?.ContinueToNextStage();
     }
 }

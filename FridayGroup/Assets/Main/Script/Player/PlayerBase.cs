@@ -46,16 +46,8 @@ public class PlayerBase : NetworkBehaviour
     private GameObject characterModelInstance;
     private Vector3 previousRenderPosition;
     private bool hasPreviousRenderPosition;
-    private bool isGoalSpectating;
-    private bool isGoalSequenceStarted;
-    private Coroutine goalPresentationCoroutine;
-    private Transform goalSpectateTarget;
-    private Vector3 defaultPlayerCameraLocalPosition;
-    private Quaternion defaultPlayerCameraLocalRotation;
-    private bool hasDefaultPlayerCameraTransform;
 
     public bool canMove = true;
-    public bool IsGoalSpectating => isGoalSpectating;
 
     protected virtual bool UsePlayerInput => true;
 
@@ -147,9 +139,6 @@ public class PlayerBase : NetworkBehaviour
             if (HasInputAuthority)
             {
                 playerViewCamera = childCam;
-                defaultPlayerCameraLocalPosition = childCam.transform.localPosition;
-                defaultPlayerCameraLocalRotation = childCam.transform.localRotation;
-                hasDefaultPlayerCameraTransform = true;
                 pitfallCameraControllers = FindObjectsOfType<PitfallCameraController>(true);
                 DisableOtherMainCameras(childCam);
                 childCam.gameObject.tag = "MainCamera";
@@ -258,11 +247,6 @@ public class PlayerBase : NetworkBehaviour
             return;
         }
 
-        if (isGoalSpectating)
-        {
-            UpdateGoalSpectatorCamera();
-        }
-
         bool isPitfallCameraActive = false;
         if (pitfallCameraControllers != null)
         {
@@ -368,149 +352,6 @@ public class PlayerBase : NetworkBehaviour
                 listener.enabled = false;
             }
         }
-    }
-
-    public void BeginGoalSpectatorMode()
-    {
-        if (!HasInputAuthority || isGoalSequenceStarted)
-        {
-            return;
-        }
-
-        isGoalSequenceStarted = true;
-        isGoalSpectating = false;
-        goalSpectateTarget = null;
-        canMove = false;
-
-        if (animator != null)
-        {
-            animator.SetBool("run", false);
-        }
-
-        goalPresentationCoroutine = StartCoroutine(ShowGoalCelebrationThenSpectate());
-    }
-
-    public void ReportGoalReachedToAllPlayers()
-    {
-        if (HasInputAuthority)
-        {
-            RPC_ReportGoalReached();
-        }
-    }
-
-    private IEnumerator ShowGoalCelebrationThenSpectate()
-    {
-        GoalPresentationUI presentationUI = GoalPresentationUI.Instance;
-        float presentationDuration = presentationUI != null
-            ? presentationUI.CelebrationDuration
-            : 2f;
-
-        if (presentationUI != null)
-        {
-            presentationUI.PlayGoalCelebration();
-        }
-
-        Debug.Log("Local player reached the goal. Playing the goal celebration.");
-        yield return new WaitForSecondsRealtime(presentationDuration);
-
-        isGoalSpectating = true;
-        goalSpectateTarget = null;
-        goalPresentationCoroutine = null;
-
-        if (presentationUI != null)
-        {
-            presentationUI.ShowSpectatorFrame();
-        }
-
-        Debug.Log("Goal celebration finished. Spectating the other player.");
-    }
-
-    public void ResetGoalSpectatorMode()
-    {
-        if (!HasInputAuthority)
-        {
-            return;
-        }
-
-        isGoalSpectating = false;
-        isGoalSequenceStarted = false;
-        goalSpectateTarget = null;
-        canMove = true;
-
-        if (goalPresentationCoroutine != null)
-        {
-            StopCoroutine(goalPresentationCoroutine);
-            goalPresentationCoroutine = null;
-        }
-
-        if (GoalPresentationUI.Instance != null)
-        {
-            GoalPresentationUI.Instance.HideAll();
-        }
-
-        if (playerViewCamera != null && hasDefaultPlayerCameraTransform)
-        {
-            playerViewCamera.transform.localPosition = defaultPlayerCameraLocalPosition;
-            playerViewCamera.transform.localRotation = defaultPlayerCameraLocalRotation;
-            cameraRotationX = NormalizeSignedAngle(defaultPlayerCameraLocalRotation.eulerAngles.x);
-        }
-    }
-
-    private void UpdateGoalSpectatorCamera()
-    {
-        if (goalSpectateTarget == null)
-        {
-            goalSpectateTarget = FindOtherPlayerCamera();
-        }
-
-        if (goalSpectateTarget != null)
-        {
-            playerViewCamera.transform.SetPositionAndRotation(
-                goalSpectateTarget.position,
-                goalSpectateTarget.rotation
-            );
-        }
-    }
-
-    private Transform FindOtherPlayerCamera()
-    {
-        NetworkRunner activeRunner = OnlineStageFlow.Instance != null
-            ? OnlineStageFlow.Instance.Runner
-            : Runner;
-
-        if (activeRunner == null || !activeRunner.IsRunning)
-        {
-            return null;
-        }
-
-        foreach (PlayerRef player in activeRunner.ActivePlayers)
-        {
-            if (player == activeRunner.LocalPlayer)
-            {
-                continue;
-            }
-
-            if (!activeRunner.TryGetPlayerObject(player, out NetworkObject playerObject) ||
-                playerObject == null)
-            {
-                continue;
-            }
-
-            PlayerBase otherPlayer = playerObject.GetComponent<PlayerBase>();
-            if (otherPlayer != null)
-            {
-                return otherPlayer.playerCamera != null
-                    ? otherPlayer.playerCamera
-                    : otherPlayer.transform;
-            }
-        }
-
-        return null;
-    }
-
-    private static float NormalizeSignedAngle(float angle)
-    {
-        return angle > 180f ? angle - 360f : angle;
     }
 
     public override void FixedUpdateNetwork()
@@ -715,23 +556,6 @@ public class PlayerBase : NetworkBehaviour
                 Debug.Log("Pickupから離れた");
             }
         }
-    }
-
-    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
-    private void RPC_ReportGoalReached(RpcInfo info = default)
-    {
-        if (OnlineStageFlow.Instance == null)
-        {
-            return;
-        }
-
-        PlayerRef player = info.Source;
-        if (player == PlayerRef.None && Object != null)
-        {
-            player = Object.InputAuthority;
-        }
-
-        OnlineStageFlow.Instance.ReportPlayerReachedGoal(player);
     }
 
     [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
