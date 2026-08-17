@@ -131,3 +131,4 @@ InitTestScene*.unity*
 *.app
 FridayGroup/Assets/Main/prefab/Gimmiks.meta
 FridayGroup/Assets/Main/prefab/Player.meta
+FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/x86_64/opus_egpv.dll
