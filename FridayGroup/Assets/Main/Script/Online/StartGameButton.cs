@@ -25,10 +25,14 @@ public class StartGameButton : MonoBehaviour
 
     public void StartGame()
     {
+        Debug.Log("[StartGameButton] StartGame() called");
+
         if (online == null)
         {
             online = Perfect_Online.Instance;
         }
+
+        Debug.Log($"[StartGameButton] online = {online}");
 
         if (online == null)
         {
@@ -37,7 +41,20 @@ public class StartGameButton : MonoBehaviour
         }
 
         OnlineStageFlow stageFlow = OnlineStageFlow.EnsureExists(gameObject);
-        if (stageFlow == null || !stageFlow.LoadStageSelect())
+
+        Debug.Log($"[StartGameButton] stageFlow = {stageFlow}");
+
+        if (stageFlow == null)
+        {
+            Debug.LogError("[StartGameButton] stageFlow is NULL");
+            return;
+        }
+
+        bool result = stageFlow.LoadStageSelect();
+
+        Debug.Log($"[StartGameButton] LoadStageSelect result = {result}");
+
+        if (!result)
         {
             Debug.LogError("ステージ選択画面へ移動できません");
         }

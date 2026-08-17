@@ -132,3 +132,6 @@ InitTestScene*.unity*
 FridayGroup/Assets/Main/prefab/Gimmiks.meta
 FridayGroup/Assets/Main/prefab/Player.meta
 FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/x86_64/opus_egpv.dll
+FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/iOS/libwebrtc-audio.a
+FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/VisionOS/device/libwebrtc-audio.a
+FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/VisionOS/simulator/libwebrtc-audio.a

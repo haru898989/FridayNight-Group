@@ -164,25 +164,48 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
     public bool LoadStageSelect()
     {
-        if (!ValidateMasterClientOperation() || isLoadingScene)
+        Debug.Log($"[StageSelect] isInitialized = {isInitialized}");
+        Debug.Log($"[StageSelect] runner = {runner}");
+
+        if (!isInitialized || runner == null)
         {
+            SetOperationMessage("NETWORK IS NOT READY");
+            return false;
+        }
+
+        Debug.Log($"[StageSelect] ConnectedPlayerCount = {ConnectedPlayerCount}");
+        Debug.Log($"[StageSelect] MinimumPlayerCountToStart = {MinimumPlayerCountToStart}");
+        Debug.Log($"[StageSelect] isLoadingScene = {isLoadingScene}");
+
+        if (!ValidateMasterClientOperation())
+        {
+            Debug.LogError("[StageSelect] ValidateMasterClientOperation() = false");
+            return false;
+        }
+
+        if (isLoadingScene)
+        {
+            Debug.LogError("[StageSelect] isLoadingScene = true");
             return false;
         }
 
         if (ConnectedPlayerCount < MinimumPlayerCountToStart)
         {
             SetOperationMessage($"WAITING FOR PLAYER... ({ConnectedPlayerCount}/{MinimumPlayerCountToStart})");
+            Debug.LogError("[StageSelect] Player count is insufficient");
             return false;
         }
 
         if (!TryGetSceneBuildIndex(StageSelectScenePath, out int buildIndex))
         {
+            Debug.LogError($"[StageSelect] Scene not found: {StageSelectScenePath}");
             return false;
         }
 
         isLoadingScene = true;
         SetOperationMessage("OPENING STAGE SELECT...");
         runner.LoadScene(SceneRef.FromIndex(buildIndex), LoadSceneMode.Single);
+
         return true;
     }
 
@@ -651,17 +674,46 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
     private bool ValidateMasterClientOperation()
     {
-        if (!IsConnected)
+        Debug.Log($"[Validate] runner = {runner}");
+
+        // 最初にrunnerそのものを確認
+        if (runner == null)
         {
+            Debug.LogError("[Validate] runner is NULL");
+            SetOperationMessage("NETWORK IS NOT READY");
+            return false;
+        }
+
+        Debug.Log($"[Validate] IsRunning = {runner.IsRunning}");
+
+        if (!runner.IsRunning)
+        {
+            Debug.LogError("[Validate] runner is not running");
             SetOperationMessage("NETWORK IS NOT CONNECTED");
             return false;
         }
 
+        Debug.Log($"[Validate] GameMode = {runner.GameMode}");
+        Debug.Log($"[Validate] IsSharedModeMasterClient = {runner.IsSharedModeMasterClient}");
+        Debug.Log($"[Validate] LocalPlayer = {runner.LocalPlayer}");
+
+        if (!runner.SessionInfo.IsValid)
+        {
+            Debug.LogError("[Validate] SessionInfo is invalid");
+            SetOperationMessage("SESSION IS NOT READY");
+            return false;
+        }
+
+        Debug.Log($"[Validate] SessionInfo.Name = {runner.SessionInfo.Name}");
+
         if (!runner.IsSharedModeMasterClient)
         {
+            Debug.LogWarning("[Validate] This client is not the Shared Mode Master Client");
             SetOperationMessage("WAITING FOR HOST...");
             return false;
         }
+
+        Debug.Log("[Validate] SUCCESS");
 
         return true;
     }
@@ -669,6 +721,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private bool TryGetSceneBuildIndex(string scenePath, out int buildIndex)
     {
         buildIndex = SceneUtility.GetBuildIndexByScenePath(scenePath);
+
         if (buildIndex >= 0)
         {
             return true;
@@ -781,8 +834,15 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
     private static void TryRestoreSelectedStageFromSession(NetworkRunner networkRunner)
     {
-        if (networkRunner == null ||
-            networkRunner.SessionInfo == null)
+        if (networkRunner == null)
+        {
+            return;
+        }
+
+        // SessionInfo can be cleared while a runner is shutting down. Read it
+        // once so the null check and property access use the same instance.
+        var sessionInfo = networkRunner.SessionInfo;
+        if (sessionInfo == null || sessionInfo.Properties == null)
         {
             return;
         }
@@ -795,7 +855,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        if (networkRunner.SessionInfo.Properties.TryGetValue(
+        if (sessionInfo.Properties.TryGetValue(
                 SelectedStageSessionProperty,
                 out SessionProperty stageProperty) &&
             stageProperty.IsString)
@@ -811,14 +871,20 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
     private void TryRestoreStageCursorFromSession(NetworkRunner networkRunner)
     {
-        if (networkRunner == null ||
-            networkRunner.IsSharedModeMasterClient ||
-            networkRunner.SessionInfo == null)
+        if (networkRunner == null || networkRunner.IsSharedModeMasterClient)
         {
             return;
         }
 
-        if (networkRunner.SessionInfo.Properties.TryGetValue(
+        // SessionInfo can be cleared while a runner is shutting down. Read it
+        // once so the null check and property access use the same instance.
+        var sessionInfo = networkRunner.SessionInfo;
+        if (sessionInfo == null || sessionInfo.Properties == null)
+        {
+            return;
+        }
+
+        if (sessionInfo.Properties.TryGetValue(
                 StageCursorSessionProperty,
                 out SessionProperty cursorProperty) &&
             cursorProperty.IsString)

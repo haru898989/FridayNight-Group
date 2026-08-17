@@ -322,6 +322,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2298150152321978108, guid: 117a5726f9a2d6249b02e86eb61a11d1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1399971045}
+    - targetCorrespondingSourceObject: {fileID: 2298150152321978108, guid: 117a5726f9a2d6249b02e86eb61a11d1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1399971047}
+    - targetCorrespondingSourceObject: {fileID: 2298150152321978108, guid: 117a5726f9a2d6249b02e86eb61a11d1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1399971046}
   m_SourcePrefab: {fileID: 100100000, guid: 117a5726f9a2d6249b02e86eb61a11d1, type: 3}
 --- !u!1 &824657786
 GameObject:
@@ -671,6 +677,62 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startButtonUI: {fileID: 2089033098}
+--- !u!114 &1399971046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1399971042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33a38d73a8571ce438052dd31e09df5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Id: 
+  DisconnectAfterKeepAlive: 0
+  KeepAliveInBackground: 60000
+  runInBackground: 1
+  statsResetInterval: 1000
+  speakerPrefab: {fileID: 0}
+  primaryRecorder: {fileID: 0}
+  usePrimaryRecorder: 0
+  cppCompatibilityMode: 0
+  Settings:
+    AppIdRealtime: 
+    AppIdFusion: 
+    AppIdQuantum: 
+    AppIdChat: 
+    AppIdVoice: 
+    AppVersion: 
+    UseNameServer: 1
+    FixedRegion: 
+    Server: 
+    Port: 0
+    ProxyServer: 
+    Protocol: 0
+    EnableProtocolFallback: 1
+    AuthMode: 2
+    EnableLobbyStatistics: 0
+    NetworkLogging: 1
+    ClientLogging: 2
+  ShowSettings: 1
+  ApplyDontDestroyOnLoad: 1
+  AutoConnectAndJoin: 1
+  UseFusionAppSettings: 1
+  UseFusionAuthValues: 1
+--- !u!114 &1399971047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1399971042}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1199893898, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1524145701
 GameObject:
   m_ObjectHideFlags: 0
