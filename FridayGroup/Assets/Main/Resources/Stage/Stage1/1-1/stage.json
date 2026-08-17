@@ -1,0 +1,16 @@
+{
+    "displayName": "1-1 TORABASAMI BASIC TEST",
+    "description": "stage1-1 TORABASAMI BASIC",
+    "previewFile": "",
+    "csvOrder": [
+        "1-1BFfloor",
+        "1-1BFwall",
+        "1-1BFwall",
+        "1-1BFwall",
+        "1-1Floor",
+        "1-1Wall",
+        "1-1Wall",
+        "1-1Wall",
+        "Roof"
+    ]
+}
