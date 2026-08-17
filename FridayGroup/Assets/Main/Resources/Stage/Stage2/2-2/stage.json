@@ -1,0 +1,16 @@
+{
+    "displayName": "2-2 OTOSHIANA AND HASHIGO ADVANCE TEST",
+    "description": "OTOSHIANA AND HASHIGO STAGE ADVANCE",
+    "previewFile": "",
+    "csvOrder": [
+        "2-2BFfloor",
+        "2-2BFwall",
+        "2-2BFwall",
+        "2-2BFwall",
+        "2-2Floor",
+        "2-2Wall",
+        "2-2Wall",
+        "2-2Wall",
+        "Roof"
+    ]
+}

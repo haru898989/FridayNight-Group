@@ -1,0 +1,16 @@
+{
+    "displayName": "1-5 TORABASAMI AND KANNATSUBANÅ@ADVANCE TEST",
+    "description": "TORABASAMI AND KANNATSUBAN ADVANCE",
+    "previewFile": "",
+    "csvOrder": [
+        "1-5BFfloor",
+        "1-5BFwall",
+        "1-5BFwall",
+        "!-5BFwall",
+        "1-5Floor",
+        "1-5Wall",
+        "1-5Wall",
+        "1-5Wall",
+        "Roof"
+    ]
+}
