@@ -1,0 +1,16 @@
+{
+    "displayName": "3-1 ROCK BASIC TEST",
+    "description": "ROCK STAGE BASIC",
+    "previewFile": "",
+    "csvOrder": [
+        "3-1BFfloor",
+        "3-1BFwall",
+        "3-1BFwall",
+        "3-1BFwall",
+        "3-1Floor",
+        "3-1Wall",
+        "3-1Wall",
+        "3-1Wall",
+        "Roof"
+    ]
+}

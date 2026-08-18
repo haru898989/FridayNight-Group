@@ -1,0 +1,16 @@
+{
+    "displayName": "3-2 ROCK ADVANCE TEST",
+    "description": "3-2 ROCK STAGE ADVANCE",
+    "previewFile": "",
+    "csvOrder": [
+        "3-2BFfloor",
+        "3-2BFwall",
+        "3-2BFwall",
+        "3-2BFwall",
+        "3-2Floor",
+        "3-2Wall",
+        "3-2Wall",
+        "3-2Wall",
+        "Roof"
+    ]
+}
