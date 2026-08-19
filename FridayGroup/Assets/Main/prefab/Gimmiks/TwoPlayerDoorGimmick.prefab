@@ -49,7 +49,7 @@ MonoBehaviour:
   secondPlate: {fileID: 0}
   puzzleId: two-player-door-1
   channelId: 1
-  requiredPlateCount: 2
+  requiredPlateCount: 1
   doorPanel: {fileID: 200400000000000002}
   openOffset: {x: 0, y: 2.2, z: 0}
   leftHinge: {fileID: 0}

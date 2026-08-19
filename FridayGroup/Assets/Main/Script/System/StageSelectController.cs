@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// StageSelectシーン上に配置されたCanvasを制御します。
@@ -30,6 +31,10 @@ public sealed class StageSelectController : MonoBehaviour
     [SerializeField] private Text confirmButtonText;
     [SerializeField] private Text statusText;
 
+    [Header("Input System")]
+    [SerializeField] private InputActionReference moveAction;   // 左右のステージ選択
+    [SerializeField] private InputActionReference submitAction; // ステージ決定
+
     private readonly List<Image> nodeImages = new List<Image>();
     private readonly List<Button> nodeButtons = new List<Button>();
     private readonly List<float> nodePositions = new List<float>();
@@ -44,6 +49,35 @@ public sealed class StageSelectController : MonoBehaviour
     private Sprite runtimePreviewSprite;
     private Coroutine contentMoveCoroutine;
 
+    // Input Systemの入力を有効にする
+    private void OnEnable()
+    {
+        if (moveAction != null)
+        {
+            moveAction.action.Enable();
+        }
+
+        if (submitAction != null)
+        {
+            submitAction.action.Enable();
+        }
+    }
+
+    // Input Systemの入力を無効にする
+    private void OnDisable()
+    {
+        if (moveAction != null)
+        {
+            moveAction.action.Disable();
+        }
+
+        if (submitAction != null)
+        {
+            submitAction.action.Disable();
+        }
+    }
+
+
     private void Start()
     {
         if (!HasRequiredSceneUI())
@@ -56,6 +90,9 @@ public sealed class StageSelectController : MonoBehaviour
         stageFlow = OnlineStageFlow.Instance;
         stages = StageCatalog.Load();
         BuildStageNodes();
+
+        // STARTボタンをクリックしたときにもステージを決定する
+        confirmButton.onClick.AddListener(ConfirmSelection);
 
         if (stageFlow != null)
         {
@@ -111,17 +148,19 @@ public sealed class StageSelectController : MonoBehaviour
             return;
         }
 
+        // 左右入力でステージを移動する
         int direction = ReadHorizontalDirection();
+
         if (direction != 0)
         {
             MoveSelection(direction);
         }
 
-        if (Input.GetKeyDown(KeyCode.Return) ||
-            Input.GetKeyDown(KeyCode.KeypadEnter) ||
-            Input.GetKeyDown(KeyCode.Space) ||
-            Input.GetKeyDown(KeyCode.JoystickButton0))
+        // 決定入力で現在のステージを選択する
+        if (submitAction != null &&
+            submitAction.action.WasPressedThisFrame())
         {
+            Debug.Log("決定入力を検出しました");
             ConfirmSelection();
         }
     }
@@ -197,35 +236,40 @@ public sealed class StageSelectController : MonoBehaviour
 
     private int ReadHorizontalDirection()
     {
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
+        if (moveAction == null)
         {
-            previousHorizontalAxis = -1f;
-            nextAxisRepeatTime = Time.unscaledTime + 0.35f;
-            return -1;
+            return 0;
         }
 
-        if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
-        {
-            previousHorizontalAxis = 1f;
-            nextAxisRepeatTime = Time.unscaledTime + 0.35f;
-            return 1;
-        }
+        // Input Systemから移動入力を取得する
+        Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
 
-        float horizontalAxis = Input.GetAxisRaw("Horizontal");
-        bool axisPressed = Mathf.Abs(horizontalAxis) >= 0.6f;
-        bool axisWasReleased = Mathf.Abs(previousHorizontalAxis) < 0.6f;
+        float horizontalAxis = moveInput.x;
+
+        bool axisPressed =
+            Mathf.Abs(horizontalAxis) >= 0.6f;
+
+        bool axisWasReleased =
+            Mathf.Abs(previousHorizontalAxis) < 0.6f;
+
         int direction = 0;
 
-        if (axisPressed && (axisWasReleased || Time.unscaledTime >= nextAxisRepeatTime))
+        if (axisPressed &&
+            (axisWasReleased ||
+             Time.unscaledTime >= nextAxisRepeatTime))
         {
-            direction = horizontalAxis > 0f ? 1 : -1;
-            nextAxisRepeatTime = Time.unscaledTime + (axisWasReleased ? 0.35f : 0.14f);
+            direction =
+                horizontalAxis > 0f ? 1 : -1;
+
+            nextAxisRepeatTime =
+                Time.unscaledTime +
+                (axisWasReleased ? 0.35f : 0.14f);
         }
 
         previousHorizontalAxis = horizontalAxis;
+
         return direction;
     }
-
     private void MoveSelection(int direction)
     {
         int nextIndex = Mathf.Clamp(selectedIndex + direction, 0, stages.Count - 1);
