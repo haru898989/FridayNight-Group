@@ -41,6 +41,12 @@ public class MapGenerator : MonoBehaviour
     public Transform mapParent;         // 生成したブロックをまとめる親オブジェクト
     public NavMeshSurface surface;
 
+    [Header("監視用地下マップ設定")]
+    [SerializeField]
+    private Vector3 monitorMazeOffset = new Vector3(100f, 0f, 0f);  // 監視用地下マップを元の地下マップからどれだけ離して生成するかを指定する座標オフセット
+
+    private Transform monitorMazeParent;                            // 監視用地下マップで生成した床や壁をまとめる親オブジェクト
+
     private int playerSpawnCount = 0;
     private Vector3 playerSpawnPosition;
 
@@ -61,6 +67,9 @@ public class MapGenerator : MonoBehaviour
         GenerateFloorMap(6);
         GenerateFloorMap(7);
         GenerateFloorMap(8);
+
+        // 地下のCSVを監視用として別座標にも生成する
+        GenerateMonitorMazeCopy(0);
 
         surface.BuildNavMesh();
 
@@ -340,6 +349,117 @@ public class MapGenerator : MonoBehaviour
         }
 
         Debug.Log($"階層 {floorIndex} のマップ生成が完了しました！");
+    }
+
+    /// <summary>
+    /// 地下マップを監視用として別の座標にコピー生成する関数
+    /// </summary>
+    private void GenerateMonitorMazeCopy(int floorIndex)
+    {
+        // 指定した階層のCSVデータが存在するか確認
+        if (floorIndex < 0 ||
+            floorIndex >= mapFloorData.Length ||
+            mapFloorData[floorIndex] == null)
+        {
+            Debug.LogWarning($"監視用マップ：階層 {floorIndex} のデータがありません");
+            return;
+        }
+        // 監視用地下マップをまとめる親オブジェクトを作成
+        if (monitorMazeParent == null)
+        {
+            GameObject monitorRoot = new GameObject("MonitorMaze");
+            monitorMazeParent = monitorRoot.transform;
+        }
+        // 指定した階層のCSVデータを文字列として読み込む
+        string csvText = mapFloorData[floorIndex].text;
+
+        // CSVを改行ごとに分けて、1行ずつ扱えるようにする
+        string[] rows = csvText.Trim().Split('\n');
+
+        // CSVの縦方向のマス数を取得
+        int height = rows.Length;
+
+        // CSVの1行目をカンマで分けて、横方向のマス数を取得
+        int width = rows[0].Replace("\r", "").Split(',').Length;
+
+        // CSVを上から1行ずつ読み込む
+        for (int y = 0; y < height; y++)
+        {
+            // 1行分のデータをカンマで分割する
+            string[] columns = rows[y].Replace("\r", "").Split(',');
+
+            // 1行の中を左から1マスずつ読み込む
+            for (int x = 0; x < width; x++)
+            {
+                // 現在のマスのデータを取得する
+                string cell = columns[x].Trim();
+
+                // 空欄の場合は何もせず次のマスへ進む
+                if (string.IsNullOrEmpty(cell))
+                {
+                    continue;
+                }
+
+                // CSVの文字列を整数に変換する
+                int key = int.Parse(cell);
+
+                // 元の地下マップの座標を計算し、監視用マップの位置までずらす
+                Vector3 spawnPos = new Vector3(
+                    x * tileSize,
+                    floorIndex * floorHeight,
+                    y * tileSize
+                ) + monitorMazeOffset;
+                // CSVの数値によって、監視用マップに生成するオブジェクトを変更する
+                switch (key)
+                {
+                    case 11: // 地下床
+                        Instantiate(
+                            floorB1[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 21: // 通常の壁
+                        Instantiate(
+                            normalWallPrefab[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 22: // ランプ付きの壁
+                        Instantiate(
+                            lampWallPrefab[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 24: // 地下用の壁
+                        Instantiate(
+                            B1normalWallPrefab[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 100: // プレイヤー開始地点
+                              // 監視用マップではプレイヤーを生成せず、床だけ生成する
+                        Instantiate(
+                            floorB1[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+                }
+            }
+        }
     }
 
     /// <summary>
