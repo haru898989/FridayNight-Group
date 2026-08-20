@@ -6,7 +6,7 @@ using UnityEngine;
 public class LadderWarp : MonoBehaviour
 {
     [Header("Warp Settings")]
-    [SerializeField] private Vector3 exitOffset = new Vector3(1.0f, 5.5f, 0.0f);
+    [SerializeField] private Vector3 exitOffset = new Vector3(-1.0f, 5.0f, 0.0f);
     [SerializeField] private float fadeDuration = 0.25f;
     [SerializeField] private float blackScreenTime = 0.15f;
 

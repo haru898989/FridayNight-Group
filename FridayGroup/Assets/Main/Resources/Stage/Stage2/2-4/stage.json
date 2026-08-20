@@ -1,0 +1,16 @@
+{
+    "displayName": "2-4 CRYSTAL ADVANCE TEST",
+    "description": "CRYSTAL STAGE ADVANCE",
+    "previewFile": "",
+    "csvOrder": [
+        "2-4BFfloor",
+        "2-4BFwall",
+        "2-4BFwall",
+        "2-4BFwall",
+        "2-4Floor",
+        "2-4Wall",
+        "2-4Wall",
+        "2-4Wall",
+        "Roof"
+    ]
+}

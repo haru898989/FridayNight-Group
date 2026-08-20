@@ -65,6 +65,7 @@ public static class StageCatalogBuilder
                     groupFolder = groupFolder,
                     stageFolder = stageFolder,
                     resourcePath = $"Stage/{groupFolder}/{stageFolder}",
+                    timeLimit = GetTimeLimit(groupFolder, stageFolder),
                     csvFiles = csvFiles
                 });
             }
@@ -84,6 +85,54 @@ public static class StageCatalogBuilder
         File.WriteAllText(catalogFullPath, json, new UTF8Encoding(false));
         AssetDatabase.ImportAsset(CatalogAssetPath, ImportAssetOptions.ForceUpdate);
         Debug.Log($"Stage catalogを更新しました: {catalog.stages.Count} stages");
+    }
+
+    private static int GetTimeLimit(string groupFolder, string stageFolder)
+    {
+        switch (stageFolder)
+        {
+            case "1-1":
+                return 60;
+
+            case "1-2":
+                return 80;
+
+            case "1-3":
+                return 60;
+
+            case "1-4":
+                return 80;
+
+            case "1-5":
+                return 100;
+
+            case "2-1":
+                return 60;
+
+            case "2-2":
+                return 80;
+
+            case "2-3":
+                return 60;
+
+            case "2-4":
+                return 80;
+
+            case "2-5":
+                return 100;
+
+            case "3-1":
+                return 30;
+
+            case "3-2":
+                return 60;
+
+            case "Final":
+                return 180;
+
+            default:
+                return 180;
+        }
     }
 
     public static void ScheduleRebuild()

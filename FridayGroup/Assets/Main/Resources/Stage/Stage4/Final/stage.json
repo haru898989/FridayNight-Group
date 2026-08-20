@@ -1,0 +1,16 @@
+{
+    "displayName": "Final  TEST",
+    "description": "Final Stage",
+    "previewFile": "",
+    "csvOrder": [
+        "FinalBFfloor",
+        "FinalBFwall",
+        "FinalBFwall",
+        "FinalBFwall",
+        "FinalFloor",
+        "FinalWall",
+        "FinalWall",
+        "FinalWall",
+        "Roof"
+    ]
+}

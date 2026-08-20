@@ -1755,11 +1755,17 @@ namespace Fusion.Editor {
     }
 
     static void ShutdownRunners() {
-      var runners = NetworkRunner.GetInstancesEnumerator();
+      // Shutdown removes runners from Fusion's instance list. Snapshot it
+      // before iterating so that list mutations do not invalidate the enumerator.
+      var instances = NetworkRunner.Instances;
+      var runners = new NetworkRunner[instances.Count];
+      for (int i = 0; i < instances.Count; ++i) {
+        runners[i] = instances[i];
+      }
 
-      while (runners.MoveNext()) {
-        if (runners.Current) {
-          runners.Current.Shutdown();
+      foreach (var runner in runners) {
+        if (runner) {
+          runner.Shutdown();
         }
       }
     }
@@ -13751,6 +13757,12 @@ namespace Fusion.Editor {
     }
 
     public static void BakeScene(Scene scene) {
+      // Unity can emit the play-mode event after an additive scene has already
+      // been unloaded. GetRootGameObjects throws for that transient state.
+      if (!scene.IsValid() || !scene.isLoaded) {
+        return;
+      }
+
       var sw = System.Diagnostics.Stopwatch.StartNew();
       try {
 
