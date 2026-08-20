@@ -128,7 +128,7 @@ public static class StageCatalogBuilder
                 return 60;
 
             case "Final":
-                return 120;
+                return 180;
 
             default:
                 return 180;
