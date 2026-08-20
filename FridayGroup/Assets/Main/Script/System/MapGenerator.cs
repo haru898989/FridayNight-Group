@@ -4,7 +4,7 @@ using Unity.AI.Navigation;
 // CSVからマップを自動生成する基礎を学ぶためのクラス
 public class MapGenerator : MonoBehaviour
 {
-    private const float PlayerSpawnHeight = 1.5f;
+    private const float PlayerSpawnHeight = 1.0f;
 
     [Header("マップデータ（階層ごとにセット）")]
     // 複数の「シート（階層）」を表現するために、配列でCSVを持たせます
@@ -226,6 +226,18 @@ public class MapGenerator : MonoBehaviour
                                     Instantiate(B1normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
                                     continuousWallCount = 0; // 壁が途切れたのでカウントリセット
                             break;
+
+                            case 8: // 感圧板1枚で開く扉
+                                int pressurePlateChannel = FindAdjacentPressurePlateChannel(rows, x, y);
+                                if (pressurePlateChannel < 0)
+                                {
+                                    pressurePlateChannel = type;
+                                    Debug.LogWarning($"CSV番号28の隣に感圧板がありません: ({x}, {y})");
+                                }
+
+                                InstantiateChannelDoor(floorIndex, spawnPos, pressurePlateChannel, 1);
+                                continuousWallCount = 0;
+                            break;
                         }
                         break;
 
@@ -373,7 +385,12 @@ public class MapGenerator : MonoBehaviour
         plate.ConfigureChannel(channelId, GetGimmickChannelColor(channelId));
     }
 
-    private void InstantiateChannelDoor(int floorIndex, Vector3 spawnPos, int channelId)
+    private void InstantiateChannelDoor(
+        int floorIndex,
+        Vector3 spawnPos,
+        int channelId,
+        int requiredPlateCount = 2
+    )
     {
         InstantiateGimmickFloor(floorIndex, spawnPos);
         GameObject doorObject =
@@ -390,7 +407,40 @@ public class MapGenerator : MonoBehaviour
             return;
         }
 
-        linkedDoor.ConfigureChannel(channelId, GetGimmickChannelColor(channelId));
+        linkedDoor.ConfigureChannel(
+            channelId,
+            GetGimmickChannelColor(channelId),
+            requiredPlateCount
+        );
+    }
+
+    private static int FindAdjacentPressurePlateChannel(string[] rows, int x, int y)
+    {
+        int[] offsetX = { -1, 1, 0, 0 };
+        int[] offsetY = { 0, 0, -1, 1 };
+
+        for (int i = 0; i < offsetX.Length; i++)
+        {
+            int targetY = y + offsetY[i];
+            if (targetY < 0 || targetY >= rows.Length)
+            {
+                continue;
+            }
+
+            string[] targetColumns = rows[targetY].Replace("\r", "").Split(',');
+            int targetX = x + offsetX[i];
+            if (targetX < 0 || targetX >= targetColumns.Length)
+            {
+                continue;
+            }
+
+            if (int.TryParse(targetColumns[targetX].Trim(), out int key) && key >= 40 && key <= 49)
+            {
+                return key % 10;
+            }
+        }
+
+        return -1;
     }
 
     private static Color GetGimmickChannelColor(int channelId)
