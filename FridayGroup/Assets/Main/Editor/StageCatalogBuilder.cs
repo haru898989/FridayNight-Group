@@ -106,6 +106,12 @@ public static class StageCatalogBuilder
             case "1-5":
                 return 100;
 
+            case "1-6":
+                return 60;
+
+            case "1-7":
+                return 60;
+
             case "2-1":
                 return 60;
 

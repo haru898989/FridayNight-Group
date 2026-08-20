@@ -10,6 +10,7 @@
                 "1-1BFwall",
                 "1-1Floor",
                 "1-1Wall",
+                "LightWall",
                 "Roof"
             ]
         },
@@ -23,6 +24,7 @@
                 "1-2BFwall",
                 "1-2floor",
                 "1-2wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -36,6 +38,7 @@
                 "1-3BFwall",
                 "1-3floor",
                 "1-3wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -49,6 +52,7 @@
                 "1-4BFwall",
                 "1-4floor",
                 "1-4wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -62,7 +66,35 @@
                 "1-5BFwall",
                 "1-5floor",
                 "1-5wall",
+                "LightWall",
                 "roof"
+            ]
+        },
+        {
+            "groupFolder": "Stage1",
+            "stageFolder": "1-6",
+            "resourcePath": "Stage/Stage1/1-6",
+            "timeLimit": 60,
+            "csvFiles": [
+                "1-6BFfloor",
+                "1-6BFwall",
+                "1-6Floor",
+                "1-6Wall",
+                "1-6Wallrantan",
+                "Roof"
+            ]
+        },
+        {
+            "groupFolder": "Stage1",
+            "stageFolder": "1-7",
+            "resourcePath": "Stage/Stage1/1-7",
+            "timeLimit": 60,
+            "csvFiles": [
+                "1-7BFfloor",
+                "1-7BFwall",
+                "1-7Floor",
+                "1-7Wall",
+                "Roof"
             ]
         },
         {
@@ -75,6 +107,7 @@
                 "2-1BFwall",
                 "2-1floor",
                 "2-1wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -88,6 +121,7 @@
                 "2-2BFwall",
                 "2-21Ffloor",
                 "2-21Fwall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -101,6 +135,7 @@
                 "2-3BFwall",
                 "2-3floor",
                 "2-3wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -114,6 +149,7 @@
                 "2-4BFwall",
                 "2-4floor",
                 "2-4wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -127,6 +163,7 @@
                 "2-5BFwall",
                 "2-5floor",
                 "2-5wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -140,6 +177,7 @@
                 "3-1BFwall",
                 "3-1Floor",
                 "3-1Wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -153,6 +191,7 @@
                 "3-2BFwall",
                 "3-2Floor",
                 "3-2Wall",
+                "LightWall",
                 "roof"
             ]
         },
@@ -166,6 +205,7 @@
                 "FinalBFwall",
                 "FinalFloor",
                 "FinalWall",
+                "LightWall",
                 "roof"
             ]
         }
