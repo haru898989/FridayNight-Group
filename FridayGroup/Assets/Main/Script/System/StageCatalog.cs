@@ -16,6 +16,9 @@ public sealed class StageCatalogEntry
     public string groupFolder;
     public string stageFolder;
     public string resourcePath;
+
+    public int timeLimit = 180;
+
     public string[] csvFiles = Array.Empty<string>();
 
     [NonSerialized] public string displayName;
