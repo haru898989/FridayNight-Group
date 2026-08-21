@@ -1,0 +1,16 @@
+{
+    "displayName": "1-6 RANNTANN BASIC TEST",
+    "description": "RANNTANN STAGE BASIC",
+    "previewFile": "",
+    "csvOrder": [
+        "1-6BFfloor",
+        "1-6BFwall",
+        "1-6BFwall",
+        "1-6BFwall",
+        "1-6Floor",
+        "1-6Wallrantan",
+        "1-6Wall",
+        "1-6Wall",
+        "Roof"
+    ]
+}

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731704, g: 0.13414727, b: 0.121078536, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -917,7 +917,7 @@ Transform:
   m_GameObject: {fileID: 659110560}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 5, z: -10}
+  m_LocalPosition: {x: 2.3, y: 2.8, z: 2.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1083,7 +1083,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!108 &915883484
 Light:
   m_ObjectHideFlags: 0
@@ -3152,6 +3152,8 @@ MonoBehaviour:
   - {fileID: 8131424688082478521, guid: 5e84af2d9bcb4d71a0f639c83e526147, type: 3}
   dark:
   - {fileID: 3815228208322897781, guid: dd0ce49098fb0144aa98f76b23e004af, type: 3}
+  lantern:
+  - {fileID: 1853947056081665965, guid: 360e8e3b332db2a44ba5cbec1dd93bd4, type: 3}
   BearTrap:
   - {fileID: 4120665723640104151, guid: 778ba5fe0a15bd345be047f7742d2467, type: 3}
   RollingRock:
