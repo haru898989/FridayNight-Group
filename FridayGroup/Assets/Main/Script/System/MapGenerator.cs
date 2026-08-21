@@ -20,7 +20,7 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] lampWallPrefab;   // [22]ランプ付きの壁
     public GameObject[] door;             // [23]扉
     public GameObject[] B1normalWallPrefab; //[24]
-    public GameObject[] dark;             // []未定
+    public GameObject[] monitorWallPrefab;  // [25]モニター付き壁
 
     public GameObject[] BearTrap;         // [31] トラばさみ
     public GameObject[] RollingRock;      // [35] 大岩
@@ -216,28 +216,57 @@ public class MapGenerator : MonoBehaviour
                     case 2: // 壁チーム
                         switch (type)
                         {
-                            case 1: // 壁
-                                    Instantiate(normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
-                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                            break;
+                            case 1: // 21：壁
+                                Instantiate(
+                                    normalWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
 
-                            case 2: // 明かり付きの壁
-                                    Instantiate(lampWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
-                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                            break;
+                            case 2: // 22：明かり付きの壁
+                                Instantiate(
+                                    lampWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
 
-                            case 3: // 扉
-                                    Instantiate(door[0], spawnPos, Quaternion.identity, mapParent);
-                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                            break;
+                            case 3: // 23：扉
+                                Instantiate(
+                                    door[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
 
-                            case 4: // 扉
-                                    Instantiate(B1normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
-                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                            break;
+                            case 4: // 24：地下用の壁
+                                Instantiate(
+                                    B1normalWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
+
+                            case 5: // 25：モニター付き壁
+                                Instantiate(
+                                    monitorWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
                         }
                         break;
-
                     case 3: // 単体ギミック
                         switch (type)
                         {
@@ -283,26 +312,53 @@ public class MapGenerator : MonoBehaviour
 
                         InstantiateGimmickFloor(floorIndex, spawnPos);
 
+                        // 60～62：クリスタル
                         if (type <= 2)
                         {
-                            Instantiate(
-                                Crystal[type],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
+                            if (Crystal != null &&
+                                type < Crystal.Length &&
+                                Crystal[type] != null)
+                            {
+                                Instantiate(
+                                    Crystal[type],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                            }
+                            else
+                            {
+                                Debug.LogError(
+                                    $"クリスタルPrefabが設定されていません。CSV番号: {key}, 配列番号: {type}"
+                                );
+                            }
                         }
+
+                        // 63～65：クリスタル歯車
                         else if (type >= 3 && type <= 5)
                         {
-                            Instantiate(
-                                CrystalGear[type - 3],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
-                        }
-                        break;
+                            int gearIndex = type - 3;
 
+                            if (CrystalGear != null &&
+                                gearIndex < CrystalGear.Length &&
+                                CrystalGear[gearIndex] != null)
+                            {
+                                Instantiate(
+                                    CrystalGear[gearIndex],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                            }
+                            else
+                            {
+                                Debug.LogError(
+                                    $"クリスタル歯車Prefabが設定されていません。CSV番号: {key}, 配列番号: {gearIndex}"
+                                );
+                            }
+                        }
+
+                        break;
                     case 7: // 70：落とし穴
 
                         InstantiateGimmickFloor(floorIndex, spawnPos);
@@ -387,6 +443,15 @@ public class MapGenerator : MonoBehaviour
         {
             // 1行分のデータをカンマで分割する
             string[] columns = rows[y].Replace("\r", "").Split(',');
+
+            if (columns.Length != width)
+            {
+                Debug.LogError(
+                    $"CSV列数不一致: {mapFloorData[floorIndex].name} " +
+                    $"行={y + 1}, 正常列数={width}, 実際={columns.Length}"
+                );
+                return;
+            }
 
             // 1行の中を左から1マスずつ読み込む
             for (int x = 0; x < width; x++)
