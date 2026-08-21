@@ -469,6 +469,9 @@ GameObject:
   - component: {fileID: -8251898176034780429}
   - component: {fileID: 1164873471780036880}
   - component: {fileID: 7556375696789779806}
+  - component: {fileID: -9177399176764268893}
+  - component: {fileID: 5365585190621819443}
+  - component: {fileID: -3145312581730644232}
   m_Layer: 0
   m_Name: player_B
   m_TagString: Player
@@ -564,6 +567,8 @@ MonoBehaviour:
   - {fileID: 6678687509293379510}
   - {fileID: -1284725589179768673}
   - {fileID: -8467644343794796084}
+  - {fileID: -9177399176764268893}
+  - {fileID: 5365585190621819443}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6678687509293379510
 MonoBehaviour:
@@ -863,6 +868,49 @@ MonoBehaviour:
     Max: 1000
     SpeedUpPerc: 5
   restartOnDeviceChange: 1
+--- !u!114 &-9177399176764268893
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3519235181358692956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a189a460c7b5c1c469e141487662aa54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _HasTransceiver:
+    _value: 0
+  _IsTransmitting:
+    _value: 0
+--- !u!114 &5365585190621819443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3519235181358692956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17d091a2952d15547b09731f7bf2e54d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _IsHoldingTransceiver:
+    _value: 0
+--- !u!114 &-3145312581730644232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3519235181358692956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad25cd43551e54d439adba58fc9f2d1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  voiceRange: 5
 --- !u!1 &5280027308616973738
 GameObject:
   m_ObjectHideFlags: 0

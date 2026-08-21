@@ -20,7 +20,8 @@ public class VoiceController : MonoBehaviour
                 return;
             }
 
-            voiceAudioSource = speaker.GetComponent<AudioSource>();
+            voiceAudioSource =
+                speaker.GetComponent<AudioSource>();
 
             if (voiceAudioSource == null)
             {
@@ -33,12 +34,11 @@ public class VoiceController : MonoBehaviour
                 return;
             }
 
-            // 3D音声
             voiceAudioSource.spatialBlend = 1f;
             voiceAudioSource.dopplerLevel = 0f;
         }
 
-        // 自分自身のPlayerを取得
+        // 自分のPlayerを取得
         GameObject localPlayer = GetLocalPlayer();
 
         if (localPlayer == null)
@@ -46,39 +46,84 @@ public class VoiceController : MonoBehaviour
             return;
         }
 
-        // 自分自身の場合は音声を聞こえる状態にする
+        // 自分自身の音声
         if (localPlayer == gameObject)
         {
             voiceAudioSource.mute = false;
             return;
         }
 
-        // 自分と発話者との距離
+        // ==========================================
+        // トランシーバー情報
+        // ==========================================
+
+        TransceiverHolder localHolder =
+            localPlayer.GetComponent<TransceiverHolder>();
+
+        bool localHasTransceiver =
+            localHolder != null &&
+            localHolder.HasTransceiver();
+
+        TransceiverHolder remoteHolder =
+            GetComponent<TransceiverHolder>();
+
+        bool remoteHasTransceiver =
+            remoteHolder != null &&
+            remoteHolder.HasTransceiver();
+
+
+        TransceiverController remoteController =
+            GetComponent<TransceiverController>();
+
+        bool remoteIsTransmitting =
+            remoteController != null &&
+            remoteController.IsTransmitting;
+
+
+        // ==========================================
+        // トランシーバー通信
+        // ==========================================
+
+        if (localHasTransceiver &&
+            remoteHasTransceiver &&
+            remoteIsTransmitting)
+        {
+            // Radio audio is non-positional while the remote player is transmitting.
+            voiceAudioSource.spatialBlend = 0f;
+            voiceAudioSource.mute = false;
+
+            return;
+        }
+
+        // ==========================================
+        // 通常のボイスチャット
+        // ==========================================
+
+        voiceAudioSource.spatialBlend = 1f;
+
         float distance = Vector3.Distance(
             localPlayer.transform.position,
             transform.position
         );
 
-        // 5m以内なら聞こえる
-        // 5mを超えたらミュート
         voiceAudioSource.mute = distance > voiceRange;
     }
 
     private GameObject GetLocalPlayer()
     {
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        GameObject[] players =
+            GameObject.FindGameObjectsWithTag("Player");
 
         foreach (GameObject player in players)
         {
-            // Player側に付いているVoiceControllerを探す
             VoiceController controller =
                 player.GetComponent<VoiceController>();
 
             if (controller != null)
             {
-                // 自分のPlayerかどうかを判定
                 Photon.Voice.Fusion.VoiceNetworkObject voiceObject =
-                    player.GetComponent<Photon.Voice.Fusion.VoiceNetworkObject>();
+                    player.GetComponent<
+                        Photon.Voice.Fusion.VoiceNetworkObject>();
 
                 if (voiceObject != null && voiceObject.IsLocal)
                 {

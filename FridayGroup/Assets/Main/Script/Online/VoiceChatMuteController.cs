@@ -14,6 +14,8 @@ public class VoiceChatMuteController : MonoBehaviour
 
     public bool IsMuted { get; private set; }
 
+    public static bool IsLocalMuted => instance != null && instance.IsMuted;
+
     private Image statusImage;
     private Sprite voiceOnSprite;
     private Sprite voiceOffSprite;
