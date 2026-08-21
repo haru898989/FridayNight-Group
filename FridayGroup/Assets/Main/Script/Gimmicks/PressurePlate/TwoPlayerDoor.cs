@@ -39,10 +39,11 @@ public class TwoPlayerDoor : MonoBehaviour
     /// <summary>
     /// CSV番号の一の位を連動チャンネルとして設定し、同じチャンネルの色を反映する。
     /// </summary>
-    public void ConfigureChannel(int channel, Color channelColor)
+    public void ConfigureChannel(int channel, Color channelColor, int plateCount = 2)
     {
         channelId = channel;
         puzzleId = $"csv-channel-{channel}";
+        requiredPlateCount = Mathf.Max(1, plateCount);
         ApplyChannelColor(channelColor);
     }
 

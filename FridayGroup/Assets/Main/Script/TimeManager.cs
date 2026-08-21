@@ -1,5 +1,6 @@
-using UnityEngine;
+using System.Collections.Generic;
 using TMPro;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class TimeManager : MonoBehaviour
@@ -19,6 +20,39 @@ public class TimeManager : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("=== TimeManager Start ===");
+
+        Debug.Log(
+            $"SelectedStageResourcePath = {StageSelectionContext.SelectedStageResourcePath}"
+        );
+
+        List<StageCatalogEntry> stages = StageCatalog.Load();
+
+        Debug.Log($"StageCatalogのステージ数 = {stages.Count}");
+
+        foreach (StageCatalogEntry s in stages)
+        {
+            Debug.Log(
+                $"Stage: {s.stageFolder}, Path: {s.resourcePath}, Time: {s.timeLimit}"
+            );
+        }
+        StageCatalogEntry stage = StageCatalog.Load()
+        .Find(x => x.resourcePath == StageSelectionContext.SelectedStageResourcePath);
+
+        if (stage != null)
+        {
+            SetTimeLimit(stage.timeLimit);
+            Debug.Log($"ステージ {stage.stageFolder} の制限時間: {stage.timeLimit}秒");
+        }
+        else
+        {
+            currentTime = timeLimit;
+            Debug.LogWarning("選択されたステージが見つからないため、デフォルトの制限時間を使用します。");
+        }
+    }
+    public void SetTimeLimit(float time)
+    {
+        timeLimit = time;
         currentTime = timeLimit;
     }
 
