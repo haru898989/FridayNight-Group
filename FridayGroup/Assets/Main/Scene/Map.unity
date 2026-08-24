@@ -740,6 +740,8 @@ MonoBehaviour:
     RawGuidValue: 025e46d4df8a05d429570e70f688ed43
   playerSpawnSpacing: 1.25
   spawnPoint: {fileID: 659110563}
+  npcPrefab:
+    RawGuidValue: 00000000000000000000000000000000
   currentSpawnPosition: {x: 0, y: 0, z: 0}
 --- !u!4 &408137615
 Transform:
@@ -3139,9 +3141,9 @@ MonoBehaviour:
   - {fileID: 4900000, guid: 6347d4d04dbf6d343b9503abe5376881, type: 3}
   - {fileID: 4900000, guid: 37bec5890328c0f4fb19a9770576e9c1, type: 3}
   floorB1:
-  - {fileID: 919132149155446097, guid: b4356dd0d7cf1e74e9864d8ef6ace1be, type: 3}
+  - {fileID: 2645225941052035153, guid: 5ac991dfcb457a5449ca536453faf0db, type: 3}
   floor1:
-  - {fileID: 919132149155446097, guid: 3ea8a843b8067df46b56e396f927c6d1, type: 3}
+  - {fileID: 7227311343914014518, guid: e87544039c029a14cbf10bb9a4e092d9, type: 3}
   normalWallPrefab:
   - {fileID: 8131424688082478521, guid: b280603d0e82eac4f82a73778c05a942, type: 3}
   lampWallPrefab:

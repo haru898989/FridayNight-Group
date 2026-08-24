@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028331, g: 0.2257133, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -857,6 +857,8 @@ MonoBehaviour:
     RawGuidValue: 025e46d4df8a05d429570e70f688ed43
   playerSpawnSpacing: 1.25
   spawnPoint: {fileID: 2009768025}
+  npcPrefab:
+    RawGuidValue: 4e602ad5d2becbf40958866ec4b5bac4
   currentSpawnPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &2009768024
 GameObject:
