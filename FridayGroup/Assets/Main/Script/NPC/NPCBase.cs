@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -18,19 +19,63 @@ public class NPCBase : PlayerBase
         Patrol,  //自由行動
         FollowPlayer,  //プレイヤーについてくる
         MoveToTarget,  //指示された場所へ移動
-        Action  //指示された行動
+        Action,  //指示された行動
+        Stop  //止まる
     }
+
 
     public override void Spawned()
     {
         base.Spawned();
+
         agent = GetComponent<NavMeshAgent>();
 
-        GameObject obj = GameObject.FindGameObjectWithTag("Player");
-        if (obj != null)
-            player = obj.transform;
+        if(agent != null && NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 3f, NavMesh.AllAreas))
+        {
+            agent.Warp(hit.position);
+        }
+        else
+        {
+            Debug.LogError("NPCをNavMesh上に配置できませんでした．");
+        }
 
         currentState = NPCState.Patrol;
+        FindPlayer();
+    }
+
+    protected void FindPlayer()
+    {
+        GameObject obj = GameObject.FindGameObjectWithTag("Player");
+
+        if (obj != null)
+        {
+            player = obj.transform;
+            Debug.Log("NPCがPlayerを発見: " + obj.name);
+        }
+    }
+
+    public virtual void ReceiveStampCommand(StampCommand command)
+    {
+        Debug.Log($"NPCがスタンプ命令を受信:{command}");
+
+        switch(command)
+        {
+            case StampCommand.FollowPlayer:
+                ChangeState(NPCState.FollowPlayer);
+                break;
+
+            case StampCommand.Stop:
+                ChangeState(NPCState.Stop);
+                break;
+
+            case StampCommand.MoveToTarget:
+                ChangeState(NPCState.MoveToTarget);
+                break;
+
+            case StampCommand.Action:
+                ChangeState(NPCState.Action);
+                break;
+        }
     }
 
     public void ChangeState(NPCState nextState)
@@ -38,7 +83,7 @@ public class NPCBase : PlayerBase
         currentState = nextState;
     }
 
-    public void SetTArget(Vector3 pos)
+    public void SetTarget(Vector3 pos)
     {
         targetPosition = pos;
         ChangeState(NPCState.MoveToTarget);
