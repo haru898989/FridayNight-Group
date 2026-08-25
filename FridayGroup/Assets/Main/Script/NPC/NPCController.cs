@@ -34,6 +34,14 @@ public class NPCController : NPCBase
             case NPCState.Action:
                 Action();
                 break;
+
+            case NPCState.FollowPlayer:
+                FollowPlayer();
+                break;
+
+            case NPCState.Stop:
+                StopMoving();
+                break;
         }
     }
 
@@ -42,15 +50,19 @@ public class NPCController : NPCBase
     {
         if (SearchGimmick())
         {
-            ChangeState(NPCState.Action);
+            ChangeState(NPCState.MoveToTarget);
             return;
         }
+
+        if (agent == null || !agent.isOnNavMesh)
+            return;
 
         if (agent.pathPending) return;
 
         if (agent.remainingDistance > arriveDistance) return;
 
         const int maxTry = 20;
+
         for (int i = 0; i<maxTry; i++)
         {
             Vector3 randomPoint =
@@ -77,17 +89,51 @@ public class NPCController : NPCBase
     //目的地へ移動
     void MoveToTarget(Vector3 targetPosition)
     {
-        agent.SetDestination(targetPosition);
+        if(agent == null || !agent.isOnNavMesh)
+            return;
+        if(agent.pathPending)
+            return;
+        if (agent.remainingDistance > arriveDistance)
+            return;
+
+        StopMoving();
+        ChangeState(NPCState.Action);
     }
 
     //アクション実行
     void Action()
     {
+
         //Debug.Log("アクション実行");
 
         ChangeState(NPCState.Patrol);
     }
 
+    //Player追跡
+    void FollowPlayer()
+    {   
+        //Playerが見つかっていなければ探す
+        if (player == null)
+        {
+            FindPlayer();
+            return;
+        }
+
+        if(agent == null) return;
+        
+        agent.SetDestination(player.position);
+    }
+
+    //停止
+    void StopMoving()
+    {
+        if (agent == null)
+            return;
+
+        agent.ResetPath();
+    }
+
+    //ギミックを探す
     bool SearchGimmick()
     {
         Collider[] hits =
@@ -125,7 +171,8 @@ public class NPCController : NPCBase
         if (nearestHit != null)
         {
             Debug.Log("ギミック発見!:" + nearestHit.name);
-            MoveToTarget(nearestHit.transform.position);
+            targetPosition = nearestHit.transform.position;
+            agent.SetDestination(targetPosition);
             return true;
         }
 

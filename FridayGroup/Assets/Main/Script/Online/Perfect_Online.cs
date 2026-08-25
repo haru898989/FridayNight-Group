@@ -138,6 +138,13 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
     {
         Debug.Log($"プレイヤーが退出しました: {player.PlayerId}");
         GameManager.Instance?.OnPlayerLeft(networkRunner, player);
+        PlayerSpawner spawner = FindObjectOfType<PlayerSpawner>();
+
+        if (spawner != null)
+        {
+            spawner.PlayerLeft();
+        }
+
         RefreshStartButtonVisibility();
     }
 

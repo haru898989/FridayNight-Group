@@ -6,6 +6,10 @@ public class MapGenerator : MonoBehaviour
 {
     private const float PlayerSpawnHeight = 1.0f;
 
+    private const float NpcSpawnHeight = 1.5f;
+    private int npcSpawnCount = 0;
+    private Vector3 npcSpawnPosition;
+
     [Header("マップデータ（階層ごとにセット）")]
     // 複数の「シート（階層）」を表現するために、配列でCSVを持たせます
     // [0]地下 [1]1階 [2]2階 のようにInspectorから設定します

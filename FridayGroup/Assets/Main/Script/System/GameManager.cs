@@ -25,11 +25,24 @@ public class GameManager : MonoBehaviour
     [Header("Fallback Spawn Point")]
     [SerializeField] private Transform spawnPoint;
 
+    [SerializeField]
+    private NetworkPrefabRef npcPrefab;
+
+    private NetworkObject npcObject;
+
     public Vector3 currentSpawnPosition;
+
+    private Vector3 npcSpawnPosition;
+    private bool isNpcSpawnReady;
+
+    private bool isNpcSpawnPending;
 
     private NetworkRunner runner;
     private bool isMapSpawnReady;
     private bool isLocalPlayerSpawnPending;
+
+    private bool shouldSpawnNpcInStage;
+    private bool isNpcDecisionReady;
 
     private void Awake()
     {
@@ -82,6 +95,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"参加者を登録しました: Player={player.PlayerId}, Slot={index + 1}");
         TrySpawnLocalPlayer();
+        //UpdateNPC();
     }
 
     public void OnPlayerLeft(NetworkRunner networkRunner, PlayerRef player)
@@ -100,6 +114,7 @@ public class GameManager : MonoBehaviour
 
         RebuildPlayerSlots();
         Debug.Log($"退出した参加者を解除しました: Player={player.PlayerId}");
+
     }
 
     /// <summary>
@@ -114,11 +129,20 @@ public class GameManager : MonoBehaviour
         RebuildPlayerSlots();
         TrySpawnLocalPlayer();
         TeleportOwnedPlayerToMapSpawn();
+
+        UpdateNPC();
+    }
+
+    public void SetNpcSpawnDecisionForNextStage(bool shouldSpawn)
+    {
+        shouldSpawnNpcInStage = shouldSpawn;
+        isNpcDecisionReady = true;
     }
 
     public void SetMapNotReady()
     {
         isMapSpawnReady = false;
+        DespawnNPC();
     }
 
     /// <summary>
@@ -369,5 +393,74 @@ public class GameManager : MonoBehaviour
                 objectName = string.Empty
             };
         }
+    }
+
+    private void UpdateNPC()
+    {
+        if(runner == null || !runner.IsRunning || !isMapSpawnReady || !isNpcDecisionReady || !runner.IsSharedModeMasterClient)
+        {
+            return;
+        }
+
+        if (shouldSpawnNpcInStage)
+        {
+            SpawnNPC();
+        }
+        else
+        {
+            DespawnNPC();
+        }
+    }
+
+    private async void SpawnNPC()
+    {
+        if (npcObject != null || isNpcSpawnPending)
+        {
+            return;
+        }
+        
+        if(npcPrefab == NetworkPrefabRef.Empty)
+        {
+            Debug.LogError("NPC Prefabが設定されていません！");
+            return;
+        }
+
+        // NPC生成場所
+        Vector3 spawnPosition = GetSpawnPosition(0) + new Vector3(1.5f, 0f, 1.5f);
+        isNpcSpawnPending = true;
+
+        try
+        {
+            npcObject = await runner.SpawnAsync(npcPrefab, spawnPosition, Quaternion.identity, PlayerRef.None, (spawnRunner, spawnedObject) =>
+            {
+                spawnedObject.transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
+            },
+            NetworkSpawnFlags.SharedModeStateAuthLocalPlayer
+            );
+
+            Debug.Log($"NPCをSpawnしました:{spawnPosition}");
+        }
+        catch(System.Exception exception)
+        {
+            Debug.LogException(exception);
+        }
+        finally
+        {
+            isNpcSpawnPending = false;
+        }
+
+    }
+
+    private void DespawnNPC()
+    {
+        if (npcObject == null)
+            return;
+        if(npcObject.HasStateAuthority)
+        {
+            runner.Despawn(npcObject);
+        }
+        npcObject = null;
+
+        Debug.Log("NPCをDespawnしました");
     }
 }

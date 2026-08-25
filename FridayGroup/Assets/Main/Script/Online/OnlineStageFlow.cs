@@ -204,6 +204,8 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
         isLoadingScene = true;
         SetOperationMessage("OPENING STAGE SELECT...");
+
+        GameManager.Instance.SetNpcSpawnDecisionForNextStage(ConnectedPlayerCount == 1);
         runner.LoadScene(SceneRef.FromIndex(buildIndex), LoadSceneMode.Single);
 
         return true;
@@ -345,6 +347,8 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             SetOperationMessage("WAITING FOR HOST...");
             return;
         }
+
+        GameManager.Instance.SetNpcSpawnDecisionForNextStage(ConnectedPlayerCount == 1);
 
         LoadNetworkScene(StageSelectScenePath, "OPENING STAGE SELECT...");
     }

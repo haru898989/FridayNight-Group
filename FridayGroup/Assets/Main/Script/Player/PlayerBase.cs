@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections;
 using Fusion;
+using UnityEngine.InputSystem.Switch;
 
 public class PlayerBase : NetworkBehaviour
 {
@@ -58,6 +59,16 @@ public class PlayerBase : NetworkBehaviour
     public bool IsGoalSpectating => isGoalSpectating;
 
     protected virtual bool UsePlayerInput => true;
+
+    //NPC
+    public enum StampCommand
+    {
+        Patrol,  //自由行動
+        FollowPlayer,  //プレイヤーについてくる
+        MoveToTarget,  //指示された場所へ移動
+        Action,  //指示された行動
+        Stop  //止まる
+    }
 
     // GameManagerから同期される情報の格納用変数
     private int myPlayerId;
@@ -773,6 +784,22 @@ public class PlayerBase : NetworkBehaviour
         }
     }
 
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    private void RPC_SendStampCommand(int command, RpcInfo info = default)
+    {
+        StampCommand stampCommand = (StampCommand)command;
+
+        Debug.Log($"StampCommand受信: {stampCommand}");
+
+        NPCBase npc = FindObjectOfType<NPCBase>();
+        if(npc == null)
+        {
+            Debug.Log("現在NPCはいません．");
+            return;
+        }
+        npc.ReceiveStampCommand(stampCommand);
+    }
+
     void CloseStampMenu()
     {
         isSelectingStamp = false;
@@ -836,7 +863,26 @@ public class PlayerBase : NetworkBehaviour
         Debug.Log("スタンプ選択終了");
         Debug.Log($"決定したIndex = {selectedIndex}");
         RPC_ShowStamp(selectedIndex);
+        StampCommand command = GetStampCommand(selectedIndex);
+        RPC_SendStampCommand((int)command);
         CloseStampMenu();
+    }
+
+    private StampCommand GetStampCommand(int index)
+    {
+        switch(index)
+        {
+            case 0:
+                return StampCommand.FollowPlayer;
+            case 1:
+                return StampCommand.Stop;
+            case 2:
+                return StampCommand.MoveToTarget;
+            case 3:
+                return StampCommand.Action;
+            default:
+                return StampCommand.Patrol;
+        }
     }
 
     void HighlightStamp(int index)
@@ -860,7 +906,7 @@ public class PlayerBase : NetworkBehaviour
         Debug.Log($"PlayerBase: プレイヤー {myPlayerId}P のデバイス設定を適用しました。Controller={usesGamepad}");
     }
 
-    // 大塚駅北口は空いてないby Taiga Sato
+
     private void OnDisable()
     {
         if (testplayerControl != null)
