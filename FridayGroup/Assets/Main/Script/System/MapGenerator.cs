@@ -27,6 +27,7 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] BearTrap;         // [31] トラばさみ
     public GameObject[] RollingRock;      // [35] 大岩
     public GameObject[] Ladder;           // [38] 梯子
+    public GameObject[] MonitorDecoyPressurePlate; // [39] デコイ起動用感圧板
 
     public GameObject[] PressurePlate;    // [40-49] 感圧板
     public GameObject[] TwoPlayerDoor;    // [50-59] 連動ドア
@@ -278,6 +279,7 @@ public class MapGenerator : MonoBehaviour
                                 InstantiateChannelDoor(floorIndex, spawnPos, pressurePlateChannel, 1);
                                 continuousWallCount = 0;
                             break;
+
                         }
                         break;
                     case 3: // 単体ギミック
@@ -307,6 +309,19 @@ public class MapGenerator : MonoBehaviour
                                 Instantiate(
                                     Ladder[0],
                                     spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                break;
+
+                            case 9: // 39：デコイ起動用感圧板
+                                InstantiateGimmickFloor(floorIndex, spawnPos);
+
+                                Vector3 platePos = spawnPos + Vector3.up * 0.55f;
+
+                                Instantiate(
+                                    MonitorDecoyPressurePlate[0],
+                                    platePos,
                                     Quaternion.identity,
                                     mapParent
                                 );
