@@ -208,6 +208,21 @@
                 "LightWall",
                 "roof"
             ]
+        },
+        {
+            "groupFolder": "Stage4",
+            "stageFolder": "MovieStage",
+            "resourcePath": "Stage/Stage4/MovieStage",
+            "timeLimit": 180,
+            "csvFiles": [
+                "BFMovieStageFloor",
+                "BFMovieStageLight",
+                "BFMovieStageWall",
+                "MovieStageFloor",
+                "MovieStageLight",
+                "MovieStageWall",
+                "Roof"
+            ]
         }
     ]
 }
