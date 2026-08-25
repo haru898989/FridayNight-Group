@@ -72,8 +72,11 @@ public class MapGenerator : MonoBehaviour
         GenerateFloorMap(8);
 
         // 地下のCSVを監視用として別座標にも生成する
-        GenerateMonitorMazeCopy(0);
-
+        // 地下4層を監視用迷路としてコピー生成
+        GenerateMonitorMazeCopy(0); // BF
+        GenerateMonitorMazeCopy(1); // 1=3
+        GenerateMonitorMazeCopy(2); // 2
+        GenerateMonitorMazeCopy(3); // 1=3
         surface.BuildNavMesh();
 
         // CSVの100で指定された位置をGameManagerへ渡す
