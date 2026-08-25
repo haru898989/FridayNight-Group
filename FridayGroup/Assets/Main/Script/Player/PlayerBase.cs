@@ -754,7 +754,7 @@ public class PlayerBase : NetworkBehaviour
     /// <summary>
     /// スタンプの実装部分
     /// </summary>
-    void ShowStamp(int index)
+    protected void ShowStamp(int index)
     {
         foreach (GameObject obj in stampObjects)
         {
@@ -797,7 +797,7 @@ public class PlayerBase : NetworkBehaviour
             Debug.Log("現在NPCはいません．");
             return;
         }
-        npc.ReceiveStampCommand(stampCommand);
+        npc.RPC_ReceiveStampCommand((int)stampCommand);
     }
 
     void CloseStampMenu()
@@ -868,6 +868,8 @@ public class PlayerBase : NetworkBehaviour
         CloseStampMenu();
     }
 
+
+    //Stampの種類
     private StampCommand GetStampCommand(int index)
     {
         switch(index)
@@ -877,9 +879,9 @@ public class PlayerBase : NetworkBehaviour
             case 1:
                 return StampCommand.Stop;
             case 2:
-                return StampCommand.MoveToTarget;
-            case 3:
                 return StampCommand.Action;
+            case 3:
+                return StampCommand.Patrol;
             default:
                 return StampCommand.Patrol;
         }

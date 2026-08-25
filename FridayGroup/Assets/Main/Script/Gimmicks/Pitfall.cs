@@ -44,6 +44,14 @@ public class Pitfall : GimmickBase
     /// </summary>
     protected override void OnPlayerHit(GameObject playerObject)
     {
+        //NPC
+        NPCBase npc = playerObject.GetComponent<NPCBase>();
+        if(npc != null)
+        {
+            npc.NotifyTrapTriggered();
+            npc.StopByTrap(2f);
+        }
+
         // ƒ[ƒvˆ—’†‚ÉÄ“x”­“®‚µ‚È‚¢‚æ‚¤‚É‚·‚é
         if (isWarping)
         {

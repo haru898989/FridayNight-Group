@@ -30,6 +30,20 @@ public abstract class GimmickBase : MonoBehaviour
             return;
         }
 
+        //NPC
+        NPCBase npc = other.GetComponentInParent<NPCBase>();
+        if (npc != null)
+        {
+            if(npc.Object == null || !npc.Object.HasStateAuthority)
+            {
+                return;
+            }
+
+            isActivated = true;
+            OnPlayerHit(npc.gameObject);
+            return;
+        }
+
         // 接触したオブジェクトがPlayerタグを持っているか確認する
         if (other.CompareTag(playerTag))
         {

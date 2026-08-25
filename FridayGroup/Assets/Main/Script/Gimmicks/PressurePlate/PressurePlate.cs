@@ -47,6 +47,13 @@ public class PressurePlate : MonoBehaviour
         if (!isPressed && playerObject != null)
         {
             isPressed = true;
+
+            NPCBase npc = playerObject.GetComponentInParent<NPCBase>();
+            if (npc != null)
+            {
+                npc.NotifyPressurePlatePressed();
+            }
+
             activatorId = GetActivatorId(playerObject);
             Debug.Log(gameObject.name + " pressed");
 
