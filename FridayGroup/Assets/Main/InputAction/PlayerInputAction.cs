@@ -906,6 +906,173 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""StageSelect"",
+            ""id"": ""78b7c0b7-30cd-4991-bab8-6d1e81650c8d"",
+            ""actions"": [
+                {
+                    ""name"": ""New action"",
+                    ""type"": ""Button"",
+                    ""id"": ""854eb2ce-084c-4a74-9819-80b629f31e18"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""move"",
+                    ""type"": ""Value"",
+                    ""id"": ""85bf9622-7a0e-4974-a6c4-4b66cd496c5d"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""submit"",
+                    ""type"": ""Button"",
+                    ""id"": ""c6f99dda-eb99-4e29-97e2-f01f624c35ad"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""98c028b8-0070-4073-b68e-541be319131e"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""New action"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7fcc6be5-919e-460f-8d56-0c20bedca73b"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""47350664-7f38-400c-827f-137a66b73a2f"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""44a28393-961b-40d0-9ecf-98514a5f8636"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""39233c01-d990-4197-ab35-8d0885896ad3"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""1f6c1778-fd7e-49a2-ac48-9980230e3ed5"",
+                    ""path"": ""<NimbusGamepadHid>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""a27d4d76-5040-4cb5-ab81-8bd523fbf235"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""00539e98-02a9-4a6e-a962-5692e49ddc6c"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6434fcdd-ab4c-4a01-a1c5-8c6e3cf6b3da"",
+                    ""path"": ""<Gamepad>/dpad"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""05815c00-1828-461d-a222-d87a08f2f52f"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4751ef56-b874-4533-a7c7-761e6037dd9e"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""29481c19-501a-4686-9ad8-60006531ae7c"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""submit"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -992,6 +1159,11 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         m_UI_TrackedDevicePosition = m_UI.FindAction("TrackedDevicePosition", throwIfNotFound: true);
         m_UI_TrackedDeviceOrientation = m_UI.FindAction("TrackedDeviceOrientation", throwIfNotFound: true);
         m_UI_LongPuress = m_UI.FindAction("LongPuress", throwIfNotFound: true);
+        // StageSelect
+        m_StageSelect = asset.FindActionMap("StageSelect", throwIfNotFound: true);
+        m_StageSelect_Newaction = m_StageSelect.FindAction("New action", throwIfNotFound: true);
+        m_StageSelect_move = m_StageSelect.FindAction("move", throwIfNotFound: true);
+        m_StageSelect_submit = m_StageSelect.FindAction("submit", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -1261,6 +1433,68 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         }
     }
     public UIActions @UI => new UIActions(this);
+
+    // StageSelect
+    private readonly InputActionMap m_StageSelect;
+    private List<IStageSelectActions> m_StageSelectActionsCallbackInterfaces = new List<IStageSelectActions>();
+    private readonly InputAction m_StageSelect_Newaction;
+    private readonly InputAction m_StageSelect_move;
+    private readonly InputAction m_StageSelect_submit;
+    public struct StageSelectActions
+    {
+        private @PlayerInputAction m_Wrapper;
+        public StageSelectActions(@PlayerInputAction wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Newaction => m_Wrapper.m_StageSelect_Newaction;
+        public InputAction @move => m_Wrapper.m_StageSelect_move;
+        public InputAction @submit => m_Wrapper.m_StageSelect_submit;
+        public InputActionMap Get() { return m_Wrapper.m_StageSelect; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(StageSelectActions set) { return set.Get(); }
+        public void AddCallbacks(IStageSelectActions instance)
+        {
+            if (instance == null || m_Wrapper.m_StageSelectActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_StageSelectActionsCallbackInterfaces.Add(instance);
+            @Newaction.started += instance.OnNewaction;
+            @Newaction.performed += instance.OnNewaction;
+            @Newaction.canceled += instance.OnNewaction;
+            @move.started += instance.OnMove;
+            @move.performed += instance.OnMove;
+            @move.canceled += instance.OnMove;
+            @submit.started += instance.OnSubmit;
+            @submit.performed += instance.OnSubmit;
+            @submit.canceled += instance.OnSubmit;
+        }
+
+        private void UnregisterCallbacks(IStageSelectActions instance)
+        {
+            @Newaction.started -= instance.OnNewaction;
+            @Newaction.performed -= instance.OnNewaction;
+            @Newaction.canceled -= instance.OnNewaction;
+            @move.started -= instance.OnMove;
+            @move.performed -= instance.OnMove;
+            @move.canceled -= instance.OnMove;
+            @submit.started -= instance.OnSubmit;
+            @submit.performed -= instance.OnSubmit;
+            @submit.canceled -= instance.OnSubmit;
+        }
+
+        public void RemoveCallbacks(IStageSelectActions instance)
+        {
+            if (m_Wrapper.m_StageSelectActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IStageSelectActions instance)
+        {
+            foreach (var item in m_Wrapper.m_StageSelectActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_StageSelectActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public StageSelectActions @StageSelect => new StageSelectActions(this);
     private int m_KeyboardMouseSchemeIndex = -1;
     public InputControlScheme KeyboardMouseScheme
     {
@@ -1328,5 +1562,11 @@ public partial class @PlayerInputAction: IInputActionCollection2, IDisposable
         void OnTrackedDevicePosition(InputAction.CallbackContext context);
         void OnTrackedDeviceOrientation(InputAction.CallbackContext context);
         void OnLongPuress(InputAction.CallbackContext context);
+    }
+    public interface IStageSelectActions
+    {
+        void OnNewaction(InputAction.CallbackContext context);
+        void OnMove(InputAction.CallbackContext context);
+        void OnSubmit(InputAction.CallbackContext context);
     }
 }

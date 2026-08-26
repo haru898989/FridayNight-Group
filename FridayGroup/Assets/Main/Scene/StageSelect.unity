@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731704, g: 0.13414727, b: 0.121078536, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1631,6 +1631,8 @@ MonoBehaviour:
   confirmButton: {fileID: 135627992}
   confirmButtonText: {fileID: 840480550}
   statusText: {fileID: 581991505}
+  moveAction: {fileID: -6352628859942114941, guid: 424272e2dcbc0534c9a309a4e1904e6d, type: 3}
+  submitAction: {fileID: -4065425205935680951, guid: 424272e2dcbc0534c9a309a4e1904e6d, type: 3}
 --- !u!4 &1820566185
 Transform:
   m_ObjectHideFlags: 0

@@ -24,12 +24,14 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] lampWallPrefab;   // [22]ランプ付きの壁
     public GameObject[] door;             // [23]扉
     public GameObject[] B1normalWallPrefab; //[24]
+    public GameObject[] monitorWallPrefab;  // [26]モニター付き壁
     public GameObject[] dark;             // []未定
     public GameObject[] lantern;             //[25]ランタン
 
     public GameObject[] BearTrap;         // [31] トラばさみ
     public GameObject[] RollingRock;      // [35] 大岩
     public GameObject[] Ladder;           // [38] 梯子
+    public GameObject[] MonitorDecoyPressurePlate; // [39] デコイ起動用感圧板
 
     public GameObject[] PressurePlate;    // [40-49] 感圧板
     public GameObject[] TwoPlayerDoor;    // [50-59] 連動ドア
@@ -45,6 +47,12 @@ public class MapGenerator : MonoBehaviour
     public float floorHeight = 3f;      // 1階層あたりの高さ（Y軸のオフセット）
     public Transform mapParent;         // 生成したブロックをまとめる親オブジェクト
     public NavMeshSurface surface;
+
+    [Header("監視用地下マップ設定")]
+    [SerializeField]
+    private Vector3 monitorMazeOffset = new Vector3(100f, 0f, 0f);  // 監視用地下マップを元の地下マップからどれだけ離して生成するかを指定する座標オフセット
+
+    private Transform monitorMazeParent;                            // 監視用地下マップで生成した床や壁をまとめる親オブジェクト
 
     private int playerSpawnCount = 0;
     private Vector3 playerSpawnPosition;
@@ -67,6 +75,12 @@ public class MapGenerator : MonoBehaviour
         GenerateFloorMap(7);
         GenerateFloorMap(8);
 
+        // 地下のCSVを監視用として別座標にも生成する
+        // 地下4層を監視用迷路としてコピー生成
+        GenerateMonitorMazeCopy(0); // BF
+        GenerateMonitorMazeCopy(1); // 1=3
+        GenerateMonitorMazeCopy(2); // 2
+        GenerateMonitorMazeCopy(3); // 1=3
         surface.BuildNavMesh();
 
         // CSVの100で指定された位置をGameManagerへ渡す
@@ -212,20 +226,35 @@ public class MapGenerator : MonoBehaviour
                     case 2: // 壁チーム
                         switch (type)
                         {
-                            case 1: // 壁
-                                    Instantiate(normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
-                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                            break;
+                            case 1: // 21：壁
+                                Instantiate(
+                                    normalWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
 
-                            case 2: // 明かり付きの壁
-                                    Instantiate(lampWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
-                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                            break;
+                            case 2: // 22：明かり付きの壁
+                                Instantiate(
+                                    lampWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
 
-                            case 3: // 扉
-                                    Instantiate(door[0], spawnPos, Quaternion.identity, mapParent);
-                                    continuousWallCount = 0; // 壁が途切れたのでカウントリセット
-                            break;
+                            case 3: // 23：扉
+                                Instantiate(
+                                    door[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
 
                             case 4: // 地下壁
                                     Instantiate(B1normalWallPrefab[0], spawnPos, Quaternion.identity, mapParent);
@@ -235,7 +264,17 @@ public class MapGenerator : MonoBehaviour
                             case 5: // ランタン
                                     Instantiate(lantern[0], spawnPos, Quaternion.identity, mapParent);
                             break;
-                            
+
+                            case 6: // 26：モニター付き壁
+                                Instantiate(
+                                    monitorWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
+
                             case 8: // 感圧板1枚で開く扉
                                 int pressurePlateChannel = FindAdjacentPressurePlateChannel(rows, x, y);
                                 if (pressurePlateChannel < 0)
@@ -247,9 +286,9 @@ public class MapGenerator : MonoBehaviour
                                 InstantiateChannelDoor(floorIndex, spawnPos, pressurePlateChannel, 1);
                                 continuousWallCount = 0;
                             break;
+
                         }
                         break;
-
                     case 3: // 単体ギミック
                         switch (type)
                         {
@@ -281,6 +320,19 @@ public class MapGenerator : MonoBehaviour
                                     mapParent
                                 );
                                 break;
+
+                            case 9: // 39：デコイ起動用感圧板
+                                InstantiateGimmickFloor(floorIndex, spawnPos);
+
+                                Vector3 platePos = spawnPos + Vector3.up * 0.55f;
+
+                                Instantiate(
+                                    MonitorDecoyPressurePlate[0],
+                                    platePos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                break;
                         }
                         break;
                     case 4: // 40-49: 感圧板（一の位が連動チャンネル）
@@ -295,26 +347,53 @@ public class MapGenerator : MonoBehaviour
 
                         InstantiateGimmickFloor(floorIndex, spawnPos);
 
+                        // 60～62：クリスタル
                         if (type <= 2)
                         {
-                            Instantiate(
-                                Crystal[type],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
+                            if (Crystal != null &&
+                                type < Crystal.Length &&
+                                Crystal[type] != null)
+                            {
+                                Instantiate(
+                                    Crystal[type],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                            }
+                            else
+                            {
+                                Debug.LogError(
+                                    $"クリスタルPrefabが設定されていません。CSV番号: {key}, 配列番号: {type}"
+                                );
+                            }
                         }
+
+                        // 63～65：クリスタル歯車
                         else if (type >= 3 && type <= 5)
                         {
-                            Instantiate(
-                                CrystalGear[type - 3],
-                                spawnPos,
-                                Quaternion.identity,
-                                mapParent
-                            );
-                        }
-                        break;
+                            int gearIndex = type - 3;
 
+                            if (CrystalGear != null &&
+                                gearIndex < CrystalGear.Length &&
+                                CrystalGear[gearIndex] != null)
+                            {
+                                Instantiate(
+                                    CrystalGear[gearIndex],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                            }
+                            else
+                            {
+                                Debug.LogError(
+                                    $"クリスタル歯車Prefabが設定されていません。CSV番号: {key}, 配列番号: {gearIndex}"
+                                );
+                            }
+                        }
+
+                        break;
                     case 7: // 70：落とし穴
 
                         InstantiateGimmickFloor(floorIndex, spawnPos);
@@ -361,6 +440,126 @@ public class MapGenerator : MonoBehaviour
         }
 
         Debug.Log($"階層 {floorIndex} のマップ生成が完了しました！");
+    }
+
+    /// <summary>
+    /// 地下マップを監視用として別の座標にコピー生成する関数
+    /// </summary>
+    private void GenerateMonitorMazeCopy(int floorIndex)
+    {
+        // 指定した階層のCSVデータが存在するか確認
+        if (floorIndex < 0 ||
+            floorIndex >= mapFloorData.Length ||
+            mapFloorData[floorIndex] == null)
+        {
+            Debug.LogWarning($"監視用マップ：階層 {floorIndex} のデータがありません");
+            return;
+        }
+        // 監視用地下マップをまとめる親オブジェクトを作成
+        if (monitorMazeParent == null)
+        {
+            GameObject monitorRoot = new GameObject("MonitorMaze");
+            monitorMazeParent = monitorRoot.transform;
+        }
+        // 指定した階層のCSVデータを文字列として読み込む
+        string csvText = mapFloorData[floorIndex].text;
+
+        // CSVを改行ごとに分けて、1行ずつ扱えるようにする
+        string[] rows = csvText.Trim().Split('\n');
+
+        // CSVの縦方向のマス数を取得
+        int height = rows.Length;
+
+        // CSVの1行目をカンマで分けて、横方向のマス数を取得
+        int width = rows[0].Replace("\r", "").Split(',').Length;
+
+        // CSVを上から1行ずつ読み込む
+        for (int y = 0; y < height; y++)
+        {
+            // 1行分のデータをカンマで分割する
+            string[] columns = rows[y].Replace("\r", "").Split(',');
+
+            if (columns.Length != width)
+            {
+                Debug.LogError(
+                    $"CSV列数不一致: {mapFloorData[floorIndex].name} " +
+                    $"行={y + 1}, 正常列数={width}, 実際={columns.Length}"
+                );
+                return;
+            }
+
+            // 1行の中を左から1マスずつ読み込む
+            for (int x = 0; x < width; x++)
+            {
+                // 現在のマスのデータを取得する
+                string cell = columns[x].Trim();
+
+                // 空欄の場合は何もせず次のマスへ進む
+                if (string.IsNullOrEmpty(cell))
+                {
+                    continue;
+                }
+
+                // CSVの文字列を整数に変換する
+                int key = int.Parse(cell);
+
+                // 元の地下マップの座標を計算し、監視用マップの位置までずらす
+                Vector3 spawnPos = new Vector3(
+                    x * tileSize,
+                    floorIndex * floorHeight,
+                    y * tileSize
+                ) + monitorMazeOffset;
+                // CSVの数値によって、監視用マップに生成するオブジェクトを変更する
+                switch (key)
+                {
+                    case 11: // 地下床
+                        Instantiate(
+                            floorB1[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 21: // 通常の壁
+                        Instantiate(
+                            normalWallPrefab[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 22: // ランプ付きの壁
+                        Instantiate(
+                            lampWallPrefab[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 24: // 地下用の壁
+                        Instantiate(
+                            B1normalWallPrefab[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
+                    case 100: // プレイヤー開始地点
+                              // 監視用マップではプレイヤーを生成せず、床だけ生成する
+                        Instantiate(
+                            floorB1[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+                }
+            }
+        }
     }
 
     /// <summary>
