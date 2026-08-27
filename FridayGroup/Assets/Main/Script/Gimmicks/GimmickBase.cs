@@ -1,3 +1,4 @@
+using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -35,6 +36,22 @@ public abstract class GimmickBase : MonoBehaviour
         {
             // 発動済みにして、同じギミックが何度も動かないようにする
             isActivated = true;
+
+            NetworkObject playerNetworkObject =
+            other.GetComponentInParent<NetworkObject>();
+
+        if (LogGenerator.Instance != null &&
+            playerNetworkObject != null &&
+            playerNetworkObject.InputAuthority != PlayerRef.None)
+        {
+            LogGenerator.Instance.SendEventLog
+            (
+                $"Player_{playerNetworkObject.InputAuthority.PlayerId}",
+                "State",
+                $"{GetType().Name}_activated",
+                transform.position
+            );
+        }
 
             // 子クラスで実装したギミックごとの処理を呼び出す
             OnPlayerHit(other.gameObject);
