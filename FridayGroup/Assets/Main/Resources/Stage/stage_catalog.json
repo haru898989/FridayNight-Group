@@ -226,6 +226,21 @@
                 "LightWall",
                 "roof"
             ]
+        },
+        {
+            "groupFolder": "Stage4",
+            "stageFolder": "TEST",
+            "resourcePath": "Stage/Stage4/TEST",
+            "timeLimit": 180,
+            "csvFiles": [
+                "BFLightWall",
+                "BFTestStageFloor",
+                "BFTestStageWall",
+                "LightWall",
+                "TestStageFloor",
+                "TestStageRoof",
+                "TestStageWall"
+            ]
         }
     ]
 }
