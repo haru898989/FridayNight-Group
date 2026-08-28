@@ -5,6 +5,7 @@ public class BearTrap : GimmickBase
 {
     [Header("Bear Trap Settings")]
     [SerializeField] private float stopTime = 2.0f;
+    private bool isConsumed;
 
     /// <summary>
     /// プレイヤーがとらばさみに触れたときに呼ばれる関数
@@ -32,6 +33,57 @@ public class BearTrap : GimmickBase
             SoundManager.Instance.PlaySE(0);
         }
 
+        PlayerBase player = playerObject.GetComponent<PlayerBase>();
+        if (player != null && player.Object != null)
+        {
+            player.RPC_RemoveBearTrap(transform.position);
+        }
+        else
+        {
+            ConsumeAtPosition(transform.position);
+        }
+    }
+
+    /// <summary>
+    /// 同じ座標に生成されている各クライアントのトラバサミを使用済みにします。
+    /// </summary>
+    public static void ConsumeAtPosition(Vector3 trapPosition)
+    {
+        BearTrap[] traps = FindObjectsByType<BearTrap>(FindObjectsSortMode.None);
+
+        foreach (BearTrap trap in traps)
+        {
+            if ((trap.transform.position - trapPosition).sqrMagnitude <= 0.01f)
+            {
+                trap.Consume();
+            }
+        }
+    }
+
+    private void Consume()
+    {
+        if (isConsumed)
+        {
+            return;
+        }
+
+        isConsumed = true;
+        GameObject trapRoot = transform.parent != null
+            ? transform.parent.gameObject
+            : gameObject;
+
+        foreach (Collider trapCollider in trapRoot.GetComponentsInChildren<Collider>(true))
+        {
+            trapCollider.enabled = false;
+        }
+
+        foreach (Renderer trapRenderer in trapRoot.GetComponentsInChildren<Renderer>(true))
+        {
+            trapRenderer.enabled = false;
+        }
+
+        // プレイヤーの固定解除コルーチンが完了してから実体を破棄する。
+        Destroy(trapRoot, stopTime + 0.1f);
     }
 
     /// <summary>

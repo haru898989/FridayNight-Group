@@ -815,10 +815,10 @@ MonoBehaviour:
   stampMenu: {fileID: 0}
   stampDisplayTime: 2
   animator: {fileID: 0}
-  characterModelPrefab: {fileID: 0}
+  characterModelPrefab: {fileID: 5818676082942201579, guid: 5ddb42764212839478d512c0afb12cfd, type: 3}
   characterModelLocalPosition: {x: 0, y: -1, z: 0}
   characterModelLocalEulerAngles: {x: 0, y: 0, z: 0}
-  characterModelLocalScale: {x: 1, y: 1, z: 1}
+  characterModelLocalScale: {x: 0.8, y: 0.8, z: 0.8}
   stampAnchor: {fileID: 0}
   stampObjects: []
   stampMenuIcons: []
