@@ -10,6 +10,7 @@ public class TimeManager : MonoBehaviour
 
     [Header("タイマー表示")]
     public TMP_Text timerText;
+    [SerializeField] private TimerRingGraphic timerGauge;
     public GameObject timeUpText;
 
     [Header("遷移先シーン")]
@@ -49,6 +50,8 @@ public class TimeManager : MonoBehaviour
             currentTime = timeLimit;
             Debug.LogWarning("選択されたステージが見つからないため、デフォルトの制限時間を使用します。");
         }
+
+        UpdateTimerUI();
     }
     public void SetTimeLimit(float time)
     {
@@ -77,10 +80,19 @@ public class TimeManager : MonoBehaviour
 
     void UpdateTimerUI()
     {
-        int minutes = Mathf.FloorToInt(currentTime / 60);
-        int seconds = Mathf.FloorToInt(currentTime % 60);
+        int totalSeconds = Mathf.CeilToInt(currentTime);
 
-        timerText.text = $"{minutes:00}:{seconds:00}";
+        if (timerText != null)
+        {
+            timerText.text = totalSeconds.ToString();
+        }
+
+        if (timerGauge != null)
+        {
+            timerGauge.FillAmount = timeLimit > 0f
+                ? currentTime / timeLimit
+                : 0f;
+        }
     }
 
     void TimeUp()

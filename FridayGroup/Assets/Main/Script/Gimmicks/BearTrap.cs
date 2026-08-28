@@ -32,8 +32,6 @@ public class BearTrap : GimmickBase
             SoundManager.Instance.PlaySE(0);
         }
 
-        // プレイヤーを一定時間止める処理を開始する
-        StartCoroutine(StopPlayer(playerObject));
     }
 
     /// <summary>
