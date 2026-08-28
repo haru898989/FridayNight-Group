@@ -93,6 +93,7 @@
                 "1-7BFfloor",
                 "1-7BFwall",
                 "1-7Floor",
+                "1-7LanterWall",
                 "1-7Wall",
                 "Roof"
             ]
@@ -255,6 +256,21 @@
                 "FinalWall",
                 "LightWall",
                 "roof"
+            ]
+        },
+        {
+            "groupFolder": "Stage4",
+            "stageFolder": "TEST",
+            "resourcePath": "Stage/Stage4/TEST",
+            "timeLimit": 180,
+            "csvFiles": [
+                "BFLightWall",
+                "BFTestStageFloor",
+                "BFTestStageWall",
+                "LightWall",
+                "TestStageFloor",
+                "TestStageRoof",
+                "TestStageWall"
             ]
         }
     ]
