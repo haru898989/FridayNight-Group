@@ -256,42 +256,6 @@
                 "LightWall",
                 "roof"
             ]
-        },
-        {
-            "groupFolder": "Stage3",
-            "stageFolder": "3-1",
-            "resourcePath": "Stage/Stage3/3-1",
-            "csvFiles": [
-                "3-1BFfloor",
-                "3-1BFwall",
-                "3-1Floor",
-                "3-1Wall",
-                "roof"
-            ]
-        },
-        {
-            "groupFolder": "Stage3",
-            "stageFolder": "3-2",
-            "resourcePath": "Stage/Stage3/3-2",
-            "csvFiles": [
-                "3-2BFfloor",
-                "3-2BFwall",
-                "3-2Floor",
-                "3-2Wall",
-                "roof"
-            ]
-        },
-        {
-            "groupFolder": "Stage4",
-            "stageFolder": "Final",
-            "resourcePath": "Stage/Stage4/Final",
-            "csvFiles": [
-                "FinalBFfloor",
-                "FinalBFwall",
-                "FinalFloor",
-                "FinalWall",
-                "roof"
-            ]
         }
     ]
 }
