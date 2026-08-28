@@ -34,6 +34,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private const string StageClearRequestMessage = "FLOW|CLEAR";
     private const string StageSelectRequestMessage = "FLOW|STAGE_SELECT";
     private const string NextStageRequestMessage = "FLOW|NEXT_STAGE";
+    private const string RestartStageRequestMessage = "FLOW|RESTART_STAGE";
     private const string TitleRequestMessage = "FLOW|TITLE_REQUEST";
 
     private readonly HashSet<int> pendingStageAcknowledgements = new HashSet<int>();
@@ -376,6 +377,35 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
         if (stageLoadCoroutine == null)
         {
             stageLoadCoroutine = StartCoroutine(LoadSelectedStageRoutine(nextStage.resourcePath));
+        }
+    }
+
+    public void RestartCurrentStage()
+    {
+        if (!IsConnected || isLoadingScene)
+        {
+            return;
+        }
+
+        if (!IsSharedModeMasterClient)
+        {
+            SendReliableMessage(runner.GetMasterClient(), RestartStageRequestMessage);
+            SetOperationMessage("WAITING FOR HOST...");
+            return;
+        }
+
+        string currentStagePath = StageSelectionContext.SelectedStageResourcePath;
+        if (string.IsNullOrWhiteSpace(currentStagePath))
+        {
+            SetOperationMessage("STAGE DATA IS NOT READY");
+            return;
+        }
+
+        GameManager.Instance.SetNpcSpawnDecisionForNextStage(ConnectedPlayerCount == 1);
+
+        if (stageLoadCoroutine == null)
+        {
+            stageLoadCoroutine = StartCoroutine(LoadSelectedStageRoutine(currentStagePath));
         }
     }
 
@@ -930,6 +960,12 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             if (message == NextStageRequestMessage)
             {
                 ContinueToNextStage();
+                return;
+            }
+
+            if (message == RestartStageRequestMessage)
+            {
+                RestartCurrentStage();
                 return;
             }
 

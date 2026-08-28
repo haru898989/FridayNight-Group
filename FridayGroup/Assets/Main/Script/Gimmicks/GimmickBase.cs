@@ -31,14 +31,19 @@ public abstract class GimmickBase : MonoBehaviour
             return;
         }
 
-        // 接触したオブジェクトがPlayerタグを持っているか確認する
-        if (other.CompareTag(playerTag))
+        // プレイヤーの子Colliderが接触した場合も、PlayerBaseを持つルートまで辿る。
+        PlayerBase player = other.GetComponentInParent<PlayerBase>();
+        GameObject playerObject = player != null ? player.gameObject : other.gameObject;
+
+        // リモートプレイヤーは各クライアント上でUntaggedになるため、
+        // ローカルプレイヤーのギミックだけを発動する。
+        if (playerObject.CompareTag(playerTag))
         {
             // 発動済みにして、同じギミックが何度も動かないようにする
             isActivated = true;
 
             NetworkObject playerNetworkObject =
-            other.GetComponentInParent<NetworkObject>();
+            playerObject.GetComponent<NetworkObject>();
 
         if (LogGenerator.Instance != null &&
             playerNetworkObject != null &&
@@ -54,7 +59,7 @@ public abstract class GimmickBase : MonoBehaviour
         }
 
             // 子クラスで実装したギミックごとの処理を呼び出す
-            OnPlayerHit(other.gameObject);
+            OnPlayerHit(playerObject);
         }
     }
 

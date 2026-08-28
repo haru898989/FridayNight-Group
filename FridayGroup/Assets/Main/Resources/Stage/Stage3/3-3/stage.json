@@ -1,0 +1,17 @@
+{
+    "displayName": "3-3 DARK MONITOR MAZE",
+    "description": "ONE PLAYER WATCHES THE MONITOR WHILE THE OTHER CROSSES THE DARK MAZE.",
+    "previewFile": "",
+    "csvOrder": [
+        "3-3BFfloor",
+        "3-3BFwall",
+        "3-3BFguide",
+        "3-3BFwall",
+        "3-3Floor",
+        "3-3Wall",
+        "3-3LightWall",
+        "3-3Wall",
+        "3-3roof"
+    ]
+}
+

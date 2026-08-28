@@ -67,7 +67,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e328911e402465aadc536269b82361a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  exitOffset: {x: -1, y: 5, z: 0}
+  exitOffset: {x: 0, y: 5, z: 0}
   fadeDuration: 0.25
   blackScreenTime: 0.15
 --- !u!1 &300100000000000002
