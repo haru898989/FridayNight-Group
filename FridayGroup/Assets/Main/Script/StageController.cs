@@ -17,7 +17,16 @@ public class StageController : MonoBehaviour
             return Vector3.zero;
         }
 
-        // PitfallWarpPointの位置を、落とし穴の移動先座標として返す
-        return pitfallWarpPoint.position;
+        Vector3 warpPosition = pitfallWarpPoint.position;
+
+        // 3-4は入口マスの角に着地するとカプセルが隣の壁へ食い込むため、
+        // 地下入口（CSVの39番）の空きマス中央へ着地させる。
+        if (StageSelectionContext.SelectedStageResourcePath == "Stage/Stage3/3-4")
+        {
+            warpPosition.x = 3.0f;
+            warpPosition.z = 8.0f;
+        }
+
+        return warpPosition;
     }
 }

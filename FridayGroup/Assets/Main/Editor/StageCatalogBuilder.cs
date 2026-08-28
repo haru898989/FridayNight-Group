@@ -133,6 +133,12 @@ public static class StageCatalogBuilder
             case "3-2":
                 return 60;
 
+            case "3-3":
+                return 240;
+
+            case "3-4":
+                return 300;
+
             case "Final":
                 return 180;
 
