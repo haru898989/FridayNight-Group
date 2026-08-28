@@ -14,6 +14,9 @@ using UnityEngine.UI;
 public sealed class UnifiedUIInputController : MonoBehaviour
 {
     private const float SelectedScale = 1.08f;
+    private static readonly Color NormalButtonColor = Color.white;
+    private static readonly Color SelectedButtonColor = new Color(1f, 0.9f, 0.3f, 1f);
+    private static readonly Color PressedButtonColor = new Color(0.78f, 0.78f, 0.78f, 1f);
     private static UnifiedUIInputController instance;
     private Selectable highlightedSelectable;
     private Vector3 highlightedOriginalScale = Vector3.one;
@@ -94,6 +97,8 @@ public sealed class UnifiedUIInputController : MonoBehaviour
             inputSystemModule.enabled = true;
             eventSystem.sendNavigationEvents = true;
         }
+
+        ApplySharedButtonStyle();
     }
 
     private void LateUpdate()
@@ -120,7 +125,10 @@ public sealed class UnifiedUIInputController : MonoBehaviour
 
         if (selected == null || !selected.IsActive() || !selected.IsInteractable())
         {
-            if (WasNavigationPressedThisFrame())
+            string sceneName = SceneManager.GetActiveScene().name;
+            bool shouldSelectAutomatically = sceneName != "Map" && sceneName != "StageSelect";
+
+            if (shouldSelectAutomatically || WasNavigationPressedThisFrame())
             {
                 selected = FindFirstAvailableSelectable();
                 if (selected != null)
@@ -135,6 +143,24 @@ public sealed class UnifiedUIInputController : MonoBehaviour
         }
 
         UpdateHighlight(selected);
+    }
+
+    private static void ApplySharedButtonStyle()
+    {
+        Button[] buttons = FindObjectsByType<Button>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None
+        );
+
+        foreach (Button button in buttons)
+        {
+            ColorBlock colors = button.colors;
+            colors.normalColor = NormalButtonColor;
+            colors.highlightedColor = SelectedButtonColor;
+            colors.selectedColor = SelectedButtonColor;
+            colors.pressedColor = PressedButtonColor;
+            button.colors = colors;
+        }
     }
 
     private static bool WasNavigationPressedThisFrame()

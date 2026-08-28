@@ -12,8 +12,8 @@ public class OnlineLobbyUI : MonoBehaviour
 {
     private OnlineStageFlow stageFlow;
     private GameObject startButtonUI;
-    private TMP_Text statusText;
-    private TMP_Text playerCountText;
+    private Text statusText;
+    private Text playerCountText;
     private bool isInitialized;
     private readonly List<GameObject> lobbyObjects = new List<GameObject>();
 
@@ -69,42 +69,30 @@ public class OnlineLobbyUI : MonoBehaviour
             return;
         }
 
-        buttonRect.sizeDelta = new Vector2(280f, 64f);
+        buttonRect.sizeDelta = new Vector2(260f, 46f);
         buttonRect.anchoredPosition = new Vector2(0f, -95f);
 
         TMP_Text buttonLabel = startButtonUI.GetComponentInChildren<TMP_Text>(true);
         if (buttonLabel != null)
         {
             buttonLabel.text = "STAGE SELECT";
-            buttonLabel.fontSize = 28f;
+            buttonLabel.fontSize = 24f;
         }
 
         Transform canvasTransform = buttonRect.parent;
 
-        GameObject panelObject = CreateUIObject("OnlineStatusPanel", canvasTransform);
-        lobbyObjects.Add(panelObject);
-        panelObject.transform.SetAsFirstSibling();
-        RectTransform panelRect = panelObject.GetComponent<RectTransform>();
-        SetCenteredRect(panelRect, new Vector2(560f, 260f), new Vector2(0f, 30f));
+        Text titleText = FindSceneText(canvasTransform, "LobbyTitle");
+        playerCountText = FindSceneText(canvasTransform, "PlayerCount");
+        statusText = FindSceneText(canvasTransform, "ConnectionStatus");
 
-        Image panelImage = panelObject.AddComponent<Image>();
-        panelImage.color = new Color(0.035f, 0.07f, 0.13f, 0.90f);
-        panelImage.raycastTarget = false;
+        AddLobbyObject(titleText);
+        AddLobbyObject(playerCountText);
+        AddLobbyObject(statusText);
 
-        TMP_Text titleText = CreateText("LobbyTitle", canvasTransform, "ONLINE LOBBY", 42f, FontStyles.Bold);
-        lobbyObjects.Add(titleText.gameObject);
-        SetCenteredRect(titleText.rectTransform, new Vector2(520f, 58f), new Vector2(0f, 125f));
-        titleText.color = new Color(1f, 0.86f, 0.25f);
-
-        playerCountText = CreateText("PlayerCount", canvasTransform, "PLAYERS 0 / 2", 32f, FontStyles.Bold);
-        lobbyObjects.Add(playerCountText.gameObject);
-        SetCenteredRect(playerCountText.rectTransform, new Vector2(520f, 52f), new Vector2(0f, 57f));
-        playerCountText.color = Color.white;
-
-        statusText = CreateText("ConnectionStatus", canvasTransform, "CONNECTING...", 23f, FontStyles.Normal);
-        lobbyObjects.Add(statusText.gameObject);
-        SetCenteredRect(statusText.rectTransform, new Vector2(520f, 50f), new Vector2(0f, 8f));
-        statusText.color = new Color(0.55f, 0.90f, 1f);
+        if (titleText == null || playerCountText == null || statusText == null)
+        {
+            Debug.LogWarning("OnlineLobbyUI: OnlineConnectシーンのロビー表示が不足しています");
+        }
     }
 
     private void Refresh()
@@ -160,32 +148,17 @@ public class OnlineLobbyUI : MonoBehaviour
         }
     }
 
-    private static GameObject CreateUIObject(string objectName, Transform parent)
+    private void AddLobbyObject(Text text)
     {
-        GameObject uiObject = new GameObject(objectName, typeof(RectTransform));
-        uiObject.layer = LayerMask.NameToLayer("UI");
-        uiObject.transform.SetParent(parent, false);
-        return uiObject;
+        if (text != null)
+        {
+            lobbyObjects.Add(text.gameObject);
+        }
     }
 
-    private static TMP_Text CreateText(string objectName, Transform parent, string text, float fontSize, FontStyles style)
+    private static Text FindSceneText(Transform parent, string objectName)
     {
-        GameObject textObject = CreateUIObject(objectName, parent);
-        TextMeshProUGUI label = textObject.AddComponent<TextMeshProUGUI>();
-        label.text = text;
-        label.fontSize = fontSize;
-        label.fontStyle = style;
-        label.alignment = TextAlignmentOptions.Center;
-        label.raycastTarget = false;
-        return label;
-    }
-
-    private static void SetCenteredRect(RectTransform rect, Vector2 size, Vector2 position)
-    {
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = size;
-        rect.anchoredPosition = position;
+        Transform child = parent.Find(objectName);
+        return child != null ? child.GetComponent<Text>() : null;
     }
 }
