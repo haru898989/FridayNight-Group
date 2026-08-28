@@ -29,6 +29,8 @@ public class PlayerBase : NetworkBehaviour
     private Animator animator;
     private int selectedIndex = 0;
     private GameObject[] stampMenuObjects;//UIようのはいれつ
+    private float previousStampNavigationAxis;
+    private float nextStampNavigationTime;
 
     [Header("Character Visual")]
     [SerializeField] private GameObject characterModelPrefab;
@@ -178,17 +180,18 @@ public class PlayerBase : NetworkBehaviour
                 {
                     Debug.Log($"子[{i}] = {stampMenu.transform.GetChild(i).name}");
                 }
-                stampMenuObjects = new GameObject[stampMenu.transform.childCount - 1];
-
-                int menuIndex = 0;
+                stampMenuObjects = new GameObject[4];
 
                 foreach (Transform child in stampMenu.transform)
                 {
                     if (child.name == "StampBackground")
                         continue;
 
-                    stampMenuObjects[menuIndex] = child.gameObject;
-                    menuIndex++;
+                    int menuIndex = GetStampMenuIndex(child.name);
+                    if (menuIndex >= 0 && menuIndex < stampMenuObjects.Length)
+                    {
+                        stampMenuObjects[menuIndex] = child.gameObject;
+                    }
                 }
 
             }
@@ -562,25 +565,30 @@ public class PlayerBase : NetworkBehaviour
         if (testplayerControl == null) return;
         if (!canMove) return;
 
-        // スタンプ選択中のみ十字キー（D-Pad）を読む
+        // スタンプ選択中は横入力またはマウスホイールで順番に選ぶ。
         if (isSelectingStamp)
         {
             Vector2 stampInput = testplayerControl.Player.StampSelect.ReadValue<Vector2>();
-            Debug.Log("StampInput = " + stampInput);
-            if (stampInput.magnitude > 0.5f)
+            float navigationAxis = Mathf.Abs(stampInput.x) >= 0.45f
+                ? stampInput.x
+                : stampInput.y;
+            bool isPressed = Mathf.Abs(navigationAxis) >= 0.5f;
+            bool wasReleased = Mathf.Abs(previousStampNavigationAxis) < 0.5f;
+
+            if (isPressed &&
+                (wasReleased || Time.unscaledTime >= nextStampNavigationTime) &&
+                stampMenuObjects != null && stampMenuObjects.Length > 0)
             {
-                float angle = Mathf.Atan2(stampInput.y, stampInput.x) * Mathf.Rad2Deg;
-
-                if (angle < 0)
-                    angle += 360;
-
-                int index = Mathf.FloorToInt(angle / (360f / stampObjects.Length));
-
-                selectedIndex = index;
-
-                HighlightStamp(index);
-                Debug.Log("Highlight : " + index);
+                // シーン上のスタンプ配置順はHierarchy順と左右が逆なので、
+                // 右入力では左隣の配列要素、左入力では右隣へ移動する。
+                int direction = navigationAxis > 0f ? -1 : 1;
+                selectedIndex = (selectedIndex + direction + stampMenuObjects.Length) %
+                                stampMenuObjects.Length;
+                HighlightStamp(selectedIndex);
+                nextStampNavigationTime = Time.unscaledTime + (wasReleased ? 0.3f : 0.16f);
             }
+
+            previousStampNavigationAxis = isPressed ? navigationAxis : 0f;
 
             // スタンプ選択中は移動処理を行わない
             if (animator != null) animator.SetBool("run", false);
@@ -881,6 +889,27 @@ public class PlayerBase : NetworkBehaviour
     private void RPC_ShowStamp(int index)
     {
         ShowStamp(index);
+
+        StampIndicatorUI indicator = StampIndicatorUI.Instance;
+        if (indicator == null)
+        {
+            indicator = FindObjectOfType<StampIndicatorUI>(true);
+        }
+
+        if (indicator == null)
+        {
+            Debug.LogWarning("StampIndicatorUIがMapシーンに見つかりません");
+            return;
+        }
+
+        if (HasInputAuthority)
+        {
+            indicator.ShowSentFeedback(index);
+        }
+        else
+        {
+            indicator.ShowRemoteStamp(transform, Camera.main, index, stampDisplayTime);
+        }
     }
 
     /// <summary>
@@ -888,11 +917,18 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     protected void ShowStamp(int index)
     {
+        if (stampObjects == null)
+        {
+            return;
+        }
+
         foreach (GameObject obj in stampObjects)
         {
             if (obj != null)
+            {
                 Debug.Log($"OFF : {obj.name}");
-            obj.SetActive(false);
+                obj.SetActive(false);
+            }
         }
 
         // 選択したスタンプだけ表示
@@ -965,7 +1001,10 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     private void OnStampStarted(InputAction.CallbackContext context)
     {
-        isSelectingStamp = !isSelectingStamp;
+        isSelectingStamp = true;
+        selectedIndex = selectedIndex < 0 ? 0 : selectedIndex;
+        previousStampNavigationAxis = 0f;
+        nextStampNavigationTime = 0f;
 
         Debug.Log("Stampボタンが押された");
 
@@ -975,6 +1014,8 @@ public class PlayerBase : NetworkBehaviour
             Debug.Log("StampMenu active = " + stampMenu.activeSelf);
         }
 
+        HighlightStamp(selectedIndex);
+
         Debug.Log("スタンプ選択開始");
     }
 
@@ -983,6 +1024,11 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     private void OnStampCanceled(InputAction.CallbackContext context)
     {
+        if (!isSelectingStamp)
+        {
+            return;
+        }
+
         Debug.Log("selectedStampIndex = " + selectedIndex);
         // 何もしない
         isSelectingStamp = false;
@@ -1021,12 +1067,42 @@ public class PlayerBase : NetworkBehaviour
 
     void HighlightStamp(int index)
     {
+        if (stampMenuObjects == null)
+        {
+            return;
+        }
+
         for (int i = 0; i < stampMenuObjects.Length; i++)
         {
             if (stampMenuObjects[i] == null) continue;
 
             stampMenuObjects[i].transform.localScale =
-                (i == index) ? Vector3.one * 1.3f : Vector3.one;
+                (i == index) ? Vector3.one * 1.35f : Vector3.one;
+
+            Image image = stampMenuObjects[i].GetComponent<Image>();
+            if (image != null)
+            {
+                image.color = i == index
+                    ? new Color(1f, 0.9f, 0.3f, 1f)
+                    : new Color(0.65f, 0.65f, 0.65f, 1f);
+            }
+        }
+    }
+
+    private static int GetStampMenuIndex(string objectName)
+    {
+        switch (objectName)
+        {
+            case "Come On":
+                return 0;
+            case "Stop":
+                return 1;
+            case "Gimmik":
+                return 2;
+            case "Free":
+                return 3;
+            default:
+                return -1;
         }
     }
     /// <summary>

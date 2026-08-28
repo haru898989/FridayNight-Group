@@ -352,13 +352,15 @@ public sealed class StageSelectController : MonoBehaviour
         {
             if (i == selectedIndex)
             {
-                nodeImages[i].color = Color.white;
+                nodeImages[i].color = new Color(1f, 0.9f, 0.3f, 1f);
+                nodeButtons[i].transform.localScale = Vector3.one * 1.08f;
             }
             else
             {
                 nodeImages[i].color = stages[i].HasMapData
                     ? new Color(0.72f, 0.72f, 0.72f, 1f)
                     : new Color(0.42f, 0.42f, 0.42f, 1f);
+                nodeButtons[i].transform.localScale = Vector3.one;
             }
 
             nodeButtons[i].interactable = CanControlSelection() && !isConfirming;
