@@ -119,6 +119,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTag: SharedGimmickPlayer
+  puzzleId: two-player-door-1
+  channelId: 1
 --- !u!1 &2690519528723669528
 GameObject:
   m_ObjectHideFlags: 0
@@ -235,7 +237,7 @@ GameObject:
   - component: {fileID: 4543074323151896479}
   m_Layer: 0
   m_Name: PressurePlateDoorGimmick
-  m_TagString: Untagged
+  m_TagString: Gimmick
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -482,6 +484,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTag: SharedGimmickPlayer
+  puzzleId: two-player-door-1
+  channelId: 1
 --- !u!1 &7371245513721463202
 GameObject:
   m_ObjectHideFlags: 0
@@ -603,7 +607,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firstPlate: {fileID: 6966590291268270432}
   secondPlate: {fileID: 3260517188114136351}
+  puzzleId: two-player-door-1
+  channelId: 1
+  requiredPlateCount: 2
+  doorPanel: {fileID: 0}
+  openOffset: {x: 0, y: 2.2, z: 0}
   leftHinge: {fileID: 9123531569015921776}
   rightHinge: {fileID: 285100149221084079}
   openAngle: 90
   openSpeed: 120
+  slideSpeed: 2.5

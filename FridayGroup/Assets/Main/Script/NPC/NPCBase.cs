@@ -1,6 +1,8 @@
+using Fusion;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class NPCBase : PlayerBase
 {
@@ -13,6 +15,84 @@ public class NPCBase : PlayerBase
     protected Transform player;
 
     protected Vector3 targetPosition;
+    private Coroutine trapStopCoroutine;
+
+    //NPCStamp
+    private const int GimmickFoundStampIndex = 0;
+    private const int PressurePlateStampIndex = 1;
+    private const int TrapTriggeredStampIndex = 2;
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_ShowNpcStamp(int stampIndex)
+    {
+        ShowStamp(stampIndex);
+    }
+
+    public void NotifyGimmickFound()
+    {
+        if(Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
+
+        RPC_ShowNpcStamp(GimmickFoundStampIndex);
+    }
+
+    public void NotifyPressurePlatePressed()
+    {
+        if(Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
+
+        RPC_ShowNpcStamp(PressurePlateStampIndex);
+    }
+
+    public void NotifyTrapTriggered()
+    {
+        if(Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
+        RPC_ShowNpcStamp(TrapTriggeredStampIndex);
+    }
+
+    public void StopByTrap(float stopSeconds)
+    {
+        if(Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
+        if(trapStopCoroutine != null)
+        {
+            StopCoroutine(trapStopCoroutine);
+        }
+
+        trapStopCoroutine = StartCoroutine(StopByTrapRoution(stopSeconds));
+    }
+
+    private IEnumerator StopByTrapRoution(float stopSeconds)
+    {
+        ChangeState(NPCState.Stop);
+
+        if(agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(stopSeconds);
+
+        if(agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
+
+        ChangeState(NPCState.Patrol);
+        trapStopCoroutine = null;
+    }
+
+
 
     public enum NPCState
     {
@@ -54,6 +134,12 @@ public class NPCBase : PlayerBase
         }
     }
 
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    public void RPC_ReceiveStampCommand(int command)
+    {
+        ReceiveStampCommand((StampCommand)command);
+    }
+
     public virtual void ReceiveStampCommand(StampCommand command)
     {
         Debug.Log($"NPCがスタンプ命令を受信:{command}");
@@ -68,8 +154,8 @@ public class NPCBase : PlayerBase
                 ChangeState(NPCState.Stop);
                 break;
 
-            case StampCommand.MoveToTarget:
-                ChangeState(NPCState.MoveToTarget);
+            case StampCommand.Patrol:
+                ChangeState(NPCState.Patrol);
                 break;
 
             case StampCommand.Action:

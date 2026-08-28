@@ -25,12 +25,16 @@ public class Pitfall : GimmickBase
     /// </summary>
     private void Awake()
     {
-        GameObject stageControllerObject = GameObject.Find("StageController");
-
-        if (stageControllerObject != null)
+        // 各落とし穴Prefabに設定された真下のワープ地点を優先する。
+        if (stageController == null)
         {
-            stageController =
-                stageControllerObject.GetComponent<StageController>();
+            GameObject stageControllerObject = GameObject.Find("StageController");
+
+            if (stageControllerObject != null)
+            {
+                stageController =
+                    stageControllerObject.GetComponent<StageController>();
+            }
         }
 
         if (stageController == null)
@@ -44,6 +48,14 @@ public class Pitfall : GimmickBase
     /// </summary>
     protected override void OnPlayerHit(GameObject playerObject)
     {
+        //NPC
+        NPCBase npc = playerObject.GetComponent<NPCBase>();
+        if(npc != null)
+        {
+            npc.NotifyTrapTriggered();
+            npc.StopByTrap(2f);
+        }
+
         // ワープ処理中に再度発動しないようにする
         if (isWarping)
         {

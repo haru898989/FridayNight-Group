@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking; // 通信機能を使うための準備
+using Fusion;
 
-public class NewLog : MonoBehaviour
+public class LogGenerator : NetworkBehaviour
 {
-    // どこからでも NewLog.Instance.SendLog(...) と呼び出せるようにする魔法
-    public static NewLog Instance { get; private set; }
+    // どこからでも LogGenerator.Instance.SendLog(...) と呼び出せるようにする魔法
+    public static LogGenerator Instance { get; private set; }
 
     [Header("GASの設定")]
     // GASのデプロイURLをここに貼り付けます
@@ -30,25 +31,38 @@ public class NewLog : MonoBehaviour
     private bool gameStarted = false;
 
 
-    private void Awake()
+    public override void Spawned()
+{
+    Instance = this;
+
+    // 状態権限を持たないクライアントはログ送信を担当しない
+    if (!Object.HasStateAuthority)
     {
-        // 準備
-        Instance = this;
+        return;
     }
 
-    private void Start()
-    {
-        // 仮のMatchID
-        // 後でGASから取得することもできる
-        matchId = "M_" + System.DateTime.Now.ToString("yyyyMMdd_HHmmss");
+    matchId = "M_" + System.DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
+    StartCoroutine(LogUploadRoutine());
+    StartGame();
+}
 
-        // ゲーム開始と同時に、定期送信ループをスタート
-        StartCoroutine(LogUploadRoutine());
+public override void Despawned(NetworkRunner runner, bool hasState)
+{
+    if (Instance == this)
+    {
+        Instance = null;
     }
+}
 
     //ゲーム開始
     public void StartGame()
 {
+
+        if (Object == null || !Object.HasStateAuthority)
+    {
+        return;
+    }
+
     // ゲーム開始時刻を記録
     gameStartTime = Time.time;
 
@@ -60,39 +74,21 @@ public class NewLog : MonoBehaviour
     StartCoroutine(PositionLogRoutine());
 
 
-    // =====================================================
-    // Player1のゲーム開始ログ
-    // =====================================================
-
-    GameObject player1 =
-        GameObject.FindGameObjectWithTag("Player1");
-
-    if (player1 != null)
+        foreach (PlayerBase player in FindObjectsOfType<PlayerBase>())
     {
-        AddLog(
-            "Player1",
-            "GameStart",
-            "Start",
-            player1.transform.position
-        );
-    }
+        NetworkObject networkObject = player.GetComponent<NetworkObject>();
 
-
-    // =====================================================
-    // Player2のゲーム開始ログ
-    // =====================================================
-
-    GameObject player2 =
-        GameObject.FindGameObjectWithTag("Player2");
-
-    if (player2 != null)
-    {
-        AddLog(
-            "Player2",
-            "GameStart",
-            "Start",
-            player2.transform.position
-        );
+        if (networkObject != null &&
+            networkObject.InputAuthority != PlayerRef.None)
+        {
+            AddLog
+            (
+                $"Player_{networkObject.InputAuthority.PlayerId}",
+                "GameStart",
+                "Start",
+                player.transform.position
+            );
+        }
     }
 }
 
@@ -120,32 +116,20 @@ public class NewLog : MonoBehaviour
         {
             yield return new WaitForSeconds(positionLogInterval);
 
-
-            // Player1
-            GameObject player1 = GameObject.FindGameObjectWithTag("Player1");
-            if (player1 != null)
+            foreach (PlayerBase player in FindObjectsOfType<PlayerBase>())
             {
-                AddLog
-                (
-                    "Player1",
-                    "Position",
-                    "",
-                    player1.transform.position
-                );
-            }
+                NetworkObject networkObject = player.GetComponent<NetworkObject>();
 
-
-            // Player2
-            GameObject player2 = GameObject.FindGameObjectWithTag("Player2");
-            if (player2 != null)
-            {
-                AddLog
-                (
-                    "Player2",
-                    "Position",
-                    "",
-                    player2.transform.position
-                );
+                if (networkObject != null &&
+                    networkObject.InputAuthority != PlayerRef.None)
+                {
+                    AddLog(
+                        $"Player_{networkObject.InputAuthority.PlayerId}",
+                        "Position",
+                        "",
+                        player.transform.position
+                    );
+                }
             }
         }
     }
@@ -158,8 +142,17 @@ public class NewLog : MonoBehaviour
     /// <summary>
     /// ゲームの出来事を記録する
     /// </summary>
-    private void AddLog(string playerId,string eventType,string eventName,Vector3 position)
+    private void AddLog(
+        string playerId,
+        string eventType,
+        string eventName,
+        Vector3 position)
     {
+        // StateAuthority 所有者以外のログは破棄する
+        if (Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
         string[] row =
         {
             matchId,playerId,GetGameTime().ToString("F2"),
@@ -235,6 +228,15 @@ public class NewLog : MonoBehaviour
 //ゲーム終了
 public void EndGame()
 {
+
+
+
+    //Fusionの権限を持っていない人はログを送らない
+    if (Object == null || !Object.HasStateAuthority)
+    {
+        return;
+    }
+
     // 位置ログを停止
     gameStarted = false;
 

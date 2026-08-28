@@ -124,7 +124,7 @@ InitTestScene*.unity*
 *.userprefs
 *.tmp
 *.log
-
+.codex_tmp
 *.apk
 *.aab
 *.unitypackage

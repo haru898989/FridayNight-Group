@@ -13,6 +13,19 @@ public class BearTrap : GimmickBase
     {
         Debug.Log("Bear trap activated");
 
+        //NPC
+        NPCBase npc = playerObject.GetComponent<NPCBase>();
+
+        if(npc != null)
+        {
+            npc.NotifyTrapTriggered();
+            npc.StopByTrap(stopTime);
+        }
+        else
+        {
+            StartCoroutine(StopPlayer(playerObject));
+        }
+
         // とらばさみ発動時の効果音を再生する
         if (SoundManager.Instance != null)
         {

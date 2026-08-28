@@ -1,3 +1,4 @@
+using Fusion;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider))]
@@ -30,14 +31,49 @@ public abstract class GimmickBase : MonoBehaviour
             return;
         }
 
-        // 接触したオブジェクトがPlayerタグを持っているか確認する
-        if (other.CompareTag(playerTag))
+        // NPC はプレイヤー用のタグを持たないため、先に個別に判定する。
+        NPCBase npc = other.GetComponentInParent<NPCBase>();
+        if (npc != null)
+        {
+            if (npc.Object == null || !npc.Object.HasStateAuthority)
+            {
+                return;
+            }
+
+            isActivated = true;
+            OnPlayerHit(npc.gameObject);
+            return;
+        }
+
+        // プレイヤーの子Colliderが接触した場合も、PlayerBaseを持つルートまで辿る。
+        PlayerBase player = other.GetComponentInParent<PlayerBase>();
+        GameObject playerObject = player != null ? player.gameObject : other.gameObject;
+
+        // リモートプレイヤーは各クライアント上でUntaggedになるため、
+        // ローカルプレイヤーのギミックだけを発動する。
+        if (playerObject.CompareTag(playerTag))
         {
             // 発動済みにして、同じギミックが何度も動かないようにする
             isActivated = true;
 
+            NetworkObject playerNetworkObject =
+            playerObject.GetComponent<NetworkObject>();
+
+        if (LogGenerator.Instance != null &&
+            playerNetworkObject != null &&
+            playerNetworkObject.InputAuthority != PlayerRef.None)
+        {
+            LogGenerator.Instance.SendEventLog
+            (
+                $"Player_{playerNetworkObject.InputAuthority.PlayerId}",
+                "State",
+                $"{GetType().Name}_activated",
+                transform.position
+            );
+        }
+
             // 子クラスで実装したギミックごとの処理を呼び出す
-            OnPlayerHit(other.gameObject);
+            OnPlayerHit(playerObject);
         }
     }
 

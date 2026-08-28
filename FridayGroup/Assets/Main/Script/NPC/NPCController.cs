@@ -18,8 +18,15 @@ public class NPCController : NPCBase
     //NPCから何m探す？
     public float searchRadius = 5f;
 
+    private Collider targetGimmick;
+
     public override void FixedUpdateNetwork()
     {
+        if(Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
+
         //状態によって行動を変える
         switch(currentState)
         {
@@ -42,6 +49,14 @@ public class NPCController : NPCBase
             case NPCState.Stop:
                 StopMoving();
                 break;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if(Object != null && Object.HasStateAuthority)
+        {
+            Physics.SyncTransforms();
         }
     }
 
@@ -75,7 +90,7 @@ public class NPCController : NPCBase
 
             if(NavMesh.SamplePosition(randomPoint,
                                       out hit,
-                                      patrolRadius,
+                                      1f,
                                       NavMesh.AllAreas))
             {
                 agent.SetDestination(hit.position);
@@ -103,9 +118,7 @@ public class NPCController : NPCBase
     //アクション実行
     void Action()
     {
-
-        //Debug.Log("アクション実行");
-
+        targetGimmick = null;
         ChangeState(NPCState.Patrol);
     }
 
@@ -173,6 +186,15 @@ public class NPCController : NPCBase
             Debug.Log("ギミック発見!:" + nearestHit.name);
             targetPosition = nearestHit.transform.position;
             agent.SetDestination(targetPosition);
+            targetGimmick = nearestHit;
+
+            bool isPressurePlate = nearestHit.GetComponentInParent<PressurePlate>() != null;
+            bool isTrap = nearestHit.GetComponentInParent<BearTrap>() != null || nearestHit.GetComponentInParent<Pitfall>() != null;
+
+            if(!isPressurePlate && !isTrap)
+            {
+                NotifyGimmickFound();
+            }
             return true;
         }
 

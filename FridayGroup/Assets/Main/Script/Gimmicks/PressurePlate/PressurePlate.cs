@@ -16,6 +16,11 @@ public class PressurePlate : MonoBehaviour
     public int ChannelId => channelId;
     public int ActivatorId => activatorId;
 
+    private void Awake()
+    {
+        MakeAllCollidersTriggers();
+    }
+
     /// <summary>
     /// CSV番号の一の位を連動チャンネルとして設定し、同じチャンネルの色を反映する。
     /// </summary>
@@ -23,7 +28,18 @@ public class PressurePlate : MonoBehaviour
     {
         channelId = channel;
         puzzleId = $"csv-channel-{channel}";
+        MakeAllCollidersTriggers();
         ApplyChannelColor(channelColor);
+    }
+
+    private void MakeAllCollidersTriggers()
+    {
+        // 感圧板は判定だけに使い、プレイヤーを物理的に止めない。
+        Collider[] plateColliders = GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < plateColliders.Length; i++)
+        {
+            plateColliders[i].isTrigger = true;
+        }
     }
 
     /// <summary>
@@ -43,17 +59,27 @@ public class PressurePlate : MonoBehaviour
     {
         GameObject playerObject = FindPlayerRoot(other);
 
-        // 一度押された感圧板は、プレイヤーが離れても押された状態を維持する。
-        if (!isPressed && playerObject != null)
+        if (playerObject != null)
         {
-            isPressed = true;
+            NPCBase npc = playerObject.GetComponentInParent<NPCBase>();
+            // 先に同じプレイヤーが複数枚を踏んでいても、後から踏んだ
+            // 別プレイヤーを記録できるよう、進入のたびに更新する。
             activatorId = GetActivatorId(playerObject);
-            Debug.Log(gameObject.name + " pressed");
 
-            // 感圧版を踏んだときの効果音を再生する
-            if (SoundManager.Instance != null)
+            if (!isPressed)
             {
-                SoundManager.Instance.PlaySE(5);
+                if (npc != null)
+                {
+                    npc.NotifyPressurePlatePressed();
+                }
+
+                isPressed = true;
+                Debug.Log(gameObject.name + " pressed");
+
+                if (SoundManager.Instance != null)
+                {
+                    SoundManager.Instance.PlaySE(5);
+                }
             }
         }
     }
@@ -84,7 +110,9 @@ public class PressurePlate : MonoBehaviour
 
         while (current != null)
         {
-            if (current.CompareTag(playerTag) || current.GetComponent<PlayerBase>() != null)
+            if (current.CompareTag(playerTag) ||
+                current.GetComponent<PlayerBase>() != null ||
+                current.GetComponent<NPCBase>() != null)
             {
                 return current.gameObject;
             }

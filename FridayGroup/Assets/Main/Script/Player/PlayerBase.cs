@@ -330,6 +330,11 @@ public class PlayerBase : NetworkBehaviour
         characterModelInstance.transform.localRotation = Quaternion.Euler(characterModelLocalEulerAngles);
         characterModelInstance.transform.localScale = characterModelLocalScale;
 
+        if (HasInputAuthority)
+        {
+            HideLocalPlayerHat();
+        }
+
         // 見た目用モデル側の物理コンポーネントはPlayerルートの判定と重複させない。
         Collider[] visualColliders = characterModelInstance.GetComponentsInChildren<Collider>(true);
         for (int i = 0; i < visualColliders.Length; i++)
@@ -357,6 +362,32 @@ public class PlayerBase : NetworkBehaviour
         if (placeholderRenderer != null)
         {
             placeholderRenderer.enabled = false;
+        }
+    }
+
+    /// <summary>
+    /// 一人称視点を遮る帽子だけを、このクライアント上の自分のモデルから非表示にする。
+    /// リモートプレイヤーのモデルは変更しないため、相手からは帽子が見える。
+    /// </summary>
+    private void HideLocalPlayerHat()
+    {
+        Transform[] visualTransforms = characterModelInstance.GetComponentsInChildren<Transform>(true);
+
+        for (int i = 0; i < visualTransforms.Length; i++)
+        {
+            Transform visualTransform = visualTransforms[i];
+            string objectName = visualTransform.name.ToLowerInvariant();
+
+            if (!objectName.Contains("hat") && !objectName.Contains("fedora"))
+            {
+                continue;
+            }
+
+            Renderer[] hatRenderers = visualTransform.GetComponentsInChildren<Renderer>(true);
+            for (int rendererIndex = 0; rendererIndex < hatRenderers.Length; rendererIndex++)
+            {
+                hatRenderers[rendererIndex].enabled = false;
+            }
         }
     }
 
@@ -652,6 +683,11 @@ public class PlayerBase : NetworkBehaviour
     {
         if (heldObject == null)
         {
+            if (nearbyObject == null)
+            {
+                nearbyObject = FindClosestPickup();
+            }
+
             if (nearbyObject != null)
             {
                 float distance = Vector3.Distance(
@@ -669,26 +705,122 @@ public class PlayerBase : NetworkBehaviour
                 heldObject.transform.SetParent(transform);
                 heldObject.transform.localPosition = new Vector3(0, 1, 1);
 
-                Collider col = heldObject.GetComponent<Collider>();
-                if (col != null)
-                    col.enabled = false;
+                SetHeldObjectCollidersEnabled(heldObject, false);
 
                 Debug.Log("物を持った");
             }
         }
         else
         {
-            Collider col = heldObject.GetComponent<Collider>();
-            if (col != null)
-                col.enabled = true;
+            GameObject objectToDrop = heldObject;
+            Vector3 dropPosition = FindDropPosition(objectToDrop);
 
-            heldObject.transform.SetParent(null);
-            Vector3 pos = heldObject.transform.position;
-            pos.y = groundY;
-            heldObject.transform.position = pos;
+            objectToDrop.transform.SetParent(null);
+            objectToDrop.transform.position = dropPosition;
+            SetHeldObjectCollidersEnabled(objectToDrop, true);
             heldObject = null;
 
             Debug.Log("物を離した");
+        }
+    }
+
+    private GameObject FindClosestPickup()
+    {
+        Collider[] nearbyColliders = Physics.OverlapSphere(
+            transform.position,
+            2f,
+            Physics.AllLayers,
+            QueryTriggerInteraction.Collide
+        );
+
+        GameObject closestPickup = null;
+        float closestSqrDistance = float.MaxValue;
+
+        for (int i = 0; i < nearbyColliders.Length; i++)
+        {
+            Transform current = nearbyColliders[i].transform;
+            while (current != null && !current.CompareTag("Pickup"))
+            {
+                current = current.parent;
+            }
+
+            if (current == null)
+            {
+                continue;
+            }
+
+            float sqrDistance = (current.position - transform.position).sqrMagnitude;
+            if (sqrDistance < closestSqrDistance)
+            {
+                closestSqrDistance = sqrDistance;
+                closestPickup = current.gameObject;
+            }
+        }
+
+        return closestPickup;
+    }
+
+    private Vector3 FindDropPosition(GameObject target)
+    {
+        Vector3 rayOrigin = transform.position + Vector3.up;
+        RaycastHit[] hits = Physics.RaycastAll(
+            rayOrigin,
+            Vector3.down,
+            10f,
+            Physics.AllLayers,
+            QueryTriggerInteraction.Ignore
+        );
+
+        float closestDistance = float.MaxValue;
+        bool foundFloor = false;
+        Vector3 floorPoint = transform.position + Vector3.down;
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Transform hitTransform = hits[i].collider.transform;
+            if (hitTransform.IsChildOf(transform) || hitTransform.IsChildOf(target.transform))
+            {
+                continue;
+            }
+
+            if (hits[i].distance < closestDistance)
+            {
+                closestDistance = hits[i].distance;
+                floorPoint = hits[i].point;
+                foundFloor = true;
+            }
+        }
+
+        float bottomOffset = 0.08f;
+        Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
+        if (renderers.Length > 0)
+        {
+            float lowestPoint = renderers[0].bounds.min.y;
+            for (int i = 1; i < renderers.Length; i++)
+            {
+                lowestPoint = Mathf.Min(lowestPoint, renderers[i].bounds.min.y);
+            }
+
+            bottomOffset = Mathf.Max(0.01f, target.transform.position.y - lowestPoint);
+        }
+
+        Vector3 dropPosition = new Vector3(transform.position.x, floorPoint.y, transform.position.z);
+        dropPosition.y += bottomOffset;
+
+        if (!foundFloor)
+        {
+            dropPosition.y = transform.position.y - 1f + bottomOffset;
+        }
+
+        return dropPosition;
+    }
+
+    private static void SetHeldObjectCollidersEnabled(GameObject target, bool isEnabled)
+    {
+        Collider[] colliders = target.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            colliders[i].enabled = isEnabled;
         }
     }
 
@@ -754,7 +886,7 @@ public class PlayerBase : NetworkBehaviour
     /// <summary>
     /// スタンプの実装部分
     /// </summary>
-    void ShowStamp(int index)
+    protected void ShowStamp(int index)
     {
         foreach (GameObject obj in stampObjects)
         {
@@ -797,7 +929,7 @@ public class PlayerBase : NetworkBehaviour
             Debug.Log("現在NPCはいません．");
             return;
         }
-        npc.ReceiveStampCommand(stampCommand);
+        npc.RPC_ReceiveStampCommand((int)stampCommand);
     }
 
     void CloseStampMenu()
@@ -868,6 +1000,8 @@ public class PlayerBase : NetworkBehaviour
         CloseStampMenu();
     }
 
+
+    //Stampの種類
     private StampCommand GetStampCommand(int index)
     {
         switch(index)
@@ -877,9 +1011,9 @@ public class PlayerBase : NetworkBehaviour
             case 1:
                 return StampCommand.Stop;
             case 2:
-                return StampCommand.MoveToTarget;
-            case 3:
                 return StampCommand.Action;
+            case 3:
+                return StampCommand.Patrol;
             default:
                 return StampCommand.Patrol;
         }
