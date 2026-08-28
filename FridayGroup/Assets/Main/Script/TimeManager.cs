@@ -5,14 +5,14 @@ using UnityEngine.SceneManagement;
 
 public class TimeManager : MonoBehaviour
 {
-    [Header("§ŒÀŠÔi•bj")]
+    [Header("åˆ¶é™æ™‚é–“ï¼ˆç§’ï¼‰")]
     public float timeLimit = 180f;
 
-    [Header("ƒ^ƒCƒ}[•\¦")]
+    [Header("ã‚¿ã‚¤ãƒãƒ¼è¡¨ç¤º")]
     public TMP_Text timerText;
     public GameObject timeUpText;
 
-    [Header("‘JˆÚæƒV[ƒ“")]
+    [Header("é·ç§»å…ˆã‚·ãƒ¼ãƒ³")]
     public string nextSceneName = "Result";
 
     private float currentTime;
@@ -28,7 +28,7 @@ public class TimeManager : MonoBehaviour
 
         List<StageCatalogEntry> stages = StageCatalog.Load();
 
-        Debug.Log($"StageCatalog‚ÌƒXƒe[ƒW” = {stages.Count}");
+        Debug.Log($"StageCatalogã®ã‚¹ãƒ†ãƒ¼ã‚¸æ•° = {stages.Count}");
 
         foreach (StageCatalogEntry s in stages)
         {
@@ -42,12 +42,12 @@ public class TimeManager : MonoBehaviour
         if (stage != null)
         {
             SetTimeLimit(stage.timeLimit);
-            Debug.Log($"ƒXƒe[ƒW {stage.stageFolder} ‚Ì§ŒÀŠÔ: {stage.timeLimit}•b");
+            Debug.Log($"ã‚¹ãƒ†ãƒ¼ã‚¸ {stage.stageFolder} ã®åˆ¶é™æ™‚é–“: {stage.timeLimit}ç§’");
         }
         else
         {
             currentTime = timeLimit;
-            Debug.LogWarning("‘I‘ğ‚³‚ê‚½ƒXƒe[ƒW‚ªŒ©‚Â‚©‚ç‚È‚¢‚½‚ßAƒfƒtƒHƒ‹ƒg‚Ì§ŒÀŠÔ‚ğg—p‚µ‚Ü‚·B");
+            Debug.LogWarning("é¸æŠã•ã‚ŒãŸã‚¹ãƒ†ãƒ¼ã‚¸ãŒè¦‹ã¤ã‹ã‚‰ãªã„ãŸã‚ã€ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®åˆ¶é™æ™‚é–“ã‚’ä½¿ç”¨ã—ã¾ã™ã€‚");
         }
     }
     public void SetTimeLimit(float time)
@@ -85,7 +85,7 @@ public class TimeManager : MonoBehaviour
 
     void TimeUp()
     {
-        Debug.Log("ŠÔØ‚ê");
+        Debug.Log("æ™‚é–“åˆ‡ã‚Œ");
         if (timeUpText != null)
         {
             timeUpText.SetActive(true);
@@ -97,11 +97,30 @@ public class TimeManager : MonoBehaviour
         {
             player.canMove = false;
         }
+
+        if (GoalPresentationUI.Instance != null)
+        {
+            GoalPresentationUI.Instance.HideAll();
+        }
+
         Invoke(nameof(ChangeScene), 2f);
     }
     
     void ChangeScene()
     {
-        SceneManager.LoadScene(nextSceneName);
+        OnlineStageFlow flow = OnlineStageFlow.Instance;
+        if (flow != null && flow.IsConnected)
+        {
+            // ã‚¿ã‚¤ãƒ ã‚ªãƒ¼ãƒãƒ¼ã¯ã‚¯ãƒªã‚¢ã§ã¯ãªã„ãŸã‚ã€æ¥ç¶šã‚’ç¶­æŒã—ãŸã¾ã¾
+            // ãƒ›ã‚¹ãƒˆã‹ã‚‰å…¨å“¡ã‚’ã‚¹ãƒ†ãƒ¼ã‚¸é¸æŠã¸æˆ»ã—ã¾ã™ã€‚
+            if (flow.IsSharedModeMasterClient)
+            {
+                flow.ReturnToStageSelect();
+            }
+
+            return;
+        }
+
+        SceneManager.LoadScene("Title");
     }
 }

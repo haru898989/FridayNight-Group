@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.AI.Navigation;
+using UnityEngine.Rendering;
 
 // CSVからマップを自動生成する基礎を学ぶためのクラス
 public class MapGenerator : MonoBehaviour
@@ -64,6 +65,8 @@ public class MapGenerator : MonoBehaviour
             return;
         }
 
+        ApplyDarkStageEnvironment();
+
         // テストとして、ゲーム開始時に「1階（配列の1番目）」と「2階（2番目）」を生成してみる
         GenerateFloorMap(0);
         GenerateFloorMap(1);
@@ -81,6 +84,7 @@ public class MapGenerator : MonoBehaviour
         GenerateMonitorMazeCopy(1); // 1=3
         GenerateMonitorMazeCopy(2); // 2
         GenerateMonitorMazeCopy(3); // 1=3
+        ActivateMonitorPlayerMarker();
         surface.BuildNavMesh();
 
         // CSVの100で指定された位置をGameManagerへ渡す
@@ -122,6 +126,25 @@ public class MapGenerator : MonoBehaviour
         mapFloorData = selectedStageData;
         Debug.Log($"選択ステージを読み込みます: {StageSelectionContext.SelectedStageResourcePath}");
         return true;
+    }
+
+    private static void ApplyDarkStageEnvironment()
+    {
+        string selectedStage = StageSelectionContext.SelectedStageResourcePath;
+        if (selectedStage != "Stage/Stage3/3-3" && selectedStage != "Stage/Stage3/3-4")
+        {
+            return;
+        }
+
+        RenderSettings.ambientMode = AmbientMode.Flat;
+        RenderSettings.ambientLight = Color.black;
+        RenderSettings.ambientIntensity = 0.0f;
+        RenderSettings.reflectionIntensity = 0.0f;
+        RenderSettings.fog = false;
+
+        // 地上に配置したランプがEditorとBuildの両方で省略されないようにする。
+        QualitySettings.pixelLightCount = Mathf.Max(QualitySettings.pixelLightCount, 8);
+        DynamicGI.UpdateEnvironment();
     }
 
     /// <summary>
@@ -191,6 +214,7 @@ public class MapGenerator : MonoBehaviour
                 // 90はゴール
                 if (key == 90)
                 {
+                    InstantiateGimmickFloor(floorIndex, spawnPos);
                     Instantiate(Goal[0], spawnPos, Quaternion.identity, mapParent);
                     continue;
                 }
@@ -250,7 +274,7 @@ public class MapGenerator : MonoBehaviour
                                 Instantiate(
                                     door[0],
                                     spawnPos,
-                                    Quaternion.identity,
+                                    GetDoorRotation(floorIndex, x, y),
                                     mapParent
                                 );
                                 continuousWallCount = 0;
@@ -262,12 +286,27 @@ public class MapGenerator : MonoBehaviour
                             break;
 
                             case 5: // ランタン
-                                    Instantiate(lantern[0], spawnPos, Quaternion.identity, mapParent);
+                                    Instantiate(
+                                        lantern[0],
+                                        spawnPos + Vector3.up * 0.55f,
+                                        Quaternion.identity,
+                                        mapParent
+                                    );
                             break;
 
                             case 6: // 26：モニター付き壁
                                 Instantiate(
                                     monitorWallPrefab[0],
+                                    spawnPos,
+                                    Quaternion.identity,
+                                    mapParent
+                                );
+                                continuousWallCount = 0;
+                                break;
+
+                            case 7: // 27：地下は暗い壁、監視コピーだけランプ付き壁
+                                Instantiate(
+                                    B1normalWallPrefab[0],
                                     spawnPos,
                                     Quaternion.identity,
                                     mapParent
@@ -283,7 +322,30 @@ public class MapGenerator : MonoBehaviour
                                     Debug.LogWarning($"CSV番号28の隣に感圧板がありません: ({x}, {y})");
                                 }
 
-                                InstantiateChannelDoor(floorIndex, spawnPos, pressurePlateChannel, 1);
+                                InstantiateChannelDoor(
+                                    floorIndex,
+                                    spawnPos,
+                                    pressurePlateChannel,
+                                    1,
+                                    GetDoorRotation(floorIndex, x, y)
+                                );
+                                continuousWallCount = 0;
+                            break;
+
+                            case 9: // 29：監視室へ入るための一方通行
+                                InstantiateGimmickFloor(floorIndex, spawnPos);
+
+                                GameObject passageObject = new GameObject("OneWayPassage");
+                                passageObject.transform.SetParent(mapParent, true);
+                                passageObject.transform.position = spawnPos;
+
+                                BoxCollider passageTrigger = passageObject.AddComponent<BoxCollider>();
+                                passageTrigger.isTrigger = true;
+                                passageTrigger.center = Vector3.up;
+                                passageTrigger.size = new Vector3(tileSize * 0.8f, 2.0f, tileSize * 0.8f);
+
+                                GeneratedOneWayPassage passage = passageObject.AddComponent<GeneratedOneWayPassage>();
+                                passage.Configure(Vector3.back * tileSize * 2.0f);
                                 continuousWallCount = 0;
                             break;
 
@@ -293,9 +355,10 @@ public class MapGenerator : MonoBehaviour
                         switch (type)
                         {
                             case 1: // 31：トラばさみ
+                                InstantiateGimmickFloor(floorIndex, spawnPos);
                                 Instantiate(
                                     BearTrap[0],
-                                    spawnPos,
+                                    spawnPos + Vector3.up * 0.55f,
                                     Quaternion.identity,
                                     mapParent
                                 );
@@ -340,7 +403,13 @@ public class MapGenerator : MonoBehaviour
                         break;
 
                     case 5: // 50-59: 扉（一の位が連動チャンネル）
-                        InstantiateChannelDoor(floorIndex, spawnPos, type);
+                        InstantiateChannelDoor(
+                            floorIndex,
+                            spawnPos,
+                            type,
+                            2,
+                            GetDoorRotation(floorIndex, x, y)
+                        );
                         break;
 
                     case 6: // 60～62：クリスタル、63～65：歯車
@@ -548,6 +617,15 @@ public class MapGenerator : MonoBehaviour
                         );
                         break;
 
+                    case 27: // 監視コピーだけに表示するランプ付き壁
+                        Instantiate(
+                            lampWallPrefab[0],
+                            spawnPos,
+                            Quaternion.identity,
+                            monitorMazeParent
+                        );
+                        break;
+
                     case 100: // プレイヤー開始地点
                               // 監視用マップではプレイヤーを生成せず、床だけ生成する
                         Instantiate(
@@ -557,9 +635,112 @@ public class MapGenerator : MonoBehaviour
                             monitorMazeParent
                         );
                         break;
+
+                    default:
+                        // ギミックは監視コピー上で動作させず、床だけを補完する。
+                        // これにより実マップのギミック配置でモニター側に穴が開かない。
+                        if (key >= 25)
+                        {
+                            Instantiate(
+                                floorB1[0],
+                                spawnPos,
+                                Quaternion.identity,
+                                monitorMazeParent
+                            );
+
+                            CreateMonitorGimmickMarker(key, spawnPos);
+                        }
+                        break;
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 監視用コピーには実物のギミックスクリプトを複製せず、位置確認用の色付きマーカーだけを置く。
+    /// </summary>
+    private void CreateMonitorGimmickMarker(int key, Vector3 spawnPos)
+    {
+        GameObject marker = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        marker.name = $"MonitorMarker_{key}";
+        marker.transform.SetParent(monitorMazeParent, true);
+        marker.transform.position = spawnPos + Vector3.up * 0.515f;
+        marker.transform.localScale = new Vector3(tileSize * 0.48f, 0.03f, tileSize * 0.48f);
+
+        Collider markerCollider = marker.GetComponent<Collider>();
+        if (markerCollider != null)
+        {
+            Destroy(markerCollider);
+        }
+
+        Renderer markerRenderer = marker.GetComponent<Renderer>();
+        if (markerRenderer != null)
+        {
+            Color markerColor = GetMonitorMarkerColor(key);
+            Shader markerShader = Shader.Find("Unlit/Color");
+
+            if (markerShader != null)
+            {
+                Material markerMaterial = new Material(markerShader);
+                markerMaterial.color = markerColor;
+                markerRenderer.material = markerMaterial;
+            }
+            else
+            {
+                markerRenderer.material.color = markerColor;
+            }
+        }
+    }
+
+    private static void ActivateMonitorPlayerMarker()
+    {
+        MonitorDecoyMirror monitorPlayerMarker =
+            Object.FindObjectOfType<MonitorDecoyMirror>(true);
+
+        if (monitorPlayerMarker != null)
+        {
+            monitorPlayerMarker.gameObject.SetActive(true);
+        }
+    }
+
+    private static Color GetMonitorMarkerColor(int key)
+    {
+        if (key == 38 || key == 90)
+        {
+            return Color.green;       // 梯子／ゴール
+        }
+
+        if (key == 31 || key == 70)
+        {
+            return Color.red;         // トラばさみ／落とし穴
+        }
+
+        if (key >= 40 && key <= 49)
+        {
+            return new Color(1.0f, 0.5f, 0.0f); // 感圧板
+        }
+
+        if (key >= 50 && key <= 59)
+        {
+            return Color.blue;        // 連動ドア
+        }
+
+        if (key >= 60 && key <= 62)
+        {
+            return Color.cyan;        // クリスタル
+        }
+
+        if (key >= 63 && key <= 65)
+        {
+            return Color.magenta;     // 歯車
+        }
+
+        if (key == 25)
+        {
+            return Color.yellow;      // ランタン
+        }
+
+        return Color.white;
     }
 
     /// <summary>
@@ -597,7 +778,8 @@ public class MapGenerator : MonoBehaviour
         int floorIndex,
         Vector3 spawnPos,
         int channelId,
-        int requiredPlateCount = 2
+        int requiredPlateCount = 2,
+        Quaternion? doorRotation = null
     )
     {
         InstantiateGimmickFloor(floorIndex, spawnPos);
@@ -605,7 +787,7 @@ public class MapGenerator : MonoBehaviour
             Instantiate(
                 TwoPlayerDoor[0],
                 spawnPos,
-                Quaternion.Euler(0f, 90f, 0f),
+                doorRotation ?? Quaternion.Euler(0f, 90f, 0f),
                 mapParent
             ); TwoPlayerDoor linkedDoor = doorObject.GetComponentInChildren<TwoPlayerDoor>(true);
 
@@ -620,6 +802,45 @@ public class MapGenerator : MonoBehaviour
             GetGimmickChannelColor(channelId),
             requiredPlateCount
         );
+    }
+
+    private Quaternion GetDoorRotation(int floorIndex, int x, int y)
+    {
+        int wallDataIndex = floorIndex + 1;
+        bool wallsOnLeftAndRight =
+            IsWallCell(wallDataIndex, x - 1, y) && IsWallCell(wallDataIndex, x + 1, y);
+        bool wallsAboveAndBelow =
+            IsWallCell(wallDataIndex, x, y - 1) && IsWallCell(wallDataIndex, x, y + 1);
+
+        if (wallsOnLeftAndRight && !wallsAboveAndBelow)
+        {
+            return Quaternion.identity;
+        }
+
+        // Prefab本来の向き。上下に壁がある場合と判定不能時は従来どおり。
+        return Quaternion.Euler(0f, 90f, 0f);
+    }
+
+    private bool IsWallCell(int floorIndex, int x, int y)
+    {
+        if (floorIndex < 0 || floorIndex >= mapFloorData.Length || mapFloorData[floorIndex] == null)
+        {
+            return false;
+        }
+
+        string[] rows = mapFloorData[floorIndex].text.Trim().Split('\n');
+        if (y < 0 || y >= rows.Length)
+        {
+            return false;
+        }
+
+        string[] columns = rows[y].Replace("\r", "").Split(',');
+        if (x < 0 || x >= columns.Length || !int.TryParse(columns[x].Trim(), out int key))
+        {
+            return false;
+        }
+
+        return key == 21 || key == 22 || key == 24 || key == 26;
     }
 
     private static int FindAdjacentPressurePlateChannel(string[] rows, int x, int y)
@@ -666,6 +887,65 @@ public class MapGenerator : MonoBehaviour
             case 8: return new Color(1.00f, 0.30f, 0.65f); // ピンク
             case 9: return new Color(0.85f, 0.85f, 0.85f); // 白
             default: return Color.white;
+        }
+    }
+}
+
+[RequireComponent(typeof(Collider))]
+internal sealed class GeneratedOneWayPassage : MonoBehaviour
+{
+    private Vector3 exitOffset = new Vector3(0.0f, 0.0f, -2.0f);
+    private float nextWarpTime;
+
+    public void Configure(Vector3 offset)
+    {
+        exitOffset = offset;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (Time.time < nextWarpTime)
+        {
+            return;
+        }
+
+        PlayerBase player = other.GetComponentInParent<PlayerBase>();
+        if (player == null)
+        {
+            return;
+        }
+
+        Fusion.NetworkObject networkObject = player.GetComponent<Fusion.NetworkObject>();
+        if (networkObject != null && !networkObject.HasStateAuthority)
+        {
+            return;
+        }
+
+        // CharacterControllerと追加Colliderが同時に入っても、1回だけ移動させる。
+        nextWarpTime = Time.time + 0.75f;
+
+        CharacterController controller = player.GetComponent<CharacterController>();
+        bool controllerWasEnabled = controller != null && controller.enabled;
+        if (controllerWasEnabled)
+        {
+            controller.enabled = false;
+        }
+
+        Vector3 targetPosition = player.transform.position;
+        targetPosition.x += exitOffset.x;
+        targetPosition.z = transform.position.z + exitOffset.z;
+        Fusion.NetworkTransform networkTransform = player.GetComponent<Fusion.NetworkTransform>();
+        if (networkTransform != null && networkObject != null && networkObject.HasStateAuthority)
+        {
+            networkTransform.Teleport(targetPosition, player.transform.rotation);
+        }
+
+        player.transform.position = targetPosition;
+        Physics.SyncTransforms();
+
+        if (controllerWasEnabled)
+        {
+            controller.enabled = true;
         }
     }
 }

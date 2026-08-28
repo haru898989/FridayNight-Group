@@ -25,12 +25,16 @@ public class Pitfall : GimmickBase
     /// </summary>
     private void Awake()
     {
-        GameObject stageControllerObject = GameObject.Find("StageController");
-
-        if (stageControllerObject != null)
+        // 各落とし穴Prefabに設定された真下のワープ地点を優先する。
+        if (stageController == null)
         {
-            stageController =
-                stageControllerObject.GetComponent<StageController>();
+            GameObject stageControllerObject = GameObject.Find("StageController");
+
+            if (stageControllerObject != null)
+            {
+                stageController =
+                    stageControllerObject.GetComponent<StageController>();
+            }
         }
 
         if (stageController == null)

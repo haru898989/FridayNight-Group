@@ -214,6 +214,36 @@
             ]
         },
         {
+            "groupFolder": "Stage3",
+            "stageFolder": "3-3",
+            "resourcePath": "Stage/Stage3/3-3",
+            "timeLimit": 240,
+            "csvFiles": [
+                "3-3BFfloor",
+                "3-3BFguide",
+                "3-3BFwall",
+                "3-3Floor",
+                "3-3LightWall",
+                "3-3roof",
+                "3-3Wall"
+            ]
+        },
+        {
+            "groupFolder": "Stage3",
+            "stageFolder": "3-4",
+            "resourcePath": "Stage/Stage3/3-4",
+            "timeLimit": 300,
+            "csvFiles": [
+                "3-4BFfloor",
+                "3-4BFguide",
+                "3-4BFwall",
+                "3-4Floor",
+                "3-4LightWall",
+                "3-4roof",
+                "3-4Wall"
+            ]
+        },
+        {
             "groupFolder": "Stage4",
             "stageFolder": "Final",
             "resourcePath": "Stage/Stage4/Final",

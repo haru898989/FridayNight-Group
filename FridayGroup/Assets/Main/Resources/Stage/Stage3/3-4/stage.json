@@ -1,0 +1,17 @@
+{
+    "displayName": "3-4 MONITOR MAZE CHALLENGE",
+    "description": "USE THE MONITOR, LANTERN, TRAPS, CRYSTAL AND PRESSURE PLATES TO ESCAPE.",
+    "previewFile": "",
+    "csvOrder": [
+        "3-4BFfloor",
+        "3-4BFwall",
+        "3-4BFguide",
+        "3-4BFwall",
+        "3-4Floor",
+        "3-4Wall",
+        "3-4LightWall",
+        "3-4Wall",
+        "3-4roof"
+    ]
+}
+
