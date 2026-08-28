@@ -95,7 +95,7 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"参加者を登録しました: Player={player.PlayerId}, Slot={index + 1}");
         TrySpawnLocalPlayer();
-        //UpdateNPC();
+        UpdateNPC();
     }
 
     public void OnPlayerLeft(NetworkRunner networkRunner, PlayerRef player)
@@ -402,7 +402,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (shouldSpawnNpcInStage)
+        if (shouldSpawnNpcInStage && IsSoloSession())
         {
             SpawnNPC();
         }
@@ -410,6 +410,18 @@ public class GameManager : MonoBehaviour
         {
             DespawnNPC();
         }
+    }
+
+    private bool IsSoloSession()
+    {
+        int count = 0;
+
+        foreach (PlayerRef player in runner.ActivePlayers)
+        {
+            count++;
+        }
+
+        return count == 1;
     }
 
     private async void SpawnNPC()

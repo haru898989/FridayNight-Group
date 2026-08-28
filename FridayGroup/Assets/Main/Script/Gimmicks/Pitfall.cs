@@ -53,7 +53,14 @@ public class Pitfall : GimmickBase
         if(npc != null)
         {
             npc.NotifyTrapTriggered();
-            npc.StopByTrap(2f);
+            npc.ChangeState(NPCBase.NPCState.Stop);
+
+            if(stageController != null)
+            {
+                npc.WarpToNavMesh(stageController.GetPitfallWarpPosition());
+            }
+
+            return;
         }
 
         // ƒ[ƒvˆ—’†‚ÉÄ“x”­“®‚µ‚È‚¢‚æ‚¤‚É‚·‚é

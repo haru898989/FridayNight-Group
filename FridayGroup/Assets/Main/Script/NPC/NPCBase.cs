@@ -125,12 +125,15 @@ public class NPCBase : PlayerBase
 
     protected void FindPlayer()
     {
-        GameObject obj = GameObject.FindGameObjectWithTag("Player");
+        PlayerBase[] players = FindObjectsOfType<PlayerBase>();
 
-        if (obj != null)
+        foreach (PlayerBase foundPlayer in players)
         {
-            player = obj.transform;
-            Debug.Log("NPC‚ªPlayer‚ð”­Œ©: " + obj.name);
+            if(foundPlayer.gameObject != gameObject)
+            {
+                player = foundPlayer.transform;
+                return;
+            }
         }
     }
 
@@ -173,6 +176,21 @@ public class NPCBase : PlayerBase
     {
         targetPosition = pos;
         ChangeState(NPCState.MoveToTarget);
+    }
+
+    public void WarpToNavMesh(Vector3 destination)
+    {
+        if(Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
+
+        if(agent != null &&
+            NavMesh.SamplePosition(destination, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+        {
+            agent.Warp(hit.position);
+        }
+        
     }
 
 }

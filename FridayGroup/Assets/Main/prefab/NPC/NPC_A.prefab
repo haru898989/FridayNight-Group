@@ -824,7 +824,7 @@ MonoBehaviour:
   stampMenuIcons: []
   canMove: 1
   patrolRadius: 6
-  arriveDistance: 0.1
+  arriveDistance: 0.05
   searchRadius: 5
 --- !u!195 &-1296505556129796520
 NavMeshAgent:

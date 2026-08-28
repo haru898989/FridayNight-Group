@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = System.Random;
@@ -19,6 +20,9 @@ public class NPCController : NPCBase
     public float searchRadius = 5f;
 
     private Collider targetGimmick;
+
+    private Pitfall pendingPitfall;
+    private bool waitingForPitfallCommand;
 
     public override void FixedUpdateNetwork()
     {
@@ -112,12 +116,26 @@ public class NPCController : NPCBase
             return;
 
         StopMoving();
+
+        if(waitingForPitfallCommand)
+        {
+            return;
+        }
+
         ChangeState(NPCState.Action);
     }
 
     //アクション実行
     void Action()
     {
+        if(waitingForPitfallCommand && pendingPitfall != null)
+        {
+            waitingForPitfallCommand = false;
+            targetPosition = pendingPitfall.transform.position;
+            agent.SetDestination(targetPosition);
+            ChangeState(NPCState.MoveToTarget);
+            return;
+        }
         targetGimmick = null;
         ChangeState(NPCState.Patrol);
     }
@@ -179,6 +197,7 @@ public class NPCController : NPCBase
                 nearestDistance = distance;
                 nearestHit = hit;
             }
+
         }
 
         if (nearestHit != null)
@@ -191,7 +210,49 @@ public class NPCController : NPCBase
             bool isPressurePlate = nearestHit.GetComponentInParent<PressurePlate>() != null;
             bool isTrap = nearestHit.GetComponentInParent<BearTrap>() != null || nearestHit.GetComponentInParent<Pitfall>() != null;
 
-            if(!isPressurePlate && !isTrap)
+            Pitfall pitfall = nearestHit.GetComponentInParent<Pitfall>();
+            if (pitfall == null)
+            {
+                pitfall = nearestHit.GetComponentInChildren<Pitfall>();
+            }
+
+            if (pitfall != null)
+            {
+
+                //落とし穴
+                pendingPitfall = pitfall;
+                waitingForPitfallCommand = true;
+                targetGimmick = nearestHit;
+                
+                Vector3 center = nearestHit.bounds.center;
+                Vector3 direction = transform.position - center;
+                direction.y = 0f;
+
+                if (direction.sqrMagnitude < 0.01f)
+                {
+                    direction = -transform.forward;
+                }
+
+                float distance = Mathf.Max(
+                    nearestHit.bounds.extents.x,
+                    nearestHit.bounds.extents.z
+                    ) + 0.25f;
+
+                Vector3 waitingPoint = center + direction.normalized * distance;
+
+                if (NavMesh.SamplePosition(waitingPoint, out NavMeshHit hit, 1.5f, NavMesh.AllAreas))
+                {
+                    waitingPoint = hit.position;
+                }
+
+                targetPosition = waitingPoint;
+                agent.SetDestination(targetPosition);
+
+                NotifyGimmickFound();
+                return true;
+            }
+
+            if (!isPressurePlate && !isTrap)
             {
                 NotifyGimmickFound();
             }
