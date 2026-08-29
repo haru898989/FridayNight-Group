@@ -25,6 +25,13 @@ public class LadderWarp : MonoBehaviour
             return;
         }
 
+        NPCBase npc = other.GetComponentInParent<NPCBase>();
+
+        if(npc != null)
+        {
+            return;
+        }
+
         GameObject playerObject = FindPlayerRoot(other);
         if (playerObject == null)
         {
@@ -144,5 +151,18 @@ public class LadderWarp : MonoBehaviour
         GUI.color = new Color(0.0f, 0.0f, 0.0f, fadeAlpha);
         GUI.DrawTexture(new Rect(0.0f, 0.0f, Screen.width, Screen.height), Texture2D.whiteTexture);
         GUI.color = previousColor;
+    }
+
+    //NPC
+    public void UseByNpc(NPCBase npc)
+    {
+
+        if(npc == null)
+        {
+            return;
+        }
+
+        Vector3 destination = transform.position + exitOffset;
+        npc.WarpToNavMesh(destination);
     }
 }

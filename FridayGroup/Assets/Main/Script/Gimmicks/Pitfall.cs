@@ -52,14 +52,26 @@ public class Pitfall : GimmickBase
         NPCBase npc = playerObject.GetComponent<NPCBase>();
         if(npc != null)
         {
-            npc.NotifyTrapTriggered();
-            npc.ChangeState(NPCBase.NPCState.Stop);
+            if (npc.IsFollowingPlayer)
+            {
+                return;
+            }
+
+            npc.NotifyPitfallFallen();
+
+            NPCController npcController = npc as NPCController;
+
+            if(npcController != null)
+            {
+                npcController.MarkPitfallAsHandled(this);
+            }
 
             if(stageController != null)
             {
                 npc.WarpToNavMesh(stageController.GetPitfallWarpPosition());
             }
 
+            npc.ChangeState(NPCBase.NPCState.Patrol);
             return;
         }
 

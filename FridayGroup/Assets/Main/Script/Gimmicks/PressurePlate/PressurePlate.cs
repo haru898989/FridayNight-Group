@@ -72,13 +72,15 @@ public class PressurePlate : MonoBehaviour
                 {
                     npc.NotifyPressurePlatePressed();
                 }
-
-                isPressed = true;
-                Debug.Log(gameObject.name + " pressed");
-
-                if (SoundManager.Instance != null)
+                if (!isPressed)
                 {
-                    SoundManager.Instance.PlaySE(5);
+                    isPressed = true;
+                    Debug.Log(gameObject.name + " pressed");
+
+                    if (SoundManager.Instance != null)
+                    {
+                        SoundManager.Instance.PlaySE(5);
+                    }
                 }
             }
         }
