@@ -131,6 +131,10 @@ public sealed class PauseMenuController : MonoBehaviour
         {
             EventSystem.current.SetSelectedGameObject(null);
         }
+
+        // ゲーム復帰時にもう一度強制的にカーソルをロック
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void RestartStage()
@@ -209,8 +213,10 @@ public sealed class PauseMenuController : MonoBehaviour
             localPlayer.canMove = localPlayerCouldMove;
         }
 
-        Cursor.lockState = previousCursorLockMode;
-        Cursor.visible = previousCursorVisible;
+        // ゲームに戻るときはカーソルを非表示・中央固定
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         localPlayer = null;
     }
 
@@ -226,5 +232,14 @@ public sealed class PauseMenuController : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void LateUpdate()
+    {
+        if (!isOpen && !isTransitioning)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 }
