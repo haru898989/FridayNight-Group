@@ -885,6 +885,12 @@ public class PlayerBase : NetworkBehaviour
         OnlineStageFlow.Instance.ReportPlayerReachedGoal(player);
     }
 
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_RemoveBearTrap(Vector3 trapPosition)
+    {
+        BearTrap.ConsumeAtPosition(trapPosition);
+    }
+
     [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
     private void RPC_ShowStamp(int index)
     {

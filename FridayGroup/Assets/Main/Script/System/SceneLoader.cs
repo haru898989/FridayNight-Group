@@ -15,8 +15,14 @@ public class SceneLoader : MonoBehaviour
 
         Instance = this;
 
-        // シーンを移動しても、このオブジェクトを削除しない
-        DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
 
