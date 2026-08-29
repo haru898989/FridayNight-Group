@@ -19,13 +19,20 @@ public class NPCBase : PlayerBase
 
     //NPCStamp
     private const int GimmickFoundStampIndex = 0;
-    private const int PressurePlateStampIndex = 1;
-    private const int TrapTriggeredStampIndex = 2;
+    private const int TrapTriggeredStampIndex = 1;
+    private const int PressurePlateStampIndex = 2;
+    private const int PitfallFallenStampIndex = 3;
+    
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_ShowNpcStamp(int stampIndex)
     {
         ShowStamp(stampIndex);
+
+        if(NPCStampIndicatorUI.Instance != null)
+        {
+            NPCStampIndicatorUI.Instance.Show(stampIndex, transform);
+        }
     }
 
     public void NotifyGimmickFound()
@@ -55,6 +62,16 @@ public class NPCBase : PlayerBase
             return;
         }
         RPC_ShowNpcStamp(TrapTriggeredStampIndex);
+    }
+
+    public void NotifyPitfallFallen()
+    {
+        if (Object == null || !Object.HasStateAuthority)
+        {
+            return;
+        }
+
+        RPC_ShowNpcStamp(PitfallFallenStampIndex);
     }
 
     public void StopByTrap(float stopSeconds)
@@ -172,6 +189,9 @@ public class NPCBase : PlayerBase
         currentState = nextState;
     }
 
+    public bool IsFollowingPlayer =>
+        currentState == NPCState.FollowPlayer;
+
     public void SetTarget(Vector3 pos)
     {
         targetPosition = pos;
@@ -185,11 +205,23 @@ public class NPCBase : PlayerBase
             return;
         }
 
-        if(agent != null &&
-            NavMesh.SamplePosition(destination, out NavMeshHit hit, 2f, NavMesh.AllAreas))
+        if(agent == null)
         {
-            agent.Warp(hit.position);
+            Debug.LogWarning("NPC‚ÌNavMesAgent‚ª‚ ‚è‚Ü‚¹‚ñ");
+            return;
         }
+
+        if(!NavMesh.SamplePosition(
+            destination,
+            out NavMeshHit hit,
+            2f,
+            NavMesh.AllAreas))
+        {
+            Debug.LogWarning($"NPC‚Ìƒ[ƒvæ•t‹ß‚ÉNavMEsh‚ª‚ ‚è‚Ü‚¹‚ñ:{destination}");
+            return;
+        }
+
+        agent.Warp(hit.position);
         
     }
 

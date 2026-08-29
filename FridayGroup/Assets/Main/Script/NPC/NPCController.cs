@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
-using UnityEditor.Experimental.GraphView;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = System.Random;
@@ -23,6 +24,8 @@ public class NPCController : NPCBase
 
     private Pitfall pendingPitfall;
     private bool waitingForPitfallCommand;
+
+    private readonly HashSet<Pitfall> handledPitfalls = new HashSet<Pitfall>();
 
     public override void FixedUpdateNetwork()
     {
@@ -131,10 +134,32 @@ public class NPCController : NPCBase
         if(waitingForPitfallCommand && pendingPitfall != null)
         {
             waitingForPitfallCommand = false;
-            targetPosition = pendingPitfall.transform.position;
+            targetPosition = targetGimmick != null
+                ? targetGimmick.bounds.center
+                : pendingPitfall.transform.position;
             agent.SetDestination(targetPosition);
             ChangeState(NPCState.MoveToTarget);
             return;
+        }
+        if(targetGimmick != null)
+        {
+            LadderWarp ladder =
+                targetGimmick.GetComponentInParent<LadderWarp>();
+
+            if(ladder == null)
+            {
+                ladder =
+                    targetGimmick.GetComponentInChildren<LadderWarp>();
+            }
+
+            if(ladder != null)
+            {
+                ladder.UseByNpc(this);
+
+                targetGimmick = null;
+                ChangeState(NPCState.Patrol);
+                return;
+            }
         }
         targetGimmick = null;
         ChangeState(NPCState.Patrol);
@@ -181,9 +206,23 @@ public class NPCController : NPCBase
                 continue;
             }
 
-            //çÇÇ≥ÇÃç∑Ç™1mà»è„Ç»ÇÁèúäO
-            float heightDiff = Mathf.Abs(hit.transform.position.y - transform.position.y);
-            if (heightDiff >= 1.0f)
+            Pitfall pitfallOnHit = hit.GetComponentInParent<Pitfall>();
+
+            if(pitfallOnHit == null)
+            {
+                pitfallOnHit = hit.GetComponentInChildren<Pitfall>();
+            }
+
+            if (pitfallOnHit != null &&
+                handledPitfalls.Contains(pitfallOnHit))
+            {
+                continue;
+            }
+
+
+                //çÇÇ≥ÇÃç∑Ç™1mà»è„Ç»ÇÁèúäO
+                float heightDiff = Mathf.Abs(hit.transform.position.y - transform.position.y);
+            if (heightDiff >= 3.0f)
             {
                 continue;
             }
@@ -233,10 +272,12 @@ public class NPCController : NPCBase
                     direction = -transform.forward;
                 }
 
+                float npcRadius = agent != null ? agent.radius : 0.5f;   
+
                 float distance = Mathf.Max(
                     nearestHit.bounds.extents.x,
                     nearestHit.bounds.extents.z
-                    ) + 0.25f;
+                    ) + npcRadius + 0.2f;
 
                 Vector3 waitingPoint = center + direction.normalized * distance;
 
@@ -260,6 +301,22 @@ public class NPCController : NPCBase
         }
 
         return false;
+    }
+
+    public void MarkPitfallAsHandled(Pitfall pitfall)
+    {
+        if(pitfall == null)
+        {
+            return;
+        }
+
+        handledPitfalls.Add(pitfall);
+
+        if(pendingPitfall == pitfall)
+        {
+            pendingPitfall = null;
+            waitingForPitfallCommand = false;
+        }
     }
 
     //íTçıîÕàÕïœçX

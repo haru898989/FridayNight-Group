@@ -119,7 +119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerTag: Player
-  isOnlyOnce: 1
+  isOnlyOnce: 0
   stopTime: 2
 --- !u!1 &4120665723640104151
 GameObject:
