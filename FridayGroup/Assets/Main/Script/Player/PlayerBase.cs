@@ -14,6 +14,7 @@ public class PlayerBase : NetworkBehaviour
     private float cameraRotationX = 0f; // カメラの位置
     public float holdThreshold = 0.5f; // ボタンの長押し判定
     private float pressStartTime;
+    private bool keyboardPickupHandled;
     private bool isSelectingStamp = false;
     private GameObject heldObject; // 持っている物
     public GameObject nearbyObject; // 近くにある持てる物
@@ -654,6 +655,33 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     private void OnBStarted(InputAction.CallbackContext context)
     {
+        if (!canMove)
+        {
+            return;
+        }
+
+        // キーボードのEは長押し待ちをせず、押した瞬間に持つ／離す。
+        // 持てる物がない場合は、既存どおり短押し決定として扱う。
+        // ゲームパッドのBは既存どおり長押し操作を維持する。
+        if (context.control.device is Keyboard)
+        {
+            GameObject pickup = heldObject == null ? FindClosestPickup() : null;
+            if (heldObject != null || pickup != null)
+            {
+                if (pickup != null)
+                {
+                    nearbyObject = pickup;
+                }
+
+                keyboardPickupHandled = true;
+                HoldObject();
+                return;
+            }
+
+            pressStartTime = Time.time;
+            return;
+        }
+
         pressStartTime = Time.time;
     }
 
@@ -662,6 +690,17 @@ public class PlayerBase : NetworkBehaviour
     /// </summary>
     private void OnBCanceled(InputAction.CallbackContext context)
     {
+        if (keyboardPickupHandled)
+        {
+            keyboardPickupHandled = false;
+            return;
+        }
+
+        if (!canMove)
+        {
+            return;
+        }
+
         float pressDuration = Time.time - pressStartTime;
         bool isHolding = heldObject != null;
 

@@ -79,6 +79,14 @@ public class TimeManager : MonoBehaviour
     {
         if (isTimeUp) return;
 
+        // オンライン通信自体は動かしたまま、全員のゲーム内時間だけを止める。
+        if ((stageFlow != null && stageFlow.IsStagePaused) ||
+            PauseMenuController.IsStagePaused)
+        {
+            UpdateTimerUI();
+            return;
+        }
+
         if (currentTime > 0)
         {
             currentTime -= Time.deltaTime;

@@ -1,5 +1,6 @@
 using Fusion;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TransceiverController : NetworkBehaviour
 {
@@ -9,6 +10,32 @@ public class TransceiverController : NetworkBehaviour
     public bool IsLocalTransmitting { get; private set; }
 
     private bool lastKeyState;
+    private InputAction transmitAction;
+
+    private void Awake()
+    {
+        transmitAction = new InputAction("Transceiver", InputActionType.Button);
+        transmitAction.AddBinding("<Keyboard>/t");
+        // Nintendo系コントローラーのXはGamepadの上ボタンです。
+        transmitAction.AddBinding("<Gamepad>/buttonNorth");
+    }
+
+    private void OnEnable()
+    {
+        transmitAction?.Enable();
+    }
+
+    private void OnDisable()
+    {
+        transmitAction?.Disable();
+        IsLocalTransmitting = false;
+        lastKeyState = false;
+    }
+
+    private void OnDestroy()
+    {
+        transmitAction?.Dispose();
+    }
 
     private void Update()
     {
@@ -22,7 +49,8 @@ public class TransceiverController : NetworkBehaviour
         bool currentKeyState =
             hasTransceiver &&
             !VoiceChatMuteController.IsLocalMuted &&
-            Input.GetKey(KeyCode.T);
+            transmitAction != null &&
+            transmitAction.IsPressed();
 
         IsLocalTransmitting = currentKeyState;
 

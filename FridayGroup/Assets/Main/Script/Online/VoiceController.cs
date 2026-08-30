@@ -1,5 +1,6 @@
 using Photon.Voice.Unity;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class VoiceController : MonoBehaviour
 {
@@ -36,6 +37,15 @@ public class VoiceController : MonoBehaviour
             // 通常会話はプレイヤーの位置から聞こえる3D音声にする。
             voiceAudioSource.spatialBlend = 1f;
             voiceAudioSource.dopplerLevel = 0f;
+        }
+
+        // ロビー／ステージ選択では距離のない通常会話として聞こえるようにする。
+        // ミュートマーク自体はVoiceChatMuteController側でMapだけに表示する。
+        if (SceneManager.GetActiveScene().name != "Map")
+        {
+            voiceAudioSource.spatialBlend = 0f;
+            voiceAudioSource.mute = false;
+            return;
         }
 
         // 自分自身のPlayerを取得

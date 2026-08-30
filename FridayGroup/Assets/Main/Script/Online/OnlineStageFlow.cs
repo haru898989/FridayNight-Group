@@ -38,6 +38,10 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private const string TitleRequestMessage = "FLOW|TITLE_REQUEST";
     private const string TimeUpRequestMessage = "FLOW|TIME_UP_REQUEST";
     private const string TimeUpNotificationMessage = "FLOW|TIME_UP";
+    private const string PauseOpenRequestMessage = "FLOW|PAUSE_OPEN";
+    private const string PauseCloseRequestMessage = "FLOW|PAUSE_CLOSE";
+    private const string PauseSelectionRequestPrefix = "FLOW|PAUSE_SELECT|";
+    private const string PauseStateMessagePrefix = "FLOW|PAUSE_STATE|";
 
     private readonly HashSet<int> pendingStageAcknowledgements = new HashSet<int>();
     private readonly HashSet<int> playersAtGoal = new HashSet<int>();
@@ -49,6 +53,9 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private bool isInitialized;
     private bool isLoadingScene;
     private bool hasBroadcastStageTimeUp;
+    private bool isStagePaused;
+    private int stagePauseOwnerPlayerId = -1;
+    private int stagePauseSelectionIndex;
     private int reliableMessageSequence;
     private string operationMessage = "CONNECTING...";
     private string currentStageCursorResourcePath;
@@ -60,6 +67,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     public event Action<string> StageCursorChanged;
     public event Action<string> OperationMessageChanged;
     public event Action StageTimeUp;
+    public event Action<bool, int, int> StagePauseChanged;
 
     public NetworkRunner Runner => runner;
     public bool IsConnected => runner != null && runner.IsRunning;
@@ -68,6 +76,13 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     public int NeededPlayerCount => SessionPlayerCapacity;
     public string OperationMessage => operationMessage;
     public string CurrentStageCursorResourcePath => currentStageCursorResourcePath;
+    public bool IsStagePaused => isStagePaused;
+    public int StagePauseOwnerPlayerId => stagePauseOwnerPlayerId;
+    public int StagePauseSelectionIndex => stagePauseSelectionIndex;
+    public bool CanLocalControlStagePause =>
+        IsConnected &&
+        isStagePaused &&
+        runner.LocalPlayer.PlayerId == stagePauseOwnerPlayerId;
     public bool CanControlStageSelection =>
         IsSharedModeMasterClient &&
         ConnectedPlayerCount >= MinimumPlayerCountToStart &&
@@ -260,6 +275,93 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
         hasBroadcastStageTimeUp = true;
         StageTimeUp?.Invoke();
         BroadcastReliableMessage(TimeUpNotificationMessage);
+    }
+
+    public void RequestOpenStagePause()
+    {
+        if (!IsConnected || isLoadingScene || isStagePaused ||
+            SceneManager.GetActiveScene().name != MapSceneName)
+        {
+            return;
+        }
+
+        if (IsSharedModeMasterClient)
+        {
+            SetStagePauseState(true, runner.LocalPlayer.PlayerId, 0, true);
+            return;
+        }
+
+        SendReliableMessage(runner.GetMasterClient(), PauseOpenRequestMessage);
+    }
+
+    public void RequestCloseStagePause()
+    {
+        if (!CanLocalControlStagePause)
+        {
+            return;
+        }
+
+        if (IsSharedModeMasterClient)
+        {
+            SetStagePauseState(false, -1, 0, true);
+            return;
+        }
+
+        SendReliableMessage(runner.GetMasterClient(), PauseCloseRequestMessage);
+    }
+
+    public void RequestStagePauseSelection(int selectionIndex)
+    {
+        if (!CanLocalControlStagePause)
+        {
+            return;
+        }
+
+        selectionIndex = Mathf.Clamp(selectionIndex, 0, 3);
+        if (selectionIndex == stagePauseSelectionIndex)
+        {
+            return;
+        }
+
+        if (IsSharedModeMasterClient)
+        {
+            SetStagePauseState(true, stagePauseOwnerPlayerId, selectionIndex, true);
+            return;
+        }
+
+        // 応答待ちの各フレームで同じ選択を再送しないよう、要求値を先に保持する。
+        stagePauseSelectionIndex = selectionIndex;
+        SendReliableMessage(
+            runner.GetMasterClient(),
+            PauseSelectionRequestPrefix + selectionIndex
+        );
+    }
+
+    private void SetStagePauseState(
+        bool paused,
+        int ownerPlayerId,
+        int selectionIndex,
+        bool broadcast)
+    {
+        isStagePaused = paused;
+        stagePauseOwnerPlayerId = paused ? ownerPlayerId : -1;
+        stagePauseSelectionIndex = paused ? Mathf.Clamp(selectionIndex, 0, 3) : 0;
+
+        StagePauseChanged?.Invoke(
+            isStagePaused,
+            stagePauseOwnerPlayerId,
+            stagePauseSelectionIndex
+        );
+
+        if (broadcast && IsSharedModeMasterClient)
+        {
+            BroadcastReliableMessage(
+                PauseStateMessagePrefix +
+                (isStagePaused ? "1" : "0") + "|" +
+                stagePauseOwnerPlayerId + "|" +
+                stagePauseSelectionIndex
+            );
+        }
     }
 
     public void ReportPlayerReachedGoal(PlayerRef player)
@@ -857,6 +959,11 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
         if (networkRunner.IsSharedModeMasterClient)
         {
+            if (isStagePaused && player.PlayerId == stagePauseOwnerPlayerId)
+            {
+                SetStagePauseState(false, -1, 0, true);
+            }
+
             TryOpenStageClearDestinationWhenEveryoneReachedGoal();
         }
 
@@ -866,6 +973,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     public void OnSceneLoadStart(NetworkRunner networkRunner)
     {
         hasBroadcastStageTimeUp = false;
+        SetStagePauseState(false, -1, 0, false);
 
         if (stageClearCoroutine != null)
         {
@@ -978,6 +1086,47 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
         if (networkRunner.IsSharedModeMasterClient)
         {
+            if (message == PauseOpenRequestMessage)
+            {
+                if (!isStagePaused &&
+                    !isLoadingScene &&
+                    SceneManager.GetActiveScene().name == MapSceneName)
+                {
+                    SetStagePauseState(true, player.PlayerId, 0, true);
+                }
+
+                return;
+            }
+
+            if (message == PauseCloseRequestMessage)
+            {
+                if (isStagePaused && player.PlayerId == stagePauseOwnerPlayerId)
+                {
+                    SetStagePauseState(false, -1, 0, true);
+                }
+
+                return;
+            }
+
+            if (message.StartsWith(PauseSelectionRequestPrefix, StringComparison.Ordinal))
+            {
+                if (isStagePaused &&
+                    player.PlayerId == stagePauseOwnerPlayerId &&
+                    int.TryParse(
+                        message.Substring(PauseSelectionRequestPrefix.Length),
+                        out int requestedSelection))
+                {
+                    SetStagePauseState(
+                        true,
+                        stagePauseOwnerPlayerId,
+                        requestedSelection,
+                        true
+                    );
+                }
+
+                return;
+            }
+
             if (message == StageClearRequestMessage)
             {
                 RegisterPlayerAtGoal(player);
@@ -1021,6 +1170,33 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
             if (player == networkRunner.GetMasterClient())
             {
                 StageTimeUp?.Invoke();
+            }
+
+            return;
+        }
+
+        if (message.StartsWith(PauseStateMessagePrefix, StringComparison.Ordinal))
+        {
+            if (player != networkRunner.GetMasterClient())
+            {
+                return;
+            }
+
+            string[] values = message
+                .Substring(PauseStateMessagePrefix.Length)
+                .Split('|');
+
+            if (values.Length == 3 &&
+                int.TryParse(values[0], out int pausedValue) &&
+                int.TryParse(values[1], out int ownerPlayerId) &&
+                int.TryParse(values[2], out int selectionIndex))
+            {
+                SetStagePauseState(
+                    pausedValue != 0,
+                    ownerPlayerId,
+                    selectionIndex,
+                    false
+                );
             }
 
             return;

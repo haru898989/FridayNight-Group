@@ -2,6 +2,7 @@ using Photon.Voice.Fusion;
 using Photon.Voice.Unity;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -19,6 +20,7 @@ public class VoiceChatMuteController : MonoBehaviour
     private Image statusImage;
     private Sprite voiceOnSprite;
     private Sprite voiceOffSprite;
+    private InputAction muteAction;
 
     private void Awake()
     {
@@ -30,6 +32,15 @@ public class VoiceChatMuteController : MonoBehaviour
 
         instance = this;
         DontDestroyOnLoad(gameObject);
+
+        muteAction = new InputAction("Mute", InputActionType.Button);
+        muteAction.AddBinding("<Keyboard>/m");
+        // Nintendo系コントローラーの「-」はGamepadのSelectとして扱われます。
+        muteAction.AddBinding("<Gamepad>/select");
+        muteAction.performed += OnMutePerformed;
+        muteAction.Enable();
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
 
         voiceOnSprite = Resources.Load<Sprite>("VoiceOn");
         voiceOffSprite = Resources.Load<Sprite>("VoiceOff");
@@ -43,12 +54,29 @@ public class VoiceChatMuteController : MonoBehaviour
         UpdateStatusUI();
     }
 
-    private void Update()
+    private void OnDestroy()
     {
-        if (WasMuteTogglePressed())
+        if (instance == this)
         {
-            ToggleMute();
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            instance = null;
         }
+
+        if (muteAction != null)
+        {
+            muteAction.performed -= OnMutePerformed;
+            muteAction.Dispose();
+        }
+    }
+
+    private void OnMutePerformed(InputAction.CallbackContext context)
+    {
+        ToggleMute();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        UpdateStatusUI();
     }
 
     public void ToggleMute()
@@ -66,24 +94,6 @@ public class VoiceChatMuteController : MonoBehaviour
         UpdateStatusUI();
 
         Debug.Log(IsMuted ? "Voice chat muted." : "Voice chat unmuted.");
-    }
-
-    private static bool WasMuteTogglePressed()
-    {
-        if (Keyboard.current != null && Keyboard.current.mKey.wasPressedThisFrame)
-        {
-            return true;
-        }
-
-        foreach (Gamepad gamepad in Gamepad.all)
-        {
-            if (gamepad.selectButton.wasPressedThisFrame)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static Recorder GetLocalPlayerRecorder()
@@ -178,6 +188,10 @@ public class VoiceChatMuteController : MonoBehaviour
     {
         if (statusImage != null)
         {
+            // ミュート状態は維持するが、マークはゲーム中だけ表示する。
+            statusImage.gameObject.SetActive(
+                SceneManager.GetActiveScene().name == "Map"
+            );
             statusImage.sprite = IsMuted ? voiceOffSprite : voiceOnSprite;
         }
     }
