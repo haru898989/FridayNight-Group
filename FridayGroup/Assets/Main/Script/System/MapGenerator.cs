@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Fusion;
 using UnityEngine;
 using Unity.AI.Navigation;
 using UnityEngine.Rendering;
@@ -43,6 +45,9 @@ public class MapGenerator : MonoBehaviour
     public GameObject[] StoneTablet;      // [80-84] 石板
     public GameObject[] Goal;             //[90]
 
+    [Header("オンラインギミック")]
+    [SerializeField] private NetworkPrefabRef transceiverPickupPrefab; // [36] トランシーバー
+
     [Header("マップ設定")]
     public float tileSize = 1f;         // 1マスのサイズ
     public float floorHeight = 3f;      // 1階層あたりの高さ（Y軸のオフセット）
@@ -57,6 +62,8 @@ public class MapGenerator : MonoBehaviour
 
     private int playerSpawnCount = 0;
     private Vector3 playerSpawnPosition;
+    private readonly List<NetworkObject> spawnedTransceivers = new List<NetworkObject>();
+    private NetworkRunner transceiverRunner;
 
     void Start()
     {
@@ -371,6 +378,11 @@ public class MapGenerator : MonoBehaviour
                                     Quaternion.identity,
                                     mapParent
                                 );
+                                break;
+
+                            case 6: // 36：トランシーバー
+                                InstantiateGimmickFloor(floorIndex, spawnPos);
+                                SpawnTransceiverPickup(spawnPos + Vector3.up * 0.5f);
                                 break;
 
                             case 8: // 38：梯子
@@ -757,6 +769,103 @@ public class MapGenerator : MonoBehaviour
         }
 
         Instantiate(floorPrefabs[0], spawnPos, Quaternion.identity, mapParent);
+    }
+
+    private async void SpawnTransceiverPickup(Vector3 spawnPos)
+    {
+        NetworkRunner runner = GetOnlineRunner();
+        if (runner == null || !runner.IsRunning || !runner.IsSharedModeMasterClient)
+        {
+            return;
+        }
+
+        if (transceiverPickupPrefab == NetworkPrefabRef.Empty)
+        {
+            Debug.LogError("CSV番号36用のトランシーバーPrefabが設定されていません。");
+            return;
+        }
+
+        transceiverRunner = runner;
+
+        try
+        {
+            NetworkObject pickupObject = await runner.SpawnAsync(
+                transceiverPickupPrefab,
+                spawnPos,
+                Quaternion.identity,
+                PlayerRef.None,
+                (spawnRunner, spawnedObject) =>
+                {
+                    spawnedObject.transform.SetPositionAndRotation(spawnPos, Quaternion.identity);
+                },
+                NetworkSpawnFlags.SharedModeStateAuthLocalPlayer
+            );
+
+            if (this == null)
+            {
+                if (pickupObject != null && pickupObject.HasStateAuthority && runner.IsRunning)
+                {
+                    runner.Despawn(pickupObject);
+                }
+
+                return;
+            }
+
+            if (pickupObject != null)
+            {
+                spawnedTransceivers.Add(pickupObject);
+            }
+        }
+        catch (System.Exception exception)
+        {
+            Debug.LogException(exception);
+        }
+    }
+
+    private static NetworkRunner GetOnlineRunner()
+    {
+        if (OnlineStageFlow.Instance != null &&
+            OnlineStageFlow.Instance.Runner != null &&
+            OnlineStageFlow.Instance.Runner.IsRunning)
+        {
+            return OnlineStageFlow.Instance.Runner;
+        }
+
+        if (Perfect_Online.Instance != null &&
+            Perfect_Online.Instance.Runner != null &&
+            Perfect_Online.Instance.Runner.IsRunning)
+        {
+            return Perfect_Online.Instance.Runner;
+        }
+
+        NetworkRunner[] runners = FindObjectsByType<NetworkRunner>(FindObjectsSortMode.None);
+        foreach (NetworkRunner runner in runners)
+        {
+            if (runner != null && runner.IsRunning)
+            {
+                return runner;
+            }
+        }
+
+        return null;
+    }
+
+    private void OnDestroy()
+    {
+        if (transceiverRunner == null || !transceiverRunner.IsRunning)
+        {
+            return;
+        }
+
+        foreach (NetworkObject pickupObject in spawnedTransceivers)
+        {
+            if (pickupObject != null && pickupObject.HasStateAuthority)
+            {
+                transceiverRunner.Despawn(pickupObject);
+            }
+        }
+
+        spawnedTransceivers.Clear();
     }
 
     private void InstantiateChannelPressurePlate(int floorIndex, Vector3 spawnPos, int channelId)

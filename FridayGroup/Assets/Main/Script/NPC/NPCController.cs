@@ -1,6 +1,5 @@
 using System;
 using TMPro;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = System.Random;
@@ -8,15 +7,15 @@ using Random = System.Random;
 
 public class NPCController : NPCBase
 {
-    [Header("„‰ñİ’è")]
-    //NPC‚ÌüˆÍ8m‚¢‚È‚¢‚Å„‰ñêŠ’T‚·
+    [Header("å·¡å›è¨­å®š")]
+    //NPCã®å‘¨å›²8mã„ãªã„ã§å·¡å›å ´æ‰€æ¢ã™
     public float patrolRadius = 8f;
 
-    //–Ú“I’n‚Æ‚Ì‹——£‚ª0.5mˆÈ‰º‚É‚È‚Á‚½‚ç“’…‚Æ”»’f
+    //ç›®çš„åœ°ã¨ã®è·é›¢ãŒ0.5mä»¥ä¸‹ã«ãªã£ãŸã‚‰åˆ°ç€ã¨åˆ¤æ–­
     public float arriveDistance = 0.5f;
 
-    [Header("’Tõİ’è")]
-    //NPC‚©‚ç‰½m’T‚·H
+    [Header("æ¢ç´¢è¨­å®š")]
+    //NPCã‹ã‚‰ä½•mæ¢ã™ï¼Ÿ
     public float searchRadius = 5f;
 
     private Collider targetGimmick;
@@ -31,7 +30,7 @@ public class NPCController : NPCBase
             return;
         }
 
-        //ó‘Ô‚É‚æ‚Á‚Äs“®‚ğ•Ï‚¦‚é
+        //çŠ¶æ…‹ã«ã‚ˆã£ã¦è¡Œå‹•ã‚’å¤‰ãˆã‚‹
         switch(currentState)
         {
             case NPCState.Patrol:
@@ -64,7 +63,7 @@ public class NPCController : NPCBase
         }
     }
 
-    //„‰ñˆ—
+    //å·¡å›å‡¦ç†
     void Patrol()
     {
         if (SearchGimmick())
@@ -102,10 +101,10 @@ public class NPCController : NPCBase
             }
         }
 
-        Debug.LogWarning("„‰ñ’n“_‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ‚Å‚µ‚½D");
+        Debug.LogWarning("å·¡å›åœ°ç‚¹ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã§ã—ãŸï¼");
     }
 
-    //–Ú“I’n‚ÖˆÚ“®
+    //ç›®çš„åœ°ã¸ç§»å‹•
     void MoveToTarget(Vector3 targetPosition)
     {
         if(agent == null || !agent.isOnNavMesh)
@@ -125,7 +124,7 @@ public class NPCController : NPCBase
         ChangeState(NPCState.Action);
     }
 
-    //ƒAƒNƒVƒ‡ƒ“Às
+    //ã‚¢ã‚¯ã‚·ãƒ§ãƒ³å®Ÿè¡Œ
     void Action()
     {
         if(waitingForPitfallCommand && pendingPitfall != null)
@@ -140,10 +139,10 @@ public class NPCController : NPCBase
         ChangeState(NPCState.Patrol);
     }
 
-    //Player’ÇÕ
+    //Playerè¿½è·¡
     void FollowPlayer()
     {   
-        //Player‚ªŒ©‚Â‚©‚Á‚Ä‚¢‚È‚¯‚ê‚Î’T‚·
+        //PlayerãŒè¦‹ã¤ã‹ã£ã¦ã„ãªã‘ã‚Œã°æ¢ã™
         if (player == null)
         {
             FindPlayer();
@@ -155,7 +154,7 @@ public class NPCController : NPCBase
         agent.SetDestination(player.position);
     }
 
-    //’â~
+    //åœæ­¢
     void StopMoving()
     {
         if (agent == null)
@@ -164,7 +163,7 @@ public class NPCController : NPCBase
         agent.ResetPath();
     }
 
-    //ƒMƒ~ƒbƒN‚ğ’T‚·
+    //ã‚®ãƒŸãƒƒã‚¯ã‚’æ¢ã™
     bool SearchGimmick()
     {
         Collider[] hits =
@@ -175,23 +174,23 @@ public class NPCController : NPCBase
 
         foreach (Collider hit in hits)
         {
-            //ƒMƒ~ƒbƒNˆÈŠO‚Í–³‹‚·‚é
+            //ã‚®ãƒŸãƒƒã‚¯ä»¥å¤–ã¯ç„¡è¦–ã™ã‚‹
             if (!hit.CompareTag("Gimmick"))
             {
                 continue;
             }
 
-            //‚‚³‚Ì·‚ª1mˆÈã‚È‚çœŠO
+            //é«˜ã•ã®å·®ãŒ1mä»¥ä¸Šãªã‚‰é™¤å¤–
             float heightDiff = Mathf.Abs(hit.transform.position.y - transform.position.y);
             if (heightDiff >= 1.0f)
             {
                 continue;
             }
 
-            //‹——£ŒvZ
+            //è·é›¢è¨ˆç®—
             float distance = Vector3.Distance(transform.position, hit.transform.position);
 
-            //¡‚Ü‚Å‚Åˆê”Ô‹ß‚¯‚ê‚ÎXV
+            //ä»Šã¾ã§ã§ä¸€ç•ªè¿‘ã‘ã‚Œã°æ›´æ–°
             if (distance < nearestDistance)
             {
                 nearestDistance = distance;
@@ -202,7 +201,7 @@ public class NPCController : NPCBase
 
         if (nearestHit != null)
         {
-            Debug.Log("ƒMƒ~ƒbƒN”­Œ©!:" + nearestHit.name);
+            Debug.Log("ã‚®ãƒŸãƒƒã‚¯ç™ºè¦‹!:" + nearestHit.name);
             targetPosition = nearestHit.transform.position;
             agent.SetDestination(targetPosition);
             targetGimmick = nearestHit;
@@ -219,7 +218,7 @@ public class NPCController : NPCBase
             if (pitfall != null)
             {
 
-                //—‚Æ‚µŒŠ
+                //è½ã¨ã—ç©´
                 pendingPitfall = pitfall;
                 waitingForPitfallCommand = true;
                 targetGimmick = nearestHit;
@@ -262,7 +261,7 @@ public class NPCController : NPCBase
         return false;
     }
 
-    //’Tõ”ÍˆÍ•ÏX
+    //æ¢ç´¢ç¯„å›²å¤‰æ›´
     private void ChangeReserchSize(float num)
     {
         searchRadius = num;

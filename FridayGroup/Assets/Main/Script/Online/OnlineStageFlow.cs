@@ -36,6 +36,8 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private const string NextStageRequestMessage = "FLOW|NEXT_STAGE";
     private const string RestartStageRequestMessage = "FLOW|RESTART_STAGE";
     private const string TitleRequestMessage = "FLOW|TITLE_REQUEST";
+    private const string TimeUpRequestMessage = "FLOW|TIME_UP_REQUEST";
+    private const string TimeUpNotificationMessage = "FLOW|TIME_UP";
 
     private readonly HashSet<int> pendingStageAcknowledgements = new HashSet<int>();
     private readonly HashSet<int> playersAtGoal = new HashSet<int>();
@@ -46,6 +48,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private Coroutine stageClearCoroutine;
     private bool isInitialized;
     private bool isLoadingScene;
+    private bool hasBroadcastStageTimeUp;
     private int reliableMessageSequence;
     private string operationMessage = "CONNECTING...";
     private string currentStageCursorResourcePath;
@@ -56,6 +59,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     public event Action StateChanged;
     public event Action<string> StageCursorChanged;
     public event Action<string> OperationMessageChanged;
+    public event Action StageTimeUp;
 
     public NetworkRunner Runner => runner;
     public bool IsConnected => runner != null && runner.IsRunning;
@@ -228,6 +232,34 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         SendReliableMessage(runner.GetMasterClient(), StageClearRequestMessage);
+    }
+
+    public void RequestStageTimeUp()
+    {
+        if (!IsConnected)
+        {
+            return;
+        }
+
+        if (IsSharedModeMasterClient)
+        {
+            BroadcastStageTimeUp();
+            return;
+        }
+
+        SendReliableMessage(runner.GetMasterClient(), TimeUpRequestMessage);
+    }
+
+    private void BroadcastStageTimeUp()
+    {
+        if (!IsSharedModeMasterClient || hasBroadcastStageTimeUp)
+        {
+            return;
+        }
+
+        hasBroadcastStageTimeUp = true;
+        StageTimeUp?.Invoke();
+        BroadcastReliableMessage(TimeUpNotificationMessage);
     }
 
     public void ReportPlayerReachedGoal(PlayerRef player)
@@ -833,6 +865,8 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnSceneLoadStart(NetworkRunner networkRunner)
     {
+        hasBroadcastStageTimeUp = false;
+
         if (stageClearCoroutine != null)
         {
             StopCoroutine(stageClearCoroutine);
@@ -974,6 +1008,22 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
                 ReturnToTitle();
                 return;
             }
+
+            if (message == TimeUpRequestMessage)
+            {
+                BroadcastStageTimeUp();
+                return;
+            }
+        }
+
+        if (message == TimeUpNotificationMessage)
+        {
+            if (player == networkRunner.GetMasterClient())
+            {
+                StageTimeUp?.Invoke();
+            }
+
+            return;
         }
 
         if (message.StartsWith(CursorMessagePrefix, StringComparison.Ordinal))

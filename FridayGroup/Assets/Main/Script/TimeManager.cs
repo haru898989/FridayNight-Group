@@ -18,9 +18,17 @@ public class TimeManager : MonoBehaviour
 
     private float currentTime;
     private bool isTimeUp = false;
+    private bool isTimeUpRequested;
+    private OnlineStageFlow stageFlow;
 
     void Start()
     {
+        stageFlow = OnlineStageFlow.Instance;
+        if (stageFlow != null)
+        {
+            stageFlow.StageTimeUp += OnStageTimeUp;
+        }
+
         Debug.Log("=== TimeManager Start ===");
 
         Debug.Log(
@@ -53,6 +61,14 @@ public class TimeManager : MonoBehaviour
 
         UpdateTimerUI();
     }
+
+    private void OnDestroy()
+    {
+        if (stageFlow != null)
+        {
+            stageFlow.StageTimeUp -= OnStageTimeUp;
+        }
+    }
     public void SetTimeLimit(float time)
     {
         timeLimit = time;
@@ -70,8 +86,7 @@ public class TimeManager : MonoBehaviour
             if (currentTime <= 0)
             {
                 currentTime = 0;
-                isTimeUp = true;
-                TimeUp();
+                RequestTimeUp();
             }
         }
 
@@ -93,6 +108,38 @@ public class TimeManager : MonoBehaviour
                 ? currentTime / timeLimit
                 : 0f;
         }
+    }
+
+    private void RequestTimeUp()
+    {
+        if (isTimeUpRequested)
+        {
+            return;
+        }
+
+        isTimeUpRequested = true;
+
+        if (stageFlow != null && stageFlow.IsConnected)
+        {
+            stageFlow.RequestStageTimeUp();
+            return;
+        }
+
+        OnStageTimeUp();
+    }
+
+    private void OnStageTimeUp()
+    {
+        if (isTimeUp)
+        {
+            return;
+        }
+
+        isTimeUp = true;
+        isTimeUpRequested = true;
+        currentTime = 0f;
+        UpdateTimerUI();
+        TimeUp();
     }
 
     void TimeUp()

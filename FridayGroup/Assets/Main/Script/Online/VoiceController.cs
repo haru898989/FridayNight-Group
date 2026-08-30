@@ -10,7 +10,7 @@ public class VoiceController : MonoBehaviour
 
     private void Update()
     {
-        // Speaker / AudioSource‚ğæ“¾
+        // Speaker / AudioSourceã‚’å–å¾—
         if (voiceAudioSource == null)
         {
             speaker = GetComponent<Speaker>();
@@ -33,12 +33,12 @@ public class VoiceController : MonoBehaviour
                 return;
             }
 
-            // 3D‰¹º
+            // é€šå¸¸ä¼šè©±ã¯ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®ä½ç½®ã‹ã‚‰èã“ãˆã‚‹3DéŸ³å£°ã«ã™ã‚‹ã€‚
             voiceAudioSource.spatialBlend = 1f;
             voiceAudioSource.dopplerLevel = 0f;
         }
 
-        // ©•ª©g‚ÌPlayer‚ğæ“¾
+        // è‡ªåˆ†è‡ªèº«ã®Playerã‚’å–å¾—
         GameObject localPlayer = GetLocalPlayer();
 
         if (localPlayer == null)
@@ -46,21 +46,44 @@ public class VoiceController : MonoBehaviour
             return;
         }
 
-        // ©•ª©g‚Ìê‡‚Í‰¹º‚ğ•·‚±‚¦‚éó‘Ô‚É‚·‚é
+        // è‡ªåˆ†è‡ªèº«ã®å ´åˆã¯éŸ³å£°ã‚’èã“ãˆã‚‹çŠ¶æ…‹ã«ã™ã‚‹
         if (localPlayer == gameObject)
         {
             voiceAudioSource.mute = false;
             return;
         }
 
-        // ©•ª‚Æ”­˜bÒ‚Æ‚Ì‹——£
+        TransceiverHolder localHolder =
+            localPlayer.GetComponent<TransceiverHolder>();
+        TransceiverHolder remoteHolder =
+            GetComponent<TransceiverHolder>();
+        TransceiverController remoteController =
+            GetComponent<TransceiverController>();
+
+        bool canUseTransceiver =
+            localHolder != null &&
+            localHolder.HasTransceiver() &&
+            remoteHolder != null &&
+            remoteHolder.HasTransceiver() &&
+            remoteController != null &&
+            remoteController.IsTransmitting;
+
+        if (canUseTransceiver)
+        {
+            // ãƒˆãƒ©ãƒ³ã‚·ãƒ¼ãƒãƒ¼ä¸­ã¯è·é›¢æ¸›è¡°ã•ã›ãšã€é›¢ã‚Œã¦ã„ã¦ã‚‚èã“ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
+            voiceAudioSource.spatialBlend = 0f;
+            voiceAudioSource.mute = false;
+            return;
+        }
+
+        voiceAudioSource.spatialBlend = 1f;
+
+        // é€šå¸¸ä¼šè©±ã¯5mä»¥å†…ã ã‘èã“ãˆã‚‹ã€‚
         float distance = Vector3.Distance(
             localPlayer.transform.position,
             transform.position
         );
 
-        // 5mˆÈ“à‚È‚ç•·‚±‚¦‚é
-        // 5m‚ğ’´‚¦‚½‚çƒ~ƒ…[ƒg
         voiceAudioSource.mute = distance > voiceRange;
     }
 
@@ -70,13 +93,13 @@ public class VoiceController : MonoBehaviour
 
         foreach (GameObject player in players)
         {
-            // Player‘¤‚É•t‚¢‚Ä‚¢‚éVoiceController‚ğ’T‚·
+            // Playerå´ã«ä»˜ã„ã¦ã„ã‚‹VoiceControllerã‚’æ¢ã™
             VoiceController controller =
                 player.GetComponent<VoiceController>();
 
             if (controller != null)
             {
-                // ©•ª‚ÌPlayer‚©‚Ç‚¤‚©‚ğ”»’è
+                // è‡ªåˆ†ã®Playerã‹ã©ã†ã‹ã‚’åˆ¤å®š
                 Photon.Voice.Fusion.VoiceNetworkObject voiceObject =
                     player.GetComponent<Photon.Voice.Fusion.VoiceNetworkObject>();
 
