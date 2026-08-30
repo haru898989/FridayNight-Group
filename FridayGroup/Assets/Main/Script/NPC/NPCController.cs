@@ -26,6 +26,10 @@ public class NPCController : NPCBase
 
     private readonly HashSet<Pitfall> handledPitfalls = new HashSet<Pitfall>();
 
+    // 処理済みの落とし穴を、現在の探索範囲で通知済みかを記録する。
+    private readonly HashSet<Pitfall> notifiedHandledPitfalls =
+        new HashSet<Pitfall>();
+
     public override void FixedUpdateNetwork()
     {
         if(Object == null || !Object.HasStateAuthority)
@@ -196,6 +200,9 @@ public class NPCController : NPCBase
         Collider[] hits =
             Physics.OverlapSphere(transform.position, searchRadius);
 
+        HashSet<Pitfall> handledPitfallsFoundThisSearch =
+            new HashSet<Pitfall>();
+
         float nearestDistance = Mathf.Infinity;
         Collider nearestHit = null;
 
@@ -215,12 +222,21 @@ public class NPCController : NPCBase
 
             if (pitfallOnHit != null && handledPitfalls.Contains(pitfallOnHit))
             {
+                // 一度落ちた穴にはもう向かわない・もう落ちない。
+                // ただし、再び探索範囲へ入った時は「ギミック発見」を送る。
+                handledPitfallsFoundThisSearch.Add(pitfallOnHit);
+
+                if (notifiedHandledPitfalls.Add(pitfallOnHit))
+                {
+                    NotifyGimmickFound();
+                }
+
                 continue;
             }
 
-            //高さの差が1m以上なら除外
+            // 高さ差が大きい別階層のギミックは除外する
             float heightDiff = Mathf.Abs(hit.transform.position.y - transform.position.y);
-            if (heightDiff >= 1.0f)
+            if (heightDiff >= 3.0f)
             {
                 continue;
             }
@@ -236,6 +252,11 @@ public class NPCController : NPCBase
             }
 
         }
+
+        // 一度探索範囲の外へ出た穴は、再発見時に再通知できるようにする。
+        notifiedHandledPitfalls.RemoveWhere(
+            pitfall => !handledPitfallsFoundThisSearch.Contains(pitfall)
+        );
 
         if (nearestHit != null)
         {

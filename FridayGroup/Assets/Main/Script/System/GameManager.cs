@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
@@ -94,8 +95,19 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log($"参加者を登録しました: Player={player.PlayerId}, Slot={index + 1}");
+
         TrySpawnLocalPlayer();
-        UpdateNPC();
+
+        // 1人ならNPCを出す。
+        // 2人へ復帰した場合は、再参加PlayerのSpawn完了後にNPCを消す。
+        if (IsSoloSession())
+        {
+            UpdateNPC();
+        }
+        else if (isMapSpawnReady && runner.IsSharedModeMasterClient)
+        {
+            StartCoroutine(WaitForJoinedPlayerSpawnThenUpdateNpc(player));
+        }
     }
 
     public void OnPlayerLeft(NetworkRunner networkRunner, PlayerRef player)
@@ -106,15 +118,30 @@ public class GameManager : MonoBehaviour
         if (index >= 0)
         {
             NetworkObject playerObject = players[index].playerObject;
-            if (playerObject != null && playerObject.HasStateAuthority)
+
+            if (playerObject != null)
             {
-                networkRunner.Despawn(playerObject);
+                // 切断したPlayerの最終位置をNPCの出現位置として保存
+                npcSpawnPosition = playerObject.transform.position;
+                isNpcSpawnReady = true;
+
+                if (playerObject.HasStateAuthority)
+                {
+                    networkRunner.Despawn(playerObject);
+                }
             }
         }
 
         RebuildPlayerSlots();
         Debug.Log($"退出した参加者を解除しました: Player={player.PlayerId}");
 
+        // 1人になったのでNPCを出す
+        shouldSpawnNpcInStage = true;
+        isNpcDecisionReady = true;
+
+        // MasterClientが切断した場合もあるため、
+        // Master切り替え完了後にNPCを生成する
+        StartCoroutine(WaitForMasterAndUpdateNpc());
     }
 
     /// <summary>
@@ -185,6 +212,14 @@ public class GameManager : MonoBehaviour
 
         NetworkPrefabRef prefab = index == 0 ? playerPrefabA : playerPrefabB;
         Vector3 spawnPosition = GetSpawnPosition(index);
+
+        // NPCがいる状態で再参加した場合、NPCの現在位置から復帰する
+        NPCBase activeNpc = FindFirstObjectByType<NPCBase>();
+
+        if (activeNpc != null)
+        {
+            spawnPosition = activeNpc.transform.position;
+        }
 
         isLocalPlayerSpawnPending = true;
         NetworkObject playerObject = null;
@@ -438,7 +473,18 @@ public class GameManager : MonoBehaviour
         }
 
         // NPC生成場所
-        Vector3 spawnPosition = GetSpawnPosition(0) + new Vector3(1.5f, 0f, 1.5f);
+        Vector3 spawnPosition;
+
+        if (isNpcSpawnReady)
+        {
+            // 回線落ちしたプレイヤーの位置
+            spawnPosition = npcSpawnPosition;
+        }
+        else
+        {
+            // 最初から1人で開始した時の位置
+            spawnPosition = GetSpawnPosition(0) + new Vector3(1.5f, 0f, 1.5f);
+        }
         isNpcSpawnPending = true;
 
         try
@@ -474,5 +520,51 @@ public class GameManager : MonoBehaviour
         npcObject = null;
 
         Debug.Log("NPCをDespawnしました");
+    }
+
+    private IEnumerator WaitForMasterAndUpdateNpc()
+    {
+        const float timeoutSeconds = 3f;
+        float elapsedSeconds = 0f;
+
+        while (elapsedSeconds < timeoutSeconds)
+        {
+            if (runner != null &&
+                runner.IsRunning &&
+                runner.IsSharedModeMasterClient)
+            {
+                UpdateNPC();
+                yield break;
+            }
+
+            elapsedSeconds += Time.deltaTime;
+            yield return null;
+        }
+
+        Debug.LogWarning("MasterClientの切り替え待機がタイムアウトしました");
+    }
+
+    private IEnumerator WaitForJoinedPlayerSpawnThenUpdateNpc(PlayerRef joinedPlayer)
+    {
+        const float timeoutSeconds = 5f;
+        float elapsedSeconds = 0f;
+
+        while (elapsedSeconds < timeoutSeconds)
+        {
+            if (runner != null &&
+                runner.IsRunning &&
+                runner.TryGetPlayerObject(joinedPlayer, out NetworkObject joinedPlayerObject) &&
+                joinedPlayerObject != null)
+            {
+                // 再参加PlayerがNPCの位置でSpawnできたため、NPCを消す
+                UpdateNPC();
+                yield break;
+            }
+
+            elapsedSeconds += Time.deltaTime;
+            yield return null;
+        }
+
+        Debug.LogWarning("再参加PlayerのSpawn待機がタイムアウトしました");
     }
 }

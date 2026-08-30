@@ -72,6 +72,7 @@ public class PressurePlate : MonoBehaviour
                 {
                     npc.NotifyPressurePlatePressed();
                 }
+
                 if (!isPressed)
                 {
                     isPressed = true;
