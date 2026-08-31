@@ -9,6 +9,7 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 {
     private const string MapScenePath = "Assets/Main/Scene/Map.unity";
     private const string SessionName = "Fusion_Test_Room_2026";
+    
 
     public static Perfect_Online Instance { get; private set; }
 
@@ -120,6 +121,7 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
         isLoadingMap = true;
         SetStartButtonVisible(false);
         GameManager.Instance?.SetMapNotReady();
+        SoundManager.Instance.PlaySE(0);
 
         Debug.Log("OnlineConnectからMapへ移動します");
         runner.LoadScene(SceneRef.FromIndex(buildIndex), LoadSceneMode.Single);
