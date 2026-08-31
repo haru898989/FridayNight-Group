@@ -278,12 +278,13 @@ public class MapGenerator : MonoBehaviour
                                 break;
 
                             case 3: // 23：扉
-                                Instantiate(
+                                GameObject staticDoorObject = Instantiate(
                                     door[0],
                                     spawnPos,
                                     GetDoorRotation(floorIndex, x, y),
                                     mapParent
                                 );
+                                DoorNavMeshObstacleUtility.Ensure(staticDoorObject);
                                 continuousWallCount = 0;
                                 break;
 
@@ -302,12 +303,16 @@ public class MapGenerator : MonoBehaviour
                             break;
 
                             case 6: // 26：モニター付き壁
-                                Instantiate(
+                                GameObject monitorObject = Instantiate(
                                     monitorWallPrefab[0],
                                     spawnPos,
                                     Quaternion.identity,
                                     mapParent
                                 );
+                                if (monitorObject.GetComponent<MonitorWatchPoint>() == null)
+                                {
+                                    monitorObject.AddComponent<MonitorWatchPoint>();
+                                }
                                 continuousWallCount = 0;
                                 break;
 
@@ -541,6 +546,7 @@ public class MapGenerator : MonoBehaviour
         {
             GameObject monitorRoot = new GameObject("MonitorMaze");
             monitorMazeParent = monitorRoot.transform;
+            monitorMazeParent.SetParent(mapParent, true);
         }
         // 指定した階層のCSVデータを文字列として読み込む
         string csvText = mapFloorData[floorIndex].text;
@@ -898,7 +904,10 @@ public class MapGenerator : MonoBehaviour
                 spawnPos,
                 doorRotation ?? Quaternion.Euler(0f, 90f, 0f),
                 mapParent
-            ); TwoPlayerDoor linkedDoor = doorObject.GetComponentInChildren<TwoPlayerDoor>(true);
+            );
+
+        DoorNavMeshObstacleUtility.Ensure(doorObject);
+        TwoPlayerDoor linkedDoor = doorObject.GetComponentInChildren<TwoPlayerDoor>(true);
 
         if (linkedDoor == null)
         {

@@ -99,6 +99,14 @@ public class BearTrap : GimmickBase
             yield break;
         }
 
+        // 複数のトラバサミを同時に踏んだ場合、2個目がFreezeAllを
+        // 「元の制約」として保存すると、解除後も永久に固定されてしまう。
+        // すでに停止中なら最初の解除処理へ任せる。
+        if (playerRigidbody.constraints == RigidbodyConstraints.FreezeAll)
+        {
+            yield break;
+        }
+
         // 元の制約を保存しておき、停止後に元へ戻せるようにする
         RigidbodyConstraints oldConstraints = playerRigidbody.constraints;
 

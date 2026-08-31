@@ -16,7 +16,7 @@ public class PlayerBase : NetworkBehaviour
     private float pressStartTime;
     private bool keyboardPickupHandled;
     private bool isSelectingStamp = false;
-    private GameObject heldObject; // 持っている物
+    protected GameObject heldObject; // 持っている物
     public GameObject nearbyObject; // 近くにある持てる物
     public GameObject selectableObject; // 決定できる対象
     public float groundY = 0f; // 地面の座標
@@ -70,7 +70,12 @@ public class PlayerBase : NetworkBehaviour
         FollowPlayer,  //プレイヤーについてくる
         MoveToTarget,  //指示された場所へ移動
         Action,  //指示された行動
-        Stop  //止まる
+        Stop,  //止まる
+        MoveForward,
+        MoveBackward,
+        MoveLeft,
+        MoveRight,
+        SolveOtherGimmick
     }
 
     // GameManagerから同期される情報の格納用変数
@@ -181,7 +186,7 @@ public class PlayerBase : NetworkBehaviour
                 {
                     Debug.Log($"子[{i}] = {stampMenu.transform.GetChild(i).name}");
                 }
-                stampMenuObjects = new GameObject[4];
+                stampMenuObjects = new GameObject[9];
 
                 foreach (Transform child in stampMenu.transform)
                 {
@@ -580,9 +585,8 @@ public class PlayerBase : NetworkBehaviour
                 (wasReleased || Time.unscaledTime >= nextStampNavigationTime) &&
                 stampMenuObjects != null && stampMenuObjects.Length > 0)
             {
-                // シーン上のスタンプ配置順はHierarchy順と左右が逆なので、
-                // 右入力では左隣の配列要素、左入力では右隣へ移動する。
-                int direction = navigationAxis > 0f ? -1 : 1;
+                // 右入力で次のスタンプ、左入力で前のスタンプへ移動する。
+                int direction = navigationAxis > 0f ? 1 : -1;
                 selectedIndex = (selectedIndex + direction + stampMenuObjects.Length) %
                                 stampMenuObjects.Length;
                 HighlightStamp(selectedIndex);
@@ -862,7 +866,7 @@ public class PlayerBase : NetworkBehaviour
         return dropPosition;
     }
 
-    private static void SetHeldObjectCollidersEnabled(GameObject target, bool isEnabled)
+    protected static void SetHeldObjectCollidersEnabled(GameObject target, bool isEnabled)
     {
         Collider[] colliders = target.GetComponentsInChildren<Collider>(true);
         for (int i = 0; i < colliders.Length; i++)
@@ -883,7 +887,7 @@ public class PlayerBase : NetworkBehaviour
     /// <summary>
     /// オブジェクトに近いときのみ持てる
     /// </summary>
-    private void OnTriggerEnter(Collider other)
+    protected virtual void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Pickup"))
         {
@@ -895,7 +899,7 @@ public class PlayerBase : NetworkBehaviour
     /// <summary>
     /// オブジェクトが遠いと持てない
     /// </summary>
-    private void OnTriggerExit(Collider other)
+    protected virtual void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Pickup"))
         {
@@ -1105,6 +1109,16 @@ public class PlayerBase : NetworkBehaviour
                 return StampCommand.Action;
             case 3:
                 return StampCommand.Patrol;
+            case 4:
+                return StampCommand.MoveForward;
+            case 5:
+                return StampCommand.MoveBackward;
+            case 6:
+                return StampCommand.MoveLeft;
+            case 7:
+                return StampCommand.MoveRight;
+            case 8:
+                return StampCommand.SolveOtherGimmick;
             default:
                 return StampCommand.Patrol;
         }
@@ -1146,6 +1160,16 @@ public class PlayerBase : NetworkBehaviour
                 return 2;
             case "Free":
                 return 3;
+            case "Up":
+                return 4;
+            case "Down":
+                return 5;
+            case "Left":
+                return 6;
+            case "Right":
+                return 7;
+            case "Other Gimmick":
+                return 8;
             default:
                 return -1;
         }
