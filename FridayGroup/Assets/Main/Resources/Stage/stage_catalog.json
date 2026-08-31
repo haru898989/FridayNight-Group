@@ -4,7 +4,7 @@
             "groupFolder": "Stage1",
             "stageFolder": "1-1",
             "resourcePath": "Stage/Stage1/1-1",
-            "timeLimit": 60,
+            "timeLimit": 20,
             "csvFiles": [
                 "1-1BFfloor",
                 "1-1BFwall",
@@ -18,7 +18,7 @@
             "groupFolder": "Stage1",
             "stageFolder": "1-2",
             "resourcePath": "Stage/Stage1/1-2",
-            "timeLimit": 80,
+            "timeLimit": 30,
             "csvFiles": [
                 "1-2BFfloor",
                 "1-2BFwall",
@@ -46,7 +46,7 @@
             "groupFolder": "Stage1",
             "stageFolder": "1-4",
             "resourcePath": "Stage/Stage1/1-4",
-            "timeLimit": 80,
+            "timeLimit": 60,
             "csvFiles": [
                 "1-4BFfloor",
                 "1-4BFwall",
@@ -60,7 +60,7 @@
             "groupFolder": "Stage1",
             "stageFolder": "1-5",
             "resourcePath": "Stage/Stage1/1-5",
-            "timeLimit": 100,
+            "timeLimit": 60,
             "csvFiles": [
                 "1-5BFfloor",
                 "1-5BFwall",
@@ -137,6 +137,7 @@
             "timeLimit": 80,
             "csvFiles": [
                 "2-2BFfloor",
+                "2-2BFlantern",
                 "2-2BFwall",
                 "2-21Ffloor",
                 "2-21Fwall",

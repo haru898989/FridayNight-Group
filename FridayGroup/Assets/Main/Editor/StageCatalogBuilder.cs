@@ -92,19 +92,19 @@ public static class StageCatalogBuilder
         switch (stageFolder)
         {
             case "1-1":
-                return 60;
+                return 20;
 
             case "1-2":
-                return 80;
+                return 30;
 
             case "1-3":
                 return 60;
 
             case "1-4":
-                return 80;
+                return 60;
 
             case "1-5":
-                return 100;
+                return 60;
 
             case "1-6":
                 return 60;

@@ -1,4 +1,5 @@
 using Fusion;
+using UnityEngine;
 
 public class TransceiverHolder : NetworkBehaviour
 {
@@ -18,6 +19,8 @@ public class TransceiverHolder : NetworkBehaviour
         return IsHoldingTransceiver;
     }
 
+    // Only the player object's State Authority may grant this state.
+    // In Shared Mode, that is the client that owns this player.
     public bool TryGrantTransceiver()
     {
         if (Object == null || !Object.HasStateAuthority || IsHoldingTransceiver)

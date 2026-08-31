@@ -11,6 +11,12 @@ public class Goal : MonoBehaviour
         {
             hasRequestedStageClear = true;
 
+            TimeManager timeManager = FindFirstObjectByType<TimeManager>();
+            if (timeManager != null)
+            {
+                timeManager.StopTimer();
+            }
+
             if (OnlineStageFlow.Instance != null && OnlineStageFlow.Instance.IsConnected)
             {
                 PlayerBase player = other.GetComponentInParent<PlayerBase>();

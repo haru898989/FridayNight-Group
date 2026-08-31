@@ -34,6 +34,11 @@ public class Perfect_Online : MonoBehaviour, INetworkRunnerCallbacks
 
     private async void Start()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        Debug.Log("カーソル非表示設定を実行");
+
         if (runner != null)
         {
             return;
