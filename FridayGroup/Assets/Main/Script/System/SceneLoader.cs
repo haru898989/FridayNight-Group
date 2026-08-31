@@ -37,9 +37,8 @@ public class SceneLoader : MonoBehaviour
             Debug.LogWarning("ƒV[ƒ“–¼‚ª‘¶İ‚µ‚Ü‚¹‚ñ");
             return;
         }
-
-        SceneManager.LoadScene(sceneName);
         SoundManager.Instance.PlaySE(0);
+        SceneManager.LoadScene(sceneName);
 
     }
 }
