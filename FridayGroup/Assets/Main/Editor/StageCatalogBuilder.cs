@@ -119,7 +119,7 @@ public static class StageCatalogBuilder
                 return 80;
 
             case "2-3":
-                return 60;
+                return 300;
 
             case "2-4":
                 return 80;

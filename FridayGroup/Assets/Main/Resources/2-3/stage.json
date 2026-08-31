@@ -1,0 +1,16 @@
+{
+    "displayName": "2-3  CRYSTAL BASIC TEST",
+    "description": "CRYSTAL STAGE BASIC",
+    "previewFile": "",
+    "csvOrder": [
+        "2-3BFfloor",
+        "2-3BFwall",
+        "2-3BFwall",
+        "2-3BFwall",
+        "2-3Floor",
+        "2-3Wall",
+        "LightWall",
+        "2-3Wall",
+        "Roof"
+    ]
+}

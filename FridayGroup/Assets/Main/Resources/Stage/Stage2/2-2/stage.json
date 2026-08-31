@@ -1,6 +1,6 @@
 {
-    "displayName": "2-2 OTOSHIANA AND HASHIGO ADVANCE TEST",
-    "description": "OTOSHIANA AND HASHIGO STAGE ADVANCE",
+    "displayName": "2-2 地下からの脱出",
+    "description": "地上と地下に分かれ、落とし穴と梯子を使って脱出しよう！",
     "previewFile": "",
     "csvOrder": [
         "2-2BFfloor",

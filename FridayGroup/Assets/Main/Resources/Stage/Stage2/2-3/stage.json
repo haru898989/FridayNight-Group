@@ -1,16 +1,17 @@
 {
-    "displayName": "2-3  CRYSTAL BASIC TEST",
-    "description": "CRYSTAL STAGE BASIC",
+    "displayName": "2-3 帰ってきた！離れていても一心同体！",
+    "description": "ひとりが監視モニターで道を示し、もうひとりが暗い迷路を進もう！",
     "previewFile": "",
     "csvOrder": [
-        "2-3BFfloor",
-        "2-3BFwall",
-        "2-3BFwall",
-        "2-3BFwall",
-        "2-3Floor",
-        "2-3Wall",
-        "LightWall",
-        "2-3Wall",
-        "Roof"
+        "3-3BFfloor",
+        "3-3BFwall",
+        "3-3BFguide",
+        "3-3BFwall",
+        "3-3Floor",
+        "3-3Wall",
+        "3-3LightWall",
+        "3-3Wall",
+        "3-3roof"
     ]
 }
+

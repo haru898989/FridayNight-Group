@@ -1,6 +1,6 @@
 {
-    "displayName": "2-1 OTOSHIANA AND HASHIGO BASIC TEST",
-    "description": "OTOSHIANA AND HASHIGO STAGE BASIC",
+    "displayName": "2-1 地下への落とし穴",
+    "description": "落とし穴の先を探索し、梯子を見つけて地上へ戻ろう！",
     "previewFile": "",
     "csvOrder": [
         "2-1BFfloor",

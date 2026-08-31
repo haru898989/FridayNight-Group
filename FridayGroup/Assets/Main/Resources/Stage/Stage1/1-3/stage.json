@@ -1,6 +1,6 @@
 {
-    "displayName": "1-3 KANNATSUBAN BASIC TEST",
-    "description": "KANNATSUBAN STAGE�@BASIC",
+    "displayName": "1-3 ふたりの感圧板",
+    "description": "ふたりで感圧板を踏み、連動する扉を開けよう！",
     "previewFile": "",
     "csvOrder": [
         "1-3BFfloor",
