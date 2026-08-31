@@ -134,3 +134,6 @@ FridayGroup/Assets/Main/prefab/Player.meta
 FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/iOS/libwebrtc-audio.a
 FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/VisionOS/device/libwebrtc-audio.a
 FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/VisionOS/simulator/libwebrtc-audio.a
+FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/VisionOS/device/libwebrtc-audio.a.meta
+FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/iOS/libwebrtc-audio.a.meta
+FridayGroup/Assets/Photon/PhotonVoice/PhotonVoiceLibs/VisionOS/simulator/libwebrtc-audio.a.meta
