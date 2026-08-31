@@ -26,7 +26,6 @@ public class SceneLoader : MonoBehaviour
     }
 
 
-
     /// <summary>
     /// ボタンからシーン名を受け取って遷移する
     /// </summary>
@@ -40,5 +39,7 @@ public class SceneLoader : MonoBehaviour
         }
 
         SceneManager.LoadScene(sceneName);
+        SoundManager.Instance.PlaySE(0);
+
     }
 }

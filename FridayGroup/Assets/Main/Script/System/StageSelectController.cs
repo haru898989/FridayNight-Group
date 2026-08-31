@@ -412,9 +412,10 @@ public sealed class StageSelectController : MonoBehaviour
             statusText.text = "THIS STAGE HAS NO CSV DATA";
             return;
         }
-
+        SoundManager.Instance.PlaySE(1);
         if (stageFlow.ConfirmStageSelection(selectedStage.resourcePath))
         {
+            
             isConfirming = true;
             UpdateNodeColors();
             UpdateConfirmState();

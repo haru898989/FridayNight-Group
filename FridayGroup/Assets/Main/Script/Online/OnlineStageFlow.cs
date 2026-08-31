@@ -692,6 +692,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
 
     public bool ConfirmStageSelection(string stageResourcePath)
     {
+        Debug.Log($"[SE CHECK] ConfirmStageSelection called : {stageResourcePath}");
         if (!ValidateMasterClientOperation() || isLoadingScene)
         {
             return false;

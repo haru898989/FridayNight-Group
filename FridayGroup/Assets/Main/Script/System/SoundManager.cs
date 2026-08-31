@@ -76,6 +76,9 @@ public class SoundManager : MonoBehaviour
         seSource.PlayOneShot(seClips[index]);
     }
 
+
+   
+
     /// <summary>
     /// BGMí‚é~
     /// </summary>

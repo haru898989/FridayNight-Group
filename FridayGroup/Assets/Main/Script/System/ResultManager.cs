@@ -10,17 +10,19 @@ public class ResultManager : MonoBehaviour
             OnlineStageFlow.Instance.ReturnToTitle();
             return;
         }
-
+        SoundManager.Instance.PlaySE(0);
         SceneManager.LoadScene("Title");
     }
 
     public void BackToStageSelect()
     {
+        SoundManager.Instance.PlaySE(0);
         OnlineStageFlow.Instance?.ReturnToStageSelect();
     }
 
     public void GoToNextStage()
     {
+        SoundManager.Instance.PlaySE(1);
         OnlineStageFlow.Instance?.ContinueToNextStage();
     }
 }
