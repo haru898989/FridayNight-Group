@@ -6,11 +6,11 @@ public class StageController : MonoBehaviour
     [SerializeField] private Transform pitfallWarpPoint;
 
     /// <summary>
-    /// —‚Æ‚µŒŠ‚ÅˆÚ“®‚·‚éæ‚ÌÀ•W‚ğ•Ô‚·ŠÖ”
+    /// è½ã¨ã—ç©´ã§ç§»å‹•ã™ã‚‹å…ˆã®åº§æ¨™ã‚’è¿”ã™é–¢æ•°
     /// </summary>
     public Vector3 GetPitfallWarpPosition()
     {
-        // ƒ[ƒvæ‚ªİ’è‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍŒx‚ğo‚µAŒ´“_À•W‚ğ•Ô‚·
+        // ãƒ¯ãƒ¼ãƒ—å…ˆãŒè¨­å®šã•ã‚Œã¦ã„ãªã„å ´åˆã¯è­¦å‘Šã‚’å‡ºã—ã€åŸç‚¹åº§æ¨™ã‚’è¿”ã™
         if (pitfallWarpPoint == null)
         {
             Debug.LogWarning("Pitfall warp point is not set");
@@ -19,9 +19,11 @@ public class StageController : MonoBehaviour
 
         Vector3 warpPosition = pitfallWarpPoint.position;
 
-        // 3-4‚Í“üŒûƒ}ƒX‚ÌŠp‚É’…’n‚·‚é‚ÆƒJƒvƒZƒ‹‚ª—×‚Ì•Ç‚ÖH‚¢‚Ş‚½‚ßA
-        // ’n‰º“üŒûiCSV‚Ì39”Ôj‚Ì‹ó‚«ƒ}ƒX’†‰›‚Ö’…’n‚³‚¹‚éB
-        if (StageSelectionContext.SelectedStageResourcePath == "Stage/Stage3/3-4")
+        // 3-4ã¯å…¥å£ãƒã‚¹ã®è§’ã«ç€åœ°ã™ã‚‹ã¨ã‚«ãƒ—ã‚»ãƒ«ãŒéš£ã®å£ã¸é£Ÿã„è¾¼ã‚€ãŸã‚ã€
+        // åœ°ä¸‹å…¥å£ï¼ˆCSVã®39ç•ªï¼‰ã®ç©ºããƒã‚¹ä¸­å¤®ã¸ç€åœ°ã•ã›ã‚‹ã€‚
+        string selectedStage = StageSelectionContext.SelectedStageResourcePath;
+        if (selectedStage == "Stage/Stage3/3-3" ||
+            selectedStage == "Stage/Stage3/3-4")
         {
             warpPosition.x = 3.0f;
             warpPosition.z = 8.0f;

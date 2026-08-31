@@ -21,11 +21,11 @@ public class Pitfall : GimmickBase
     private bool isWarping = false;
 
     /// <summary>
-    /// MapƒV[ƒ“‚ÌStageController‚ğæ“¾‚·‚éŠÖ”
+    /// Mapã‚·ãƒ¼ãƒ³ã®StageControllerã‚’å–å¾—ã™ã‚‹é–¢æ•°
     /// </summary>
     private void Awake()
     {
-        // Še—‚Æ‚µŒŠPrefab‚Éİ’è‚³‚ê‚½^‰º‚Ìƒ[ƒv’n“_‚ğ—Dæ‚·‚éB
+        // å„è½ã¨ã—ç©´Prefabã«è¨­å®šã•ã‚ŒãŸçœŸä¸‹ã®ãƒ¯ãƒ¼ãƒ—åœ°ç‚¹ã‚’å„ªå…ˆã™ã‚‹ã€‚
         if (stageController == null)
         {
             GameObject stageControllerObject = GameObject.Find("StageController");
@@ -39,12 +39,12 @@ public class Pitfall : GimmickBase
 
         if (stageController == null)
         {
-            Debug.LogError("Œ»İ‚ÌƒV[ƒ“‚ÉStageController‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ");
+            Debug.LogError("ç¾åœ¨ã®ã‚·ãƒ¼ãƒ³ã«StageControllerãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“");
         }
     }
 
     /// <summary>
-    /// ƒvƒŒƒCƒ„[‚ª—‚Æ‚µŒŠ‚ÉG‚ê‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éŠÖ”
+    /// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãŒè½ã¨ã—ç©´ã«è§¦ã‚ŒãŸã¨ãã«å‘¼ã°ã‚Œã‚‹é–¢æ•°
     /// </summary>
     protected override void OnPlayerHit(GameObject playerObject)
     {
@@ -52,7 +52,10 @@ public class Pitfall : GimmickBase
         NPCBase npc = playerObject.GetComponent<NPCBase>();
         if(npc != null)
         {
-            if (npc.IsFollowingPlayer)
+            bool isNpcMazeStage =
+                StageSelectionContext.SelectedStageResourcePath == "Stage/Stage3/3-3";
+
+            if (npc.IsFollowingPlayer && !isNpcMazeStage)
             {
                 return;
             }
@@ -71,22 +74,31 @@ public class Pitfall : GimmickBase
                 npc.WarpToNavMesh(stageController.GetPitfallWarpPosition());
             }
 
-            npc.ChangeState(NPCBase.NPCState.Patrol);
+            if (npcController != null)
+            {
+                npcController.HandlePitfallWarped();
+            }
+            else
+            {
+                npc.ChangeState(isNpcMazeStage
+                    ? NPCBase.NPCState.Stop
+                    : NPCBase.NPCState.Patrol);
+            }
             return;
         }
 
-        // ƒ[ƒvˆ—’†‚ÉÄ“x”­“®‚µ‚È‚¢‚æ‚¤‚É‚·‚é
+        // ãƒ¯ãƒ¼ãƒ—å‡¦ç†ä¸­ã«å†åº¦ç™ºå‹•ã—ãªã„ã‚ˆã†ã«ã™ã‚‹
         if (isWarping)
         {
             return;
         }
 
-        // ƒvƒŒƒCƒ„[‚ğ—‰º‚³‚¹‚Ä‚©‚çƒ[ƒv‚·‚éˆ—‚ğŠJn‚·‚é
+        // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’è½ä¸‹ã•ã›ã¦ã‹ã‚‰ãƒ¯ãƒ¼ãƒ—ã™ã‚‹å‡¦ç†ã‚’é–‹å§‹ã™ã‚‹
         StartCoroutine(FallAndWarp(playerObject));
     }
 
     /// <summary>
-    /// ƒvƒŒƒCƒ„[‚ğ‰º‚É—‚Æ‚µCw’è’n“_‚Öƒ[ƒv‚³‚¹‚éŠÖ”
+    /// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’ä¸‹ã«è½ã¨ã—ï¼ŒæŒ‡å®šåœ°ç‚¹ã¸ãƒ¯ãƒ¼ãƒ—ã•ã›ã‚‹é–¢æ•°
     /// </summary>
     private IEnumerator FallAndWarp(GameObject playerObject)
     {
@@ -108,17 +120,17 @@ public class Pitfall : GimmickBase
         playerObject.transform.position = centeredPosition;
         Physics.SyncTransforms();
 
-        // —‚Æ‚µŒŠ‰‰o—pƒJƒƒ‰‚ÉØ‚è‘Ö‚¦‚é
+        // è½ã¨ã—ç©´æ¼”å‡ºç”¨ã‚«ãƒ¡ãƒ©ã«åˆ‡ã‚Šæ›¿ãˆã‚‹
         if (pitfallCameraController != null)
         {
             pitfallCameraController.StartPitfallCamera();
             pitfallCameraController.MoveToCameraPoint(entryCameraPoint);
         }
 
-        // —‚Æ‚µŒŠ‚É“ü‚Á‚½uŠÔ‚ÌƒJƒƒ‰‚ğ­‚µŒ©‚¹‚é
+        // è½ã¨ã—ç©´ã«å…¥ã£ãŸç¬é–“ã®ã‚«ãƒ¡ãƒ©ã‚’å°‘ã—è¦‹ã›ã‚‹
         yield return new WaitForSeconds(entryCameraWaitTime);
 
-        // —‰ºŠJn‚Æ“¯‚ÉŒø‰Ê‰¹‚ğ–Â‚ç‚·
+        // è½ä¸‹é–‹å§‹ã¨åŒæ™‚ã«åŠ¹æœéŸ³ã‚’é³´ã‚‰ã™
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.PlaySE(1);
@@ -127,34 +139,34 @@ public class Pitfall : GimmickBase
         Collider playerCollider = playerObject.GetComponent<Collider>();
         Rigidbody playerRigidbody = playerObject.GetComponent<Rigidbody>();
 
-        // —‰º’†‚Éˆø‚Á‚©‚©‚ç‚È‚¢‚æ‚¤‚ÉCollider‚ğˆê“I‚É–³Œø‰»‚·‚é
+        // è½ä¸‹ä¸­ã«å¼•ã£ã‹ã‹ã‚‰ãªã„ã‚ˆã†ã«Colliderã‚’ä¸€æ™‚çš„ã«ç„¡åŠ¹åŒ–ã™ã‚‹
         if (playerCollider != null)
         {
             playerCollider.enabled = false;
         }
 
-        // —‰º‘O‚É‘¬“x‚ğ~‚ß‚é
+        // è½ä¸‹å‰ã«é€Ÿåº¦ã‚’æ­¢ã‚ã‚‹
         if (playerRigidbody != null && !playerRigidbody.isKinematic)
         {
             playerRigidbody.velocity = Vector3.zero;
             playerRigidbody.angularVelocity = Vector3.zero;
         }
 
-        // —‰º’†‚ÌƒJƒƒ‰ƒAƒ“ƒOƒ‹‚ÉØ‚è‘Ö‚¦‚é
+        // è½ä¸‹ä¸­ã®ã‚«ãƒ¡ãƒ©ã‚¢ãƒ³ã‚°ãƒ«ã«åˆ‡ã‚Šæ›¿ãˆã‚‹
         if (pitfallCameraController != null)
         {
             pitfallCameraController.MoveToCameraPoint(fallingCameraPoint);
         }
 
-        // Œ»İˆÊ’u‚ğ—‰ºŠJnˆÊ’u‚Æ‚µ‚Ä•Û‘¶‚·‚é
+        // ç¾åœ¨ä½ç½®ã‚’è½ä¸‹é–‹å§‹ä½ç½®ã¨ã—ã¦ä¿å­˜ã™ã‚‹
         Vector3 startPosition = playerObject.transform.position;
 
-        // Œ»İˆÊ’u‚©‚ç‰º•ûŒü‚ÉfallDistance•ª‚¾‚¯ˆÚ“®‚µ‚½ˆÊ’u‚ğ—‰ºæ‚É‚·‚é
+        // ç¾åœ¨ä½ç½®ã‹ã‚‰ä¸‹æ–¹å‘ã«fallDistanceåˆ†ã ã‘ç§»å‹•ã—ãŸä½ç½®ã‚’è½ä¸‹å…ˆã«ã™ã‚‹
         Vector3 fallPosition = startPosition + Vector3.down * fallDistance;
 
         float timer = 0.0f;
 
-        // fallTime•b‚©‚¯‚Ä‰º‚É—‚Æ‚·
+        // fallTimeç§’ã‹ã‘ã¦ä¸‹ã«è½ã¨ã™
         while (timer < fallTime)
         {
             timer += Time.deltaTime;
@@ -165,7 +177,7 @@ public class Pitfall : GimmickBase
             yield return null;
         }
 
-        // StageController‚ªİ’è‚³‚ê‚Ä‚¢‚È‚¢ê‡‚ÍI—¹‚·‚é
+        // StageControllerãŒè¨­å®šã•ã‚Œã¦ã„ãªã„å ´åˆã¯çµ‚äº†ã™ã‚‹
         if (stageController == null)
         {
             Debug.LogWarning("StageController is not set");
@@ -184,12 +196,12 @@ public class Pitfall : GimmickBase
             yield break;
         }
 
-        // ƒ[ƒvæ‚ğæ“¾‚·‚é
+        // ãƒ¯ãƒ¼ãƒ—å…ˆã‚’å–å¾—ã™ã‚‹
         Vector3 warpPosition = stageController.GetPitfallWarpPosition();
 
         Debug.Log(
-            $"ƒ[ƒvæ={warpPosition}C" +
-            $"Œ»İ’n={playerObject.transform.position}"
+            $"ãƒ¯ãƒ¼ãƒ—å…ˆ={warpPosition}ï¼Œ" +
+            $"ç¾åœ¨åœ°={playerObject.transform.position}"
         );
         // NetworkTransform must also be teleported, otherwise Fusion can restore
         // the last falling position after the normal Transform assignment.
@@ -201,10 +213,10 @@ public class Pitfall : GimmickBase
         }
 
 
-        // Rigidbody‚ª‚ ‚éê‡‚ÍCRigidbody‚ÌˆÊ’u‚ğ’¼Ú•ÏX‚·‚é
+        // RigidbodyãŒã‚ã‚‹å ´åˆã¯ï¼ŒRigidbodyã®ä½ç½®ã‚’ç›´æ¥å¤‰æ›´ã™ã‚‹
         if (playerRigidbody != null)
         {
-            // Kinematic‚Å‚Í‚È‚¢ê‡‚¾‚¯‘¬“x‚ğ~‚ß‚é
+            // Kinematicã§ã¯ãªã„å ´åˆã ã‘é€Ÿåº¦ã‚’æ­¢ã‚ã‚‹
             if (!playerRigidbody.isKinematic)
             {
                 playerRigidbody.velocity = Vector3.zero;
@@ -214,30 +226,30 @@ public class Pitfall : GimmickBase
             playerRigidbody.position = warpPosition;
         }
 
-        // Transform‚ÌˆÊ’u‚à’¼Ú•ÏX‚µ‚ÄCŠmÀ‚Éƒ[ƒv‚³‚¹‚é
+        // Transformã®ä½ç½®ã‚‚ç›´æ¥å¤‰æ›´ã—ã¦ï¼Œç¢ºå®Ÿã«ãƒ¯ãƒ¼ãƒ—ã•ã›ã‚‹
         playerObject.transform.position = warpPosition;
 
-        // •¨—‰‰Z‚ÆTransform‚ÌˆÊ’u‚ğ“¯Šú‚·‚é
+        // ç‰©ç†æ¼”ç®—ã¨Transformã®ä½ç½®ã‚’åŒæœŸã™ã‚‹
         Physics.SyncTransforms();
 
 
-        // ’…’n‚ÌƒJƒƒ‰ƒAƒ“ƒOƒ‹‚ÉØ‚è‘Ö‚¦‚é
+        // ç€åœ°æ™‚ã®ã‚«ãƒ¡ãƒ©ã‚¢ãƒ³ã‚°ãƒ«ã«åˆ‡ã‚Šæ›¿ãˆã‚‹
         if (pitfallCameraController != null)
         {
             pitfallCameraController.MoveToCameraPoint(landCameraPoint);
         }
 
-        // Collider‚ğ–ß‚·
+        // Colliderã‚’æˆ»ã™
         if (playerCollider != null)
         {
             playerCollider.enabled = true;
         }
-        // CharacterController‚ğ–ß‚·
+        // CharacterControllerã‚’æˆ»ã™
         if (playerController != null)
         {
             playerController.enabled = true;
         }
-        // ƒ[ƒv’¼Œã‚Å‚Í‚È‚­C­‚µ‘Ò‚Á‚Ä‚©‚ç’…’n‰¹‚ğ–Â‚ç‚·
+        // ãƒ¯ãƒ¼ãƒ—ç›´å¾Œã§ã¯ãªãï¼Œå°‘ã—å¾…ã£ã¦ã‹ã‚‰ç€åœ°éŸ³ã‚’é³´ã‚‰ã™
         yield return new WaitForSeconds(landSoundDelay);
 
         if (SoundManager.Instance != null)
@@ -245,10 +257,10 @@ public class Pitfall : GimmickBase
             SoundManager.Instance.PlaySE(2);
         }
 
-        // ’…’nƒJƒƒ‰‚ğ­‚µŒ©‚¹‚é
+        // ç€åœ°ã‚«ãƒ¡ãƒ©ã‚’å°‘ã—è¦‹ã›ã‚‹
         yield return new WaitForSeconds(landCameraWaitTime);
 
-        // ’Êí‚ÌˆêlÌƒJƒƒ‰‚Ö–ß‚·
+        // é€šå¸¸ã®ä¸€äººç§°ã‚«ãƒ¡ãƒ©ã¸æˆ»ã™
         if (pitfallCameraController != null)
         {
             pitfallCameraController.EndPitfallCamera();
