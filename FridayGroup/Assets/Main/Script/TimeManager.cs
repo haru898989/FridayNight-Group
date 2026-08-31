@@ -19,6 +19,7 @@ public class TimeManager : MonoBehaviour
     private float currentTime;
     private bool isTimeUp = false;
     private bool isTimeUpRequested;
+    private bool isTimerStopped;
     private OnlineStageFlow stageFlow;
 
     void Start()
@@ -77,7 +78,7 @@ public class TimeManager : MonoBehaviour
 
     void Update()
     {
-        if (isTimeUp) return;
+        if (isTimeUp || isTimerStopped) return;
 
         // オンライン通信自体は動かしたまま、全員のゲーム内時間だけを止める。
         if ((stageFlow != null && stageFlow.IsStagePaused) ||
@@ -189,5 +190,15 @@ public class TimeManager : MonoBehaviour
         }
 
         SceneManager.LoadScene("Title");
+    }
+    /// <summary>
+    /// ゴールしたときにタイマーを停止する
+    /// </summary>
+    public void StopTimer()
+    {
+        isTimerStopped = true;
+        UpdateTimerUI();
+
+        Debug.Log("ゴールしたためタイマーを停止しました。");
     }
 }
