@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SoundManager : MonoBehaviour
 {
@@ -24,31 +25,83 @@ public class SoundManager : MonoBehaviour
 
         Instance = this;
 
-        // ƒV[ƒ“‚ğˆÚ“®‚µ‚Ä‚àÁ‚³‚È‚¢
+        // ã‚·ãƒ¼ãƒ³ã‚’ç§»å‹•ã—ã¦ã‚‚æ¶ˆã•ãªã„
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        PlayBGMForScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        PlayBGMForScene(scene.name);
+    }
+
+    private void PlayBGMForScene(string sceneName)
+    {
+        switch (sceneName)
+        {
+            case "Title":
+            case "OnlineConnect":
+                PlayBGM(0);
+                break;
+            case "StageSelect":
+                PlayBGM(1);
+                break;
+            case "Map":
+                PlayBGM(2);
+                break;
+            case "Result":
+            case "GameComplete":
+                PlayBGM(3);
+                break;
+            default:
+                StopBGM();
+                break;
+        }
     }
 
 
 
     /// <summary>
-    /// BGM‚ğ”Ô†‚ÅÄ¶
+    /// BGMã‚’ç•ªå·ã§å†ç”Ÿ
     /// </summary>
     /// <param name="index"></param>
     public void PlayBGM(int index)
     {
+        if (bgmSource == null)
+        {
+            Debug.LogWarning("BGMç”¨AudioSourceãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚");
+            return;
+        }
+
         if (bgmClips == null || index < 0 || index >= bgmClips.Length)
         {
-            Debug.LogWarning("w’è‚³‚ê‚½BGM‚ª‘¶İ‚µ‚Ü‚¹‚ñB index: " + index);
+            Debug.LogWarning("æŒ‡å®šã•ã‚ŒãŸBGMãŒå­˜åœ¨ã—ã¾ã›ã‚“ã€‚ index: " + index);
             return;
         }
 
         if (bgmClips[index] == null)
         {
-            Debug.LogWarning("BGM‚ÌAudioClip‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB index: " + index);
+            Debug.LogWarning("BGMã®AudioClipãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚ index: " + index);
             return;
         }
 
-        bgmSource.clip = bgmClips[index];
+        AudioClip nextClip = bgmClips[index];
+        if (bgmSource.clip == nextClip && bgmSource.isPlaying)
+        {
+            return;
+        }
+
+        bgmSource.clip = nextClip;
         bgmSource.loop = true;
         bgmSource.Play();
     }
@@ -56,20 +109,20 @@ public class SoundManager : MonoBehaviour
 
 
     /// <summary>
-    /// SE‚ğ”Ô†‚ÅÄ¶
+    /// SEã‚’ç•ªå·ã§å†ç”Ÿ
     /// </summary>
     /// <param name="index"></param>
     public void PlaySE(int index)
     {
         if (seClips == null || index < 0 || index >= seClips.Length)
         {
-            Debug.LogWarning("w’è‚³‚ê‚½SE‚ª‘¶İ‚µ‚Ü‚¹‚ñB index: " + index);
+            Debug.LogWarning("æŒ‡å®šã•ã‚ŒãŸSEãŒå­˜åœ¨ã—ã¾ã›ã‚“ã€‚ index: " + index);
             return;
         }
 
         if (seClips[index] == null)
         {
-            Debug.LogWarning("SE‚ÌAudioClip‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB index: " + index);
+            Debug.LogWarning("SEã®AudioClipãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚ index: " + index);
             return;
         }
 
@@ -80,15 +133,18 @@ public class SoundManager : MonoBehaviour
    
 
     /// <summary>
-    /// BGM’â~
+    /// BGMåœæ­¢
     /// </summary>
     public void StopBGM()
     {
-        bgmSource.Stop();
+        if (bgmSource != null)
+        {
+            bgmSource.Stop();
+        }
     }
 
     /// <summary>
-    /// BGMˆê’â~
+    /// BGMä¸€æ™‚åœæ­¢
     /// </summary>
     public void PauseBGM()
     {
@@ -96,7 +152,7 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// BGMÄŠJ
+    /// BGMå†é–‹
     /// </summary>
     public void ResumeBGM()
     {
@@ -104,7 +160,7 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// BGM‰¹—Ê•ÏX
+    /// BGMéŸ³é‡å¤‰æ›´
     /// </summary>
     /// <param name="volume"></param>
     public void SetBGMVolume(float volume)
@@ -113,7 +169,7 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// SE‰¹—Ê•ÏX
+    /// SEéŸ³é‡å¤‰æ›´
     /// </summary>
     /// <param name="volume"></param>
     public void SetSEVolume(float volume)
