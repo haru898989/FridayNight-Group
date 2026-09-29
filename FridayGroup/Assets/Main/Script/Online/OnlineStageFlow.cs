@@ -42,6 +42,7 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
     private const string PauseCloseRequestMessage = "FLOW|PAUSE_CLOSE";
     private const string PauseSelectionRequestPrefix = "FLOW|PAUSE_SELECT|";
     private const string PauseStateMessagePrefix = "FLOW|PAUSE_STATE|";
+    private const string StageCompletedMessagePrefix = "FLOW|STAGE_COMPLETED|";
 
     private readonly HashSet<int> pendingStageAcknowledgements = new HashSet<int>();
     private readonly HashSet<int> playersAtGoal = new HashSet<int>();
@@ -569,8 +570,17 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
         string message = destination == ResultScenePath
             ? "OPENING RESULT..."
             : "OPENING COMPLETE SCREEN...";
+        string clearedStage = StageSelectionContext.SelectedStageResourcePath;
+
+        if (!string.IsNullOrWhiteSpace(clearedStage))
+        {
+            StageProgress.MarkCompleted(clearedStage);
+            BroadcastReliableMessage(StageCompletedMessagePrefix + clearedStage);
+        }
         LoadNetworkScene(destination, message);
     }
+
+
 
     private bool LoadNetworkScene(string scenePath, string message)
     {
@@ -1123,6 +1133,18 @@ public sealed class OnlineStageFlow : MonoBehaviour, INetworkRunnerCallbacks
                         requestedSelection,
                         true
                     );
+                }
+
+                return;
+            }
+
+            if (message.StartsWith(StageCompletedMessagePrefix))
+            {
+                string clearedStage = message.Substring(StageCompletedMessagePrefix.Length);
+
+                if (!string.IsNullOrWhiteSpace(clearedStage))
+                {
+                    StageProgress.MarkCompleted(clearedStage);
                 }
 
                 return;

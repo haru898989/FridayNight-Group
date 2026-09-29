@@ -32,6 +32,7 @@ public class Goal : MonoBehaviour
                 return;
             }
 
+            StageProgress.MarkCompleted(StageSelectionContext.SelectedStageResourcePath);
             SceneManager.LoadScene("Result");
         }
     }

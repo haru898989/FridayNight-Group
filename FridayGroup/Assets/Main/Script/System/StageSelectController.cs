@@ -225,6 +225,20 @@ public sealed class StageSelectController : MonoBehaviour
                 groupLabel.text = stage.groupFolder;
             }
 
+            Text completedLabel = nodeButton.transform.Find("CompletedText")?.GetComponent<Text>();
+            if (completedLabel != null)
+            {
+                bool isCompleted = StageProgress.IsCompleted(stage.resourcePath);
+
+                completedLabel.text = isCompleted
+                    ? "☑ Completed"
+                    : "☐ Completed";
+
+                completedLabel.color = isCompleted
+                    ? new Color(0.45f, 1f, 0.55f, 1f)
+                    : new Color(1f, 1f, 1f, 0.75f);
+            }
+
             int capturedIndex = i;
             nodeButton.onClick.RemoveAllListeners();
             nodeButton.onClick.AddListener(() => SelectByIndex(capturedIndex));
