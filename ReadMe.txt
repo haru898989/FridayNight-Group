@@ -1,4 +1,4 @@
-###### TWOGETHER
+# TWOGETHER
 
 ## 🎮 ゲーム概要
 
