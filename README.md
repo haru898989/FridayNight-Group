@@ -203,12 +203,6 @@ NPCはプレイヤーと同じようにステージ内を行動することが�
 
 ---
 
-## 📸 スクリーンショット
-
-> **TODO：後からゲーム画面を追加予定**
-
----
-
 ## 🎥 プレイ動画
 
 > **TODO：後から動画リンクを追加予定**
@@ -217,13 +211,11 @@ NPCはプレイヤーと同じようにステージ内を行動することが�
 
 ## 👥 開発メンバー
 
-> **TODO：後から追加予定**
-
-| メンバー | 担当   |
-| ---- | ---- |
-| TODO | TODO |
-| TODO | TODO |
-| TODO | TODO |
+・浮田拓海(リーダー)
+・小笹豪
+・辻本晃成
+・波多優奈
+・牧桃花
 
 ---
 
@@ -239,23 +231,7 @@ NPCはプレイヤーと同じようにステージ内を行動することが�
 | Map Data             | CSV           |
 | Platform             | Windows       |
 
----
-
-## 📁 プロジェクト構成
-
-> **TODO：必要に応じて後から追加予定**
-
-```text
-FridayGroup/
-├── Assets/
-│   ├── Main/
-│   ├── ...
-│   └── ...
-├── ProjectSettings/
-└── ...
 ```
-
----
 
 ## 🏆 U-22プログラミング・コンテスト
 
@@ -265,9 +241,6 @@ FridayGroup/
 
 ## 🔗 Links
 
-> **TODO：後から追加予定**
-
-* U-22プログラミング・コンテスト
-* ProtoPedia
-* プレイ動画
-* その他関連リンク
+* [U-22プログラミング・コンテスト](https://u22procon.com/)
+* [ProtoPedia](https://protopedia.net/prototype/private/446517ad-1686-4fdb-bd74-da7126ef644e)
+* [プレイ動画](https://protopedia.net/prototype/private/446517ad-1686-4fdb-bd74-da7126ef644e)
