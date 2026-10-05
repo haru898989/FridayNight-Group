@@ -1,4 +1,4 @@
-# TWOGETHER
+<img width="2160" height="2880" alt="image" src="https://github.com/user-attachments/assets/98686cea-3147-4f74-b371-a474ea42db44" /># TWOGETHER
 
 ## 🎮 ゲーム概要
 
@@ -195,11 +195,13 @@ NPCはプレイヤーと同じようにステージ内を行動することが�
 
 | 操作      | キーボード | コントローラー |
 | ------- | ----- | ------- |
-| 移動      | TODO  | TODO    |
-| ジャンプ    | TODO  | TODO    |
-| ミュート    | M     | TODO    |
-| トランシーバー | T     | TODO    |
-| その他     | TODO  | TODO    |
+| 移動      | WASD  | 左十字ボタン    |
+| ミュート    | M     | ビューボタン    |
+| トランシーバー | T     | X    |
+|  アイテム持ち上げ   |  E |  B  |
+|  ポーズ/ステージメニュー   | escape |  メニューボタン  |
+|  視点移動   | マウス |  右十字ボタン  |
+|  スタンプ   | Q |  Lボタン  |
 
 ---
 
