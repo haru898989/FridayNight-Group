@@ -1,4 +1,4 @@
-<img width="2160" height="2880" alt="image" src="https://github.com/user-attachments/assets/98686cea-3147-4f74-b371-a474ea42db44" /># TWOGETHER
+TWOGETHER
 
 ## 🎮 ゲーム概要
 
